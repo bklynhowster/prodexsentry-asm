@@ -1,0 +1,589 @@
+name: Scanner
+
+# COMMANDsentry — Phase 4a active scanning workflow.
+#
+# Pulls the oldest queued scan from public.scan_queue, dispatches it to the
+# tier-specific runner (run_light.py / run_medium.py / run_heavy.py), and
+# closes out the scan_run. One scan per invocation.
+#
+# Triggers:
+#   • Cron every 10 minutes at offset minutes (:07, :17, :27, :37, :47, :57)
+#     to dodge GitHub's high-load windows at hour boundaries.
+#   • workflow_run after ASM Discover succeeds — guaranteed 6-hour drain
+#     even if cron is being a jerk. GH Actions' scheduled cron is best-
+#     effort and known to flake on private repos with low activity, so
+#     this is the reliable backstop. (Behavior verified empirically on
+#     2026-05-28 — 5-min cron failed to fire for >70 min after deploy.)
+#   • workflow_dispatch — optional asset_id + intensity inputs to queue a
+#     one-off scan from the GH Actions UI. Useful for testing + on-demand
+#     re-scans without going through the portal.
+#
+# Concurrency:
+#   • No restriction (NOT a single-group lock). The DB-level partial unique
+#     index `scan_queue_one_running_per_asset` already protects against the
+#     same asset being scanned concurrently. Allowing multiple workflow
+#     runs in parallel means a queue of 60 Light scans can drain across
+#     multiple runners in parallel instead of serializing through one.
+#
+# Asset auto-queueing:
+#   • New assets discovered by ASM Discover are NOT automatically queued
+#     here. The ASM importer is the right place to do that (separate
+#     commit, M5+). This workflow is purely the "scan executor" half.
+#
+# Spec: Obsidian / COMMANDsentry / 48 - Phase 4a Spec and Context Handoff.md
+
+on:
+  # ─── INTERNAL 10-min CRON DISABLED 2026-06-10 ─────────────────────
+  # Retired in favor of conditional dispatch via commandsentry-portal
+  # /api/scan-tick — cron-job.org → portal → portal only fires this
+  # workflow when scan_queue actually has queued work. Empty cycles
+  # → zero Actions minutes (GitHub rounds every run UP to 1 billed
+  # minute regardless of duration, so empty pokes were the cost
+  # driver). Part of Force7 Initiative 2 #1.
+  #
+  # The cron-job.org Job #1 + the deeper workflow_run-after-ASM-
+  # Discover chain below still guarantee a poke within ≤10 min /
+  # ≤6h respectively.
+  #
+  # schedule:
+  #   - cron: '7-57/10 * * * *'
+
+  # Chain after every successful ASM Discover run — guarantees a queue
+  # drain pass at least every 6 hours (the ASM Discover cadence) even
+  # if cron-job.org / the portal go dark. ASM Discover has been running
+  # reliably for weeks so it's the trustworthy deeper backstop. 4 fires
+  # per day is acceptable cost (~4 billed min/day worst-case).
+  workflow_run:
+    workflows: ["ASM Discover"]
+    types: [completed]
+
+  workflow_dispatch:
+    inputs:
+      asset_id:
+        description: 'Asset to scan ad-hoc (e.g., portal.unimacgraphics.com). Leave blank to only drain the queue.'
+        required: false
+        default: ''
+        type: string
+      intensity:
+        description: 'Tier for the ad-hoc scan. Ignored when asset_id is blank.'
+        required: false
+        default: 'light'
+        type: choice
+        options:
+          - light
+          - medium
+          - heavy
+      authenticated:
+        description: 'Run authenticated scan? Only valid for medium/heavy and requires asset_auth_config row.'
+        required: false
+        default: false
+        type: boolean
+      force_vpn:
+        description: 'Force VPN egress on regardless of tier. Use for end-to-end testing of the VPN integration with a Light tier scan against a safe target. Production runs (cron-triggered) ignore this — VPN is auto-enabled only for Medium/Heavy there.'
+        required: false
+        default: false
+        type: boolean
+      threshold_probe_mode:
+        description: 'Run Medium tier in THRESHOLD PROBE MODE — nuclei uses a per-chunk rate ladder (5/15/30/50/100 req/s), post-chunk healthchecks log which rate triggered the WAF ban. Skips nikto + ffuf. Only takes effect when intensity=medium.'
+        required: false
+        default: false
+        type: boolean
+      threshold_probe_safe_only:
+        description: 'In THRESHOLD PROBE MODE, replace the standard 5-chunk plan with 5 identical chunks of `medium,tech` templates (the only chunk that did NOT trigger bans in scans #82+#87). If all 5 pass post-check, template content is confirmed as the ban trigger. Requires threshold_probe_mode=true.'
+        required: false
+        default: false
+        type: boolean
+      patient_mode:
+        description: 'Run Medium tier in PATIENT MODE — mirrors the Mac runbook tuning that survives FortiGate (rate-limit 10, 5s inter-chunk delay, 30 min cooldown before rotating on ban). Runs the standard 5-chunk broad-template plan. Expected runtime: 15-150 min depending on bans. Only takes effect when intensity=medium.'
+        required: false
+        default: false
+        type: boolean
+      patient_ban_cooldown_s:
+        description: 'Override the patient-mode ban cooldown (seconds). Default 1800 (30 min, Mac runbook). Drop to 300 (5 min) for faster experiments.'
+        required: false
+        default: '1800'
+        type: string
+      skip_vpn:
+        description: 'VALIDATE-MODE — skip Mullvad bring-up entirely. The runner scans from the GH Actions datacenter egress. Only safe against allowlisted public training targets (scripts/scanner/degradation.py::VALIDATION_TARGETS — currently {demo.testfire.net}). The scanner aborts BEFORE any target-bound op on any other target — DegradedRunError(validate_mode_target_not_allowlisted). Used for the validate-the-scanner-SHA path when Mullvad is banned by the control. NEVER pair with a client/owned asset.'
+        required: false
+        default: false
+        type: boolean
+      stealth_ua:
+        description: 'STEP 1 of the two-step diagnostic (post-advisor-brief audit 2026-05-31 PM). Pins User-Agent to a single Chrome/131 string (matches Mac stringent script line 95) + drops nuclei rate to 2 req/s. Tests: does cloud nuclei broad templates survive on FortiGate when it presents as a browser at the same gentle rate the Mac uses?'
+        required: false
+        default: false
+        type: boolean
+      crawl_first_mode:
+        description: 'STEP 2 of the two-step diagnostic (use only if STEP 1 with stealth_ua=true bans). Runs katana FIRST to crawl the target, then nuclei against the discovered URL list ONLY — skips template-driven path enumeration entirely so the scanner never requests /wp-login, /admin, /.env, etc. unless the crawl found them. Mirrors what the Mac stringent scan actually does (Pass 1 against 529 crawled URLs). Composable with stealth_ua.'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  # Required so the job's GITHUB_TOKEN can pull the scanner container
+  # image from ghcr.io (the image is private by default).
+  packages: read
+
+# Default to bash for every `run:` block. Inside a `container:` job
+# the default shell is `sh` (dash on Ubuntu 24.04) which doesn't
+# support bash-isms like `printf %q`. Scan #68 died on exactly that.
+defaults:
+  run:
+    shell: bash
+
+# Per-invocation timeout sized for Heavy worst case + headroom. Light = ~5s,
+# Medium = ~15 min, Heavy = ~60-90 min, plus ~5 min for tool install/cache.
+# 120 min ceiling matches the enrich workflow.
+jobs:
+  scan:
+    # Skip the chained run if upstream ASM Discover failed. Other triggers
+    # (cron, workflow_dispatch) always run.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    # ════ Pinned scanner container image ═══════════════════════════
+    # Built + published by .github/workflows/build-scanner-image.yml.
+    # Bakes wireguard-go, wg, the full Phase 4a toolchain (PD tools +
+    # ffuf + nikto + wafw00f + testssl.sh), Python + psycopg.
+    # See [[59 - Container Image Build Spec]] in Obsidian.
+    #
+    # Pin to a date+sha tag in production; bump explicitly when the
+    # image is rebuilt. NET_ADMIN + /dev/net/tun are required for
+    # wireguard-go to create + own a TUN device.
+    container:
+      image: ghcr.io/bklynhowster/prodexsentry-scanner:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: >-
+        --cap-add=NET_ADMIN
+        --device=/dev/net/tun
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify baked-in toolchain
+        run: |
+          # Sanity check — image build's smoke-test already validated these,
+          # but it's cheap insurance against a bad image being :latest.
+          echo "═══ Baked-in toolchain ═══"
+          for t in wireguard-go wg python3 \
+                   subfinder dnsx httpx naabu nuclei fingerprintx \
+                   ffuf nikto wafw00f testssl.sh \
+                   whois jq yq curl dig openssl sudo ip iptables; do
+            if command -v "$t" >/dev/null 2>&1; then
+              printf "  ✓ %-15s %s\n" "$t" "$(command -v $t)"
+            else
+              echo "::error::Required tool not found in container: $t"
+              exit 1
+            fi
+          done
+          echo "All baked-in tools present."
+
+      # ─── If workflow_dispatch with asset_id was supplied: queue it ──
+      # Idempotent — checks for an existing queued/running row first so
+      # re-fires don't trip the scan_queue_one_running_per_asset unique
+      # index. Re-fire is treated as "join the existing scan" rather than
+      # an error. Pairs with the 20260531a auto-sync trigger that prevents
+      # stale 'running' queue rows from blocking re-fires after a scan
+      # successfully completes. See [[64 - Session Log 2026-05-31 PM]]
+      # P-bug-2.
+      - name: Queue ad-hoc scan from workflow_dispatch inputs
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.asset_id != '' }}
+        env:
+          PGCONNECT_TIMEOUT: 10
+          SUPABASE_DSN:      ${{ secrets.SUPABASE_DSN }}
+        run: |
+          ASSET_ID="${{ github.event.inputs.asset_id }}"
+          INTENSITY="${{ github.event.inputs.intensity }}"
+          AUTHENTICATED="${{ github.event.inputs.authenticated }}"
+
+          # Defensive shell-quote: psql -c with double-quoted SQL.
+          # ASSET_ID gets interpolated via printf %q escape since it's
+          # user-supplied and might contain shell metachars.
+          ASSET_ID_QUOTED=$(printf '%q' "$ASSET_ID")
+
+          # Check for an already-active queue row for this asset.
+          EXISTING=$(psql "$SUPABASE_DSN" -t -A -v ON_ERROR_STOP=1 -c "
+            select queue_id || '|' || status
+              from public.scan_queue
+             where asset_id = '$ASSET_ID'
+               and status in ('queued', 'running')
+             order by triggered_at desc
+             limit 1;
+          ")
+
+          if [ -n "$EXISTING" ]; then
+            EXIST_QUEUE_ID="${EXISTING%%|*}"
+            EXIST_STATUS="${EXISTING##*|}"
+            echo "::warning::Asset $ASSET_ID already has an active queue row ($EXIST_STATUS, queue_id=$EXIST_QUEUE_ID). Skipping INSERT — the existing row will be claimed by poll_queue."
+          else
+            psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -c "
+              insert into public.scan_queue
+                (asset_id, intensity, authenticated, source, notes)
+              values
+                ('$ASSET_ID', '$INTENSITY', $AUTHENTICATED, 'workflow_dispatch',
+                 'Ad-hoc fire via GH Actions UI (workflow_dispatch).');
+            "
+            echo "Queued $INTENSITY scan for $ASSET_ID (authenticated=$AUTHENTICATED)."
+          fi
+
+      # ─── Atomically claim the next queued scan ─────────────────────
+      - name: Poll queue + claim next scan
+        id: poll
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+        run: |
+          python scripts/scanner/poll_queue.py > /tmp/scan_descriptor.json
+          if [ -s /tmp/scan_descriptor.json ]; then
+            INTENSITY=$(python -c "import json; print(json.load(open('/tmp/scan_descriptor.json'))['intensity'])")
+            ASSET_ID=$(python -c "import json; print(json.load(open('/tmp/scan_descriptor.json'))['asset_id'])")
+            SCAN_RUN_ID=$(python -c "import json; print(json.load(open('/tmp/scan_descriptor.json'))['scan_run_id'])")
+            # 2026-06-02: surface top_hosting_org so vpn_decision can
+            # route Pressable Light scans through VPN. Empty string when
+            # no asset_surface row exists yet (brand-new asset before
+            # first ASM Discover sync).
+            HOSTING_ORG=$(python -c "import json; print((json.load(open('/tmp/scan_descriptor.json'))['asset'].get('top_hosting_org') or '').strip())")
+            echo "intensity=$INTENSITY"     >> "$GITHUB_OUTPUT"
+            echo "asset_id=$ASSET_ID"       >> "$GITHUB_OUTPUT"
+            echo "scan_run_id=$SCAN_RUN_ID" >> "$GITHUB_OUTPUT"
+            echo "hosting_org=$HOSTING_ORG" >> "$GITHUB_OUTPUT"
+            echo "has_work=true"            >> "$GITHUB_OUTPUT"
+            echo "Claimed: $INTENSITY scan on $ASSET_ID (scan_run_id=$SCAN_RUN_ID, hosting='$HOSTING_ORG')"
+          else
+            echo "has_work=false" >> "$GITHUB_OUTPUT"
+            echo "No queued scans to claim — nothing to do."
+          fi
+
+      # ─── Record the GH run_id on the scan_run for back-linking ─────
+      # Stamps the link between this workflow run and the scan_run so the
+      # portal can deep-link "view scanner logs" from the asset's history.
+      - name: Stamp github_run_id on scan_run
+        if: steps.poll.outputs.has_work == 'true'
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+        run: |
+          GH_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          SCAN_RUN_ID="${{ steps.poll.outputs.scan_run_id }}"
+          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -c "
+            update public.scan_run
+               set github_run_id = '$GH_URL'
+             where scan_run_id   = '$SCAN_RUN_ID';
+          "
+
+      # ─── VPN bring-up (M7b, Mullvad as of 2026-05-30) ──────────────
+      # Wraps any Medium/Heavy scan in Mullvad VPN egress so we don't
+      # get FortiGate/Cloudflare-banned on the GH runner IP. Also fires
+      # when force_vpn=true via workflow_dispatch — useful for testing
+      # the VPN integration end-to-end with a known-safe Light tier
+      # scan before pointing noisier tools through it.
+      #
+      # Light tier in production (cron path) deliberately bypasses VPN —
+      # ~35s install+connect overhead for an IronPort-safe check suite
+      # that nothing will ban us for.
+      #
+      # 2026-06-02: ALSO fires for Light scans on Pressable / Automattic
+      # Atomic targets. Pressable's WAF (atomic_bur) rate-limits Azure
+      # ASN on /wp-admin/* paths regardless of intensity — verified
+      # 2026-06-01: GET /wp-admin/?action=postpass from a GH runner
+      # returns 429, same request from a residential IP returns 302.
+      # Without VPN, wp-admin probes (WPS Hide Login, common_paths
+      # /wp-admin/install.php) silently fail on Pressable targets.
+      # The hosting-aware routing trades ~35s for working wp-admin
+      # coverage on those ~3 assets.
+      #
+      # Migrated from ExpressVPN 2026-05-30. Mullvad installs via apt
+      # repo (no .deb asset to manage), CLI is headless-native, atomic
+      # region switching via `relay set location`. See Obsidian
+      # [[55 - Mullvad VPN Account Credentials]] for the full why.
+      - name: Determine if VPN should be brought up
+        id: vpn_decision
+        if: ${{ steps.poll.outputs.has_work == 'true' }}
+        run: |
+          INTENSITY="${{ steps.poll.outputs.intensity }}"
+          FORCE_VPN="${{ github.event.inputs.force_vpn }}"
+          HOSTING_ORG="${{ steps.poll.outputs.hosting_org }}"
+
+          # Pressable / Automattic detection — case-insensitive substring.
+          # Surface emits hosting_org strings like:
+          #   "Automattic (Pressable/WordPress.com)"
+          #   "Automattic Inc."
+          # Both forms hit the same Atomic WAF, both need VPN routing.
+          IS_PRESSABLE=false
+          if echo "$HOSTING_ORG" | grep -iE 'automattic|pressable|wordpress\.com' >/dev/null; then
+            IS_PRESSABLE=true
+          fi
+
+          if [[ "$INTENSITY" == "medium" || "$INTENSITY" == "heavy" \
+             || "$FORCE_VPN" == "true" \
+             || "$IS_PRESSABLE" == "true" ]]; then
+            echo "use_vpn=true" >> "$GITHUB_OUTPUT"
+            REASON=""
+            if [[ "$INTENSITY" == "medium" || "$INTENSITY" == "heavy" ]]; then REASON="intensity=$INTENSITY"; fi
+            if [[ "$FORCE_VPN" == "true" ]]; then REASON="${REASON:+$REASON, }force_vpn=true"; fi
+            if [[ "$IS_PRESSABLE" == "true" ]]; then REASON="${REASON:+$REASON, }pressable=true (hosting='$HOSTING_ORG')"; fi
+            echo "VPN will be brought up — $REASON"
+          else
+            echo "use_vpn=false" >> "$GITHUB_OUTPUT"
+            echo "VPN bypassed (intensity=$INTENSITY, force_vpn=$FORCE_VPN, hosting='$HOSTING_ORG')"
+          fi
+
+      - name: Make VPN scripts executable
+        if: ${{ steps.vpn_decision.outputs.use_vpn == 'true' && github.event.inputs.skip_vpn != 'true' }}
+        run: |
+          chmod +x scripts/scanner/vpn_bringup.sh
+          chmod +x scripts/scanner/vpn_rotate.sh
+          chmod +x scripts/scanner/vpn_teardown.sh
+          chmod +x scripts/scanner/wg_up_userspace.sh
+
+      - name: Fetch + extract WireGuard configs
+        if: ${{ steps.vpn_decision.outputs.use_vpn == 'true' && github.event.inputs.skip_vpn != 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/wg-download
+          gh release download vpn-tools \
+            --repo bklynhowster/commandsentry-asm \
+            --pattern 'mullvad-wg-configs.tar.gz' \
+            --dir /tmp/wg-download
+          sudo mkdir -p /etc/wireguard
+          sudo tar xzf /tmp/wg-download/mullvad-wg-configs.tar.gz -C /tmp/wg-download
+          sudo cp /tmp/wg-download/wg-configs/*.conf /etc/wireguard/
+          sudo chmod 600 /etc/wireguard/*.conf
+
+          # ─── PATCH: defeat the nft hang on GH Actions runners ───────
+          # Scan #55 (2026-05-30) hung on `nft -f /dev/fd/63` for 4+ min
+          # — wg-quick's ipv4 catchall rule uses nftables which can stall
+          # on hosted runners. Switch each config to Table=off + manual
+          # ip-rule routing (what wg-quick already does for ipv6, applied
+          # to v4 too). Inject PostUp/PreDown before [Peer] in every conf.
+          sudo python3 scripts/scanner/patch_wg_configs.py
+
+          echo ""
+          echo "Available WireGuard configs (post-patch):"
+          sudo ls -la /etc/wireguard/
+          echo ""
+          # Show a sample of the first conf found (pool went from 5 city-level
+          # names to 205 per-server names — us-nyc.conf no longer exists; we
+          # have us-nyc-wg-001.conf etc. Just grab whatever's first).
+          FIRST_CONF=$(sudo ls /etc/wireguard/ | grep '\.conf$' | head -1)
+          echo "Sample (${FIRST_CONF}, redacted):"
+          sudo sed -E 's/(PrivateKey|PublicKey|PresharedKey) = .*/\1 = <redacted>/' "/etc/wireguard/${FIRST_CONF}"
+          echo ""
+          echo "Total configs available for rotation: $(sudo ls /etc/wireguard/ | grep -c '\.conf$')"
+
+      - name: Bring up VPN (WireGuard via wireguard-go userspace)
+        id: vpn
+        if: ${{ steps.vpn_decision.outputs.use_vpn == 'true' && github.event.inputs.skip_vpn != 'true' }}
+        env:
+          # Leave VPN_REGION empty by default — vpn_bringup.sh picks the
+          # first available .conf alphabetically when unset. With the
+          # 205-region pool, hardcoding a single starting region (us-nyc)
+          # would always start at us-nyc-wg-001 which we don't want.
+          # SCANNER_VPN_REGION can still be set as a workflow var to pin
+          # a specific bring-up region for debugging.
+          VPN_REGION: ${{ vars.SCANNER_VPN_REGION || '' }}
+        run: scripts/scanner/vpn_bringup.sh
+
+      # ─── Carve Supabase out of the VPN tunnel ─────────────────────
+      # HEAVY_VPN_DB_ROUTING_FIX_SPEC.md. Heavy-v1 runs #831–#835 (5/5)
+      # failed: ROE gate could not reach Supabase :5432 through the
+      # deterministic us-atl-wg-001 exit — a Mullvad-side port/dest
+      # restriction times out the TCP connect even though DNS resolved
+      # fine. Fix: install /32 direct routes for each Supabase pooler IP
+      # via the original gateway. wg_up_userspace.sh already installs
+      # `ip rule … table main suppress_prefixlength 0`, so any non-default
+      # route in the main table beats the tunnel default — and the
+      # original `default via <gw>` is still in main (suppressed, not
+      # deleted), so we can read the gw/dev straight from `ip route show`.
+      #
+      # Scan target traffic still egresses via Mullvad (only specific
+      # /32s carve out); resolve at runtime every bring-up since pooler
+      # IPs rotate (today: 18.214.78.123 / 3.227.209.82 / 18.213.155.45).
+      # `ip route replace` is idempotent on re-run / rotation.
+      #
+      # SAME gate condition as the VPN bring-up step above (only runs
+      # when VPN is up). Fails LOUD on missing host/gw/dev because a
+      # silent carve-out failure would let the next run trip the same
+      # ROE-gate timeout and we'd be back to square one — better to
+      # surface the misconfig at bring-up than during scan execution.
+      - name: Carve Supabase out of the VPN tunnel
+        if: ${{ steps.vpn_decision.outputs.use_vpn == 'true' && github.event.inputs.skip_vpn != 'true' }}
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+        run: |
+          set -uo pipefail
+          # Original default route still lives in main (wg only suppresses
+          # it via ip-rule, doesn't delete it). awk-extract the gw + dev
+          # from the FIRST `default` line; LIMIT 1 in case multiple
+          # interfaces have defaults.
+          ORIG_GW=$(ip route show default table main | awk '/default/{print $3; exit}')
+          ORIG_DEV=$(ip route show default table main | awk '/default/{print $5; exit}')
+          echo "[db-carveout] original gw=$ORIG_GW dev=$ORIG_DEV"
+          DB_HOST=$(python3 -c 'import os,urllib.parse as u; print(u.urlparse(os.environ["SUPABASE_DSN"]).hostname or "")')
+          echo "[db-carveout] resolving DB host: $DB_HOST"
+          if [ -z "$DB_HOST" ] || [ -z "$ORIG_GW" ] || [ -z "$ORIG_DEV" ]; then
+            echo "[db-carveout] missing host/gw/dev — aborting carve-out (fail loud)"
+            exit 1
+          fi
+          # Resolve at runtime every bring-up — pooler IPs rotate;
+          # never hardcode. getent ahostsv4 uses libnss-dns which
+          # routes through the tunnel; resolution works post-bring-up
+          # (the failing runs already returned 3 pooler IPs).
+          for ip in $(getent ahostsv4 "$DB_HOST" | awk '{print $1}' | sort -u); do
+            echo "[db-carveout] direct route $ip/32 via $ORIG_GW dev $ORIG_DEV"
+            sudo ip route replace "$ip/32" via "$ORIG_GW" dev "$ORIG_DEV"
+          done
+          echo "[db-carveout] verify:"
+          for ip in $(getent ahostsv4 "$DB_HOST" | awk '{print $1}' | sort -u); do
+            ip route get "$ip" | sed 's/^/  /'
+          done
+
+      # ─── Dispatch to tier-specific runner ──────────────────────────
+      # Light + Medium implemented; Heavy still pending (M9).
+
+      - name: Run Light tier
+        if: ${{ steps.poll.outputs.has_work == 'true' && steps.poll.outputs.intensity == 'light' }}
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+        run: |
+          python scripts/scanner/run_light.py /tmp/scan_descriptor.json
+
+      - name: Run Medium tier
+        if: ${{ steps.poll.outputs.has_work == 'true' && steps.poll.outputs.intensity == 'medium' }}
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+          # Bearer for the portal /api/roe-block-alert endpoint. Used
+          # by roe_gate.py best-effort SendGrid delivery on a blocked
+          # active scan. Gate's abort decision does NOT depend on this
+          # being set or the POST succeeding — see roe_gate.py.
+          ROE_ALERT_TOKEN: ${{ secrets.ROE_ALERT_TOKEN }}
+          # SPEC_SCANNER_DEGRADATION_HARDENING.md batch 2 — validate-mode.
+          # When the workflow_dispatch input skip_vpn=true is set, no
+          # Mullvad bring-up happens (the three VPN steps above gate on
+          # this). run_medium.py reads SKIP_VPN at startup and calls
+          # assert_validate_mode_target_allowed(ctx.hostname, skip_vpn)
+          # BEFORE any target-bound op. Non-allowlisted target →
+          # DegradedRunError, scan_run.status='degraded', exit 1.
+          # NEVER manually fire skip_vpn=true on a client/owned asset.
+          SKIP_VPN: ${{ github.event.inputs.skip_vpn || 'false' }}
+          # When threshold_probe_mode workflow input is true, run_medium.py
+          # uses a per-chunk rate ladder + post-chunk healthchecks to map
+          # the rate-to-ban threshold (skips nikto/ffuf for isolation).
+          THRESHOLD_PROBE_MODE: ${{ github.event.inputs.threshold_probe_mode }}
+          # When threshold_probe_safe_only ALSO true, all 5 chunks use the
+          # `medium,tech` template tag — the only chunk that didn't trigger
+          # bans in scans #82+#87. Isolates whether template content is
+          # the actual ban trigger.
+          THRESHOLD_PROBE_SAFE_ONLY: ${{ github.event.inputs.threshold_probe_safe_only }}
+          # PATIENT MODE — mirrors Mac runbook tuning (-rl 10, 5s delays,
+          # 30 min cooldown on ban before rotating). Hypothesis: bans are
+          # velocity-driven, not source-IP-class-driven, so the same
+          # patience pattern that lets the Mac scan survive FortiGate
+          # should also let cloud scans survive.
+          PATIENT_MODE: ${{ github.event.inputs.patient_mode }}
+          PATIENT_BAN_COOLDOWN_S: ${{ github.event.inputs.patient_ban_cooldown_s }}
+          # STEP 1 of the two-step diagnostic (post-advisor-brief audit
+          # 2026-05-31 PM). Pin Chrome/131 UA + rate-2. Tests whether
+          # browser-shaped requests at Mac rate survive FortiGate.
+          STEALTH_UA: ${{ github.event.inputs.stealth_ua }}
+          # STEP 2 — only useful if STEP 1 bans. Runs katana preflight,
+          # then nuclei scans only the crawled URL list (no path enum).
+          # Composable with STEALTH_UA.
+          CRAWL_FIRST_MODE: ${{ github.event.inputs.crawl_first_mode }}
+        run: |
+          python scripts/scanner/run_medium.py /tmp/scan_descriptor.json
+
+      - name: Run Heavy tier
+        # note 129 / RUN_HEAVY_V1_BUILD_SPEC.md P0 — replaced the M9
+        # no-op stub with the real run_heavy invocation. v1 scope:
+        # testssl (TLS depth via cs_parsers/testssl.py canonical
+        # identity) + naabu/fingerprintx (net depth). VPN already
+        # wrapped by the upstream vpn_decision step for
+        # intensity in (medium,heavy). No medium-specific tunables
+        # carried over (WAF-rate, patient mode, stealth UA, etc.) —
+        # heavy's TLS-handshake/port-probe surface doesn't share
+        # medium's HTTP-fuzzing WAF-survival problem (HEAVY_TIER_
+        # READINESS_ASSESSMENT.md §4). SKIP_VPN exposed for
+        # validate-mode interlock (Batch-2 step d carries over to
+        # heavy when v1 lands).
+        if: ${{ steps.poll.outputs.has_work == 'true' && steps.poll.outputs.intensity == 'heavy' }}
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+          ROE_ALERT_TOKEN: ${{ secrets.ROE_ALERT_TOKEN }}
+          SKIP_VPN: ${{ github.event.inputs.skip_vpn || 'false' }}
+        run: |
+          python scripts/scanner/run_heavy.py /tmp/scan_descriptor.json
+
+      # ─── Tear down VPN (always, if we brought it up) ───────────────
+      # Runs even when the scan failed so we never leave a connection
+      # slot consumed against the Mullvad 5-device cap.
+      # Skipped in validate-mode (skip_vpn=true) because no tunnel was
+      # brought up to tear down — see SPEC_SCANNER_DEGRADATION_HARDENING.
+      - name: Tear down VPN
+        if: ${{ always() && steps.vpn_decision.outputs.use_vpn == 'true' && github.event.inputs.skip_vpn != 'true' }}
+        run: scripts/scanner/vpn_teardown.sh
+
+      # ─── Cleanup any orphaned 'running' rows from this invocation ──
+      # If the runner died mid-step (OOM, GH Actions restart, etc.), the
+      # scan_queue + scan_run rows are stuck 'running' forever. This
+      # post-step ALWAYS runs (`if: always()`) and marks them failed.
+      # It's a per-invocation safety net; a separate cron should do
+      # global liveness sweeps for orphans older than 4 hours.
+      - name: Cleanup orphaned running rows from this scan_run
+        if: ${{ always() && steps.poll.outputs.has_work == 'true' }}
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+        run: |
+          SCAN_RUN_ID="${{ steps.poll.outputs.scan_run_id }}"
+          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -c "
+            update public.scan_run
+               set status = 'failed',
+                   completed_at = now(),
+                   duration_seconds = extract(epoch from (now() - started_at))::int,
+                   error_message   = coalesce(error_message,
+                                              'workflow ended without explicit close-out')
+             where scan_run_id = '$SCAN_RUN_ID'
+               and status      = 'running';
+          " || true
+
+          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -c "
+            update public.scan_queue
+               set status = 'failed',
+                   completed_at = now(),
+                   duration_seconds = extract(epoch from (now() - started_at))::int,
+                   error_message   = coalesce(error_message,
+                                              'workflow ended without explicit close-out')
+             where scan_run_id = '$SCAN_RUN_ID'
+               and status      = 'running';
+          " || true
+
+      # ─── Summarize ─────────────────────────────────────────────────
+      - name: Summary
+        if: ${{ always() }}
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+        run: |
+          if [ "${{ steps.poll.outputs.has_work }}" != "true" ]; then
+            echo "## :zzz: No queued scans this tick" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          SCAN_RUN_ID="${{ steps.poll.outputs.scan_run_id }}"
+          STATUS=$(psql "$SUPABASE_DSN" -t -A -c "
+            select status from public.scan_run where scan_run_id='$SCAN_RUN_ID';
+          " 2>/dev/null || echo "unknown")
+
+          {
+            echo "## Scanner run"
+            echo ""
+            echo "| Field         | Value |"
+            echo "|---------------|-------|"
+            echo "| Asset         | \`${{ steps.poll.outputs.asset_id }}\` |"
+            echo "| Intensity     | ${{ steps.poll.outputs.intensity }} |"
+            echo "| scan_run_id   | \`$SCAN_RUN_ID\` |"
+            echo "| Final status  | $STATUS |"
+          } >> "$GITHUB_STEP_SUMMARY"

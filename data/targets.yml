@@ -1,0 +1,21 @@
+version: 2
+defaults:
+  schedule: nightly
+  rate_limit: normal
+  notify_on:
+    - critical
+    - high
+  retain_history_days: 365
+# ─── Prodex Labs targets ─────────────────────────────────────────────
+# Add each AUTHORIZED apex below (scope_verified: true = Prodex owns it /
+# you have written authorization to scan it). Then run ASM Discover via
+# workflow_dispatch with the target id (or "all"). Empty list = no scans.
+targets: []
+# Example (uncomment + edit once the apex is confirmed in-scope):
+#  - id: prodexlabs
+#    type: apex
+#    value: prodexlabs.com
+#    scope_verified: true
+#    owner: prodex_labs
+#    tags: [production, public-facing]
+#    notes: Prodex Labs primary domain.

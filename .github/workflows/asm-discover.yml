@@ -1,0 +1,352 @@
+name: ASM Discover
+
+# COMMANDsentry — scheduled discovery workflow.
+# Runs the lean ASM tool stack against every enabled target in data/targets.yml
+# and commits the resulting asset JSON back to the repo. Netlify auto-deploys
+# the dashboard from those committed files (Module 5).
+
+on:
+  # Every 6 hours. Each target's own `schedule:` field can refine cadence later.
+  schedule:
+    - cron: '0 */6 * * *'
+
+  # Manual trigger — gives a "Run workflow" button in the GitHub UI.
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target ID to scan (or "all")'
+        required: false
+        default: 'all'
+        type: string
+
+  # Re-scan when targets.yml changes — adding a new target triggers a scan.
+  push:
+    branches: [main]
+    paths:
+      - 'data/targets.yml'
+      - '.github/workflows/asm-discover.yml'
+      - 'scanner/**'
+
+# Need write access to commit scan results back, and actions:write to chain
+# the deploy-netlify workflow afterwards (GITHUB_TOKEN commits don't auto-trigger
+# other workflows by default, so we explicitly fire the deploy).
+permissions:
+  contents: write
+  actions:  write
+
+# Don't pile up overlapping scans. A new run cancels the previous queued one.
+concurrency:
+  group: asm-discover
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180      # 3h, well under GH's 6h ceiling. Bumped from 90
+                              # after multi-source enum found 23 total subs which
+                              # took ~92 min in per-sub deep-scan loop and killed
+                              # the workflow before commit could run.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Need full history for git operations
+          fetch-depth: 0
+
+      - name: Configure git identity (for auto-commit)
+        run: |
+          git config user.name  "commandsentry-bot"
+          git config user.email "commandsentry-bot@users.noreply.github.com"
+
+      - name: Set up Go (required for ProjectDiscovery tools)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Go binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/bin
+            ~/.commandsentry
+          key: ${{ runner.os }}-asm-tools-${{ hashFiles('scanner/install-tools.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-asm-tools-
+
+      - name: Install ASM tool stack
+        run: |
+          chmod +x scanner/install-tools.sh
+          scanner/install-tools.sh --platform ubuntu
+
+      - name: Verify tools installed
+        run: |
+          for t in subfinder dnsx httpx naabu fingerprintx nuclei wafw00f whois jq yq python3 dig openssl; do
+            if ! command -v "$t" >/dev/null 2>&1; then
+              echo "::error::Required tool not found: $t"
+              exit 1
+            fi
+          done
+          echo "All tools present."
+
+      - name: Determine targets to scan
+        id: targets
+        # Diff-aware: push events only scan NEW targets added in this commit
+        # (not every target in the file). Cron and manual still scan all/explicit.
+        # No errexit so the empty-scan-list "exit 0" path doesn't fail the job.
+        shell: bash {0}
+        run: |
+          set -uo pipefail
+
+          if [[ ! -f data/targets.yml ]]; then
+            echo "::error::data/targets.yml is missing from the repo."
+            exit 1
+          fi
+
+          INPUT_TARGET="${{ github.event.inputs.target }}"
+          EVENT_NAME="${{ github.event_name }}"
+          MODE=""
+          : > /tmp/scan_list
+
+          # ─── Branch 1: explicit single target via workflow_dispatch ──
+          if [[ -n "$INPUT_TARGET" && "$INPUT_TARGET" != "all" ]]; then
+            MODE="single"
+            echo "$INPUT_TARGET" > /tmp/scan_list
+            echo "Mode: single target ($INPUT_TARGET) — manual dispatch"
+
+          # ─── Branch 2: explicit "all" or scheduled cron ──
+          elif [[ "$INPUT_TARGET" == "all" || "$EVENT_NAME" == "schedule" ]]; then
+            MODE="all"
+            yq '.targets[] | select(.enabled != false) | .id' data/targets.yml | tr -d '"' | head -50 > /tmp/scan_list
+            echo "Mode: all enabled targets — $EVENT_NAME"
+
+          # ─── Branch 3: push event — diff-aware ──
+          elif [[ "$EVENT_NAME" == "push" ]]; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+            echo "Files changed in this push:"
+            echo "$CHANGED" | sed 's/^/  /'
+
+            # 3a: if scanner code or workflow itself changed → scan all (engine moved)
+            if echo "$CHANGED" | grep -qE '^(scanner/|\.github/workflows/asm-discover\.yml)'; then
+              MODE="all"
+              yq '.targets[] | select(.enabled != false) | .id' data/targets.yml | tr -d '"' | head -50 > /tmp/scan_list
+              echo "Mode: all (engine code changed — re-scanning everything to detect any output differences)"
+
+            # 3b: if only targets.yml changed → diff to find newly-added IDs
+            elif echo "$CHANGED" | grep -qE '^data/targets\.yml$'; then
+              MODE="diff"
+              git show HEAD~1:data/targets.yml 2>/dev/null > /tmp/old-targets.yml || echo "targets: []" > /tmp/old-targets.yml
+              yq '.targets[]? | .id' /tmp/old-targets.yml 2>/dev/null | tr -d '"' | sort -u > /tmp/old-ids
+              yq '.targets[]? | .id' data/targets.yml | tr -d '"' | sort -u > /tmp/new-ids
+              # IDs in new but not in old
+              comm -13 /tmp/old-ids /tmp/new-ids > /tmp/scan_list
+
+              ADDED_COUNT=$(wc -l < /tmp/scan_list | tr -d ' ')
+              REMOVED_COUNT=$(comm -23 /tmp/old-ids /tmp/new-ids | wc -l | tr -d ' ')
+              echo "Diff result: $ADDED_COUNT added, $REMOVED_COUNT removed"
+
+              if [[ ! -s /tmp/scan_list ]]; then
+                echo "::notice::No new targets in this commit (only removals or metadata edits). Skipping scan."
+                echo "mode=skipped" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              echo "Mode: diff — only scanning newly-added target(s)"
+
+            # 3c: push touched some other path (probably bot's own data commit) → skip
+            else
+              echo "::notice::Push didn't touch scanner code or targets.yml. Nothing to scan."
+              echo "mode=skipped" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+          # ─── Branch 4: unknown event → safe fallback to scan-all ──
+          else
+            MODE="all"
+            yq '.targets[] | select(.enabled != false) | .id' data/targets.yml | tr -d '"' | head -50 > /tmp/scan_list
+            echo "Mode: all (unknown event $EVENT_NAME — defaulting to scan-all)"
+          fi
+
+          if [[ ! -s /tmp/scan_list ]]; then
+            echo "::error::Scan list is empty after determination — bug in branch logic"
+            exit 1
+          fi
+
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "Targets queued for scan ($MODE):"
+          cat /tmp/scan_list | sed 's/^/  • /'
+
+      - name: Run ASM discovery
+        # NO errexit — phases run independently.
+        # CRITICAL: redirect /dev/null into the scanner. Otherwise it inherits
+        # stdin from this loop (bound to /tmp/scan_list), and any subprocess
+        # inside (testssl.sh, wafw00f, etc.) that reads stdin will consume the
+        # rest of our target list, killing the loop after iteration 1.
+        if: steps.targets.outputs.mode != 'skipped'
+        shell: bash {0}
+        run: |
+          chmod +x scanner/asm-discover.sh
+          while IFS= read -r tid; do
+            if [[ -z "$tid" ]]; then continue; fi
+            echo "::group::Scan target: $tid"
+            scanner/asm-discover.sh "$tid" </dev/null || echo "::warning::Target $tid had non-zero exit"
+            echo "::endgroup::"
+          done < /tmp/scan_list
+
+      - name: Sync dashboard data
+        if: steps.targets.outputs.mode != 'skipped'
+        run: |
+          chmod +x web/sync-data.sh
+          web/sync-data.sh
+
+      - name: Send email alerts (changes only)
+        if: steps.targets.outputs.mode != 'skipped'
+        # Graceful no-op if SENDGRID_API_KEY isn't set, so workflow doesn't fail
+        # before the operator has wired email alerts. (Migrated Resend→SendGrid
+        # 2026-07-01 — reuses the same secret the daily digest already runs on.)
+        env:
+          SENDGRID_API_KEY:  ${{ secrets.SENDGRID_API_KEY }}
+          ALERT_FROM_EMAIL:  ${{ vars.ALERT_FROM_EMAIL }}
+          ALERT_TO_EMAIL:    ${{ vars.ALERT_TO_EMAIL }}
+          ALERT_FROM_NAME:   ${{ vars.ALERT_FROM_NAME }}
+          DASHBOARD_URL:     ${{ vars.DASHBOARD_URL }}
+        run: python3 scanner/post-email-alerts.py
+
+      - name: Commit scan results
+        # No errexit so we can handle push race conditions cleanly.
+        # Strategy on push race: soft-reset to origin/main and re-stage,
+        # since our just-scanned JSON is authoritative.
+        if: steps.targets.outputs.mode != 'skipped'
+        shell: bash {0}
+        run: |
+          set -uo pipefail
+
+          git add data/assets/ data/state/ web/data/ || true
+          git reset HEAD -- 'data/raw/**' 2>/dev/null || true
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          CHANGED=$(git diff --staged --name-only | grep -E '^data/assets/.*\.json$' | wc -l | tr -d ' ')
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+          MSG="asm-scan: ${CHANGED} asset(s) updated · ${TIMESTAMP}"
+
+          # First commit
+          git commit -m "$MSG" \
+                     -m "Triggered by: ${{ github.event_name }}" \
+                     -m "Workflow run: ${{ github.run_id }}"
+
+          # Push with retry on race conditions
+          for attempt in 1 2 3; do
+            if git push; then
+              echo "Pushed on attempt $attempt"
+              exit 0
+            fi
+
+            echo "Push rejected on attempt $attempt — resetting to origin/main and re-applying"
+            git fetch origin main
+            # Mixed reset (default): HEAD AND index move to origin/main; working
+            # tree keeps our scan data. Critical fix vs --soft: with --soft,
+            # the index stayed frozen at the runner's old commit, so any files
+            # that existed in the new origin/main but not in the runner's old
+            # commit (e.g. recently-pushed scripts) got recorded as STAGED
+            # DELETIONS and committed away on the next `git commit`. --mixed
+            # resets the index to match the new HEAD, then `git add` re-stages
+            # only the scan files we explicitly want to commit. Bug discovered
+            # 2026-05-16 after scripts/normalize/run_normalize.py disappeared
+            # from a runner commit.
+            git reset --mixed origin/main
+            git add data/assets/ data/state/ web/data/
+
+            if git diff --staged --quiet; then
+              echo "No changes left to commit after reset (concurrent scan covered it)."
+              exit 0
+            fi
+
+            # Re-create the commit on top of new origin/main
+            git commit -m "$MSG" \
+                       -m "Triggered by: ${{ github.event_name }}" \
+                       -m "Workflow run: ${{ github.run_id }}" \
+                       -m "Note: rebased onto origin/main (attempt $attempt)"
+          done
+
+          echo "::error::Push still failing after 3 retries"
+          exit 1
+
+      - name: Push asset surface data to Supabase
+        # Runs AFTER the JSON files are committed back. Reads data/assets/*.json
+        # and upserts into the portal's asset_surface table so the Surface tab
+        # on /assets/[asset_id] reflects the latest scan.
+        #
+        # Graceful no-op if SUPABASE_DSN isn't set as a repo secret yet —
+        # script exits cleanly with a warning. Add the secret in
+        # GitHub → Settings → Secrets and variables → Actions → New secret
+        # name=SUPABASE_DSN, value=(from Obsidian: 21 - Supabase Project Credentials.md)
+        if: success() && steps.targets.outputs.mode != 'skipped'
+        env:
+          SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
+          # Optional: if set, the importer fans out SendGrid notification
+          # emails to users subscribed to ASM events at real_time cadence.
+          # Missing key = silent (events still written to DB, just no email).
+          # Migrated Resend→SendGrid 2026-07-01 (same secret as the digest).
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          if [[ -z "${SUPABASE_DSN}" ]]; then
+            echo "::warning::SUPABASE_DSN secret not set — skipping Surface upload."
+            echo "Add it in GitHub repo settings to enable per-scan Supabase sync."
+            exit 0
+          fi
+          python3 -m pip install --break-system-packages --quiet 'psycopg[binary]==3.3.4'
+          python3 scripts/db/import_asm_to_surface.py --source-tag asm_cron
+
+      - name: Trigger Netlify deploy (chain past GITHUB_TOKEN anti-recursion)
+        if: success() && steps.targets.outputs.mode != 'skipped'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Only fire deploy if the scan actually produced a new commit
+          LATEST_MSG=$(git log -1 --format=%s)
+          if [[ "$LATEST_MSG" == asm-scan:* ]]; then
+            echo "Found scan commit on HEAD ($LATEST_MSG) — triggering deploy"
+            gh workflow run deploy-netlify.yml
+          else
+            echo "No asm-scan commit on HEAD — skipping deploy trigger"
+          fi
+
+      - name: Summarize run
+        if: always()
+        run: |
+          MODE="${{ steps.targets.outputs.mode }}"
+          echo "## ASM scan summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Mode:** \`$MODE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Triggered by:** \`${{ github.event_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$MODE" == "skipped" ]]; then
+            echo "_No new targets to scan in this push (only removals or metadata edits). Skipping the scan saved compute time._" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "### Assets scanned" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f /tmp/scan_list ]]; then
+            while IFS= read -r tid; do
+              [[ -z "$tid" ]] && continue
+              FILE="data/assets/${tid}.json"
+              if [[ -f "$FILE" ]]; then
+                SUBS=$(jq '.summary.live_subdomain_count // 0' "$FILE" 2>/dev/null || echo "?")
+                SVCS=$(jq '.summary.service_count // 0' "$FILE" 2>/dev/null || echo "?")
+                echo "- \`${tid}\` — ${SUBS} live subdomain(s), ${SVCS} service(s)" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "- \`${tid}\` — no output file (scan may have failed)" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            done < /tmp/scan_list
+          fi
