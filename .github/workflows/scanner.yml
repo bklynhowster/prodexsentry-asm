@@ -45,8 +45,12 @@ on:
   # Discover chain below still guarantee a poke within ≤10 min /
   # ≤6h respectively.
   #
-  # schedule:
-  #   - cron: '7-57/10 * * * *'
+  # ── TEMP fleet-drain enabled 2026-07-03 (Prodex) ──────────────────
+  #    Standing 5-min cron to auto-drain the queued Light fleet sweep
+  #    (no portal auto-dispatch wired yet). DISABLE after the sweep —
+  #    empty ticks bill ~1 GH-min each. Re-comment these two lines.
+  schedule:
+    - cron: '*/5 * * * *'
 
   # Chain after every successful ASM Discover run — guarantees a queue
   # drain pass at least every 6 hours (the ASM Discover cadence) even
