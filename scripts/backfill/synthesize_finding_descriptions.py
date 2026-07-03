@@ -71,7 +71,7 @@ MODEL_ID = "claude-sonnet-4-6"  # the production model (bumped 2026-05-27)
 MAX_TOKENS = 2048
 TEMPERATURE = 0.2  # low — we want consistent, factual output
 
-DEFAULT_SUPABASE_URL = "https://hdygktppfvuspnumpfuq.supabase.co"
+DEFAULT_SUPABASE_URL = "https://bxcvzpbmxsdtalyfanee.supabase.co"
 
 # Findings whose description is shorter than this AND matches a "citation"
 # pattern are considered thin and qualify for synthesis.

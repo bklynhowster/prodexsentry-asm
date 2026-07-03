@@ -1,0 +1,206 @@
+name: Enrich finding descriptions
+
+# PRODEXsentry — auto-enrichment for finding §1 / §2 / §3 narrative.
+#
+# The portal's finding detail page renders three narrative slots:
+#   §1 What is this?            → findings.description_synth
+#   §2 What could it do?        → findings.impact
+#   §3 How do I get rid of it?  → findings.remediation
+#
+# Scanners (testssl, nuclei, nikto, wpscan, etc.) don't emit prose — they
+# emit machine output. This workflow runs the Phase F synthesis script
+# (scripts/backfill/synthesize_finding_descriptions.py) against every
+# finding whose §1/§2/§3 is still NULL, calling Claude Sonnet 4.6 to
+# produce the narrative + structured extractions (CVE/CWE/tags/CVSS/
+# affected component/framework mappings).
+#
+# Output is written with description_source = 'ai_synthesized' which the
+# portal renders immediately (auto-publish, per 2026-05-27 decision). The
+# /admin/finding-descriptions admin page lets Howie approve → flip to
+# 'ai_synthesized_reviewed' or reject → revert to scanner text.
+#
+# Triggers:
+#   - workflow_run completed for asm-discover OR scanner (chains after
+#     every passive discover AND every active Phase 4a scan)
+#   - cron daily at 13:00 UTC (safety net — catches any drift)
+#   - workflow_dispatch (on-demand from the Actions UI)
+#
+# Cost expectation: Sonnet 4.6 at ~$3/MTok in, ~$15/MTok out. ~2k in +
+# ~1k out per finding ≈ $0.02/finding. A typical scan tick produces 0-30
+# new findings, so most runs are well under $1. First-pass backfill of
+# 200+ existing thin findings is ~$4-5 one-time.
+
+on:
+  # Chain after every passive ASM discover run AND every active scanner
+  # run, so new findings get §1/§2/§3 populated within minutes of a scan
+  # completing — regardless of which workflow produced them.
+  # Added 'Scanner' 2026-05-29 — without it, Phase 4a Light scan
+  # findings only got enriched on the next 13:00 UTC cron tick (up to
+  # 24h latency), violating the "scan → immediate interpretation"
+  # workflow assumption Howie expected.
+  workflow_run:
+    workflows: ["ASM Discover", "Scanner"]
+    types: [completed]
+
+  # Safety net cron — catches any findings the workflow_run path missed
+  # (e.g., findings inserted by manual SQL or by import_jsonl.py).
+  schedule:
+    - cron: '0 13 * * *'   # 13:00 UTC = 09:00 ET, well after the daily scan tick
+
+  # Manual trigger — useful for forcing a re-synthesis after a prompt change.
+  workflow_dispatch:
+    inputs:
+      severity:
+        description: 'Severity filter (space-separated, e.g. "HIGH MODERATE-HIGH"). Empty = all severities.'
+        required: false
+        default: ''
+        type: string
+      finding_id:
+        description: 'Single finding_id to (re)synthesize. Overrides severity.'
+        required: false
+        default: ''
+        type: string
+      force:
+        description: 'Re-synthesize even if fully populated already.'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+# Don't pile up overlapping enrichment runs.
+concurrency:
+  group: enrich-finding-descriptions
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    # Skip the chained run if the upstream ASM Discover failed.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    # 120 min — script --limit was bumped 100→300 on 2026-05-27 so a single
+    # workflow_dispatch can drain the typical thin-findings backlog in one
+    # sitting. At observed ~22s/finding with Sonnet 4.6, 300 findings ≈
+    # 110 min worst case. 120 min gives a small safety buffer; ongoing
+    # cron + workflow_run sweeps then handle small daily deltas under the
+    # old 60-min ceiling no problem.
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ─── Cheap gate: skip if there are no thin findings to enrich ──
+      # Part of Force7 Initiative 2 #1. Most chained runs land here on
+      # zero work — every Scanner workflow_run completion fires this,
+      # but most scans add 0 new thin findings. Skipping the python
+      # install + synthesis worker on those saves ~30-60s of runner
+      # wall time and the synthesis script invocation cost. (GitHub
+      # still bills 1 min minimum per run; this avoids the ABOVE-floor
+      # work that compounds when scans get noisy.)
+      #
+      # REST approach (vs psql): ubuntu-latest hosted runners DO ship
+      # psql but it's not free to assume across future runner image
+      # updates. PostgREST exact-count via HEAD + content-range is
+      # rock-solid + already-used credential pattern (matches the
+      # SUPABASE_SERVICE_ROLE_KEY the synthesis worker uses below).
+      - name: Skip if zero thin findings
+        id: precheck
+        # workflow_dispatch with force=true or a specific finding_id
+        # must always run — those are intentional re-syntheses.
+        if: ${{ github.event.inputs.force != 'true' && github.event.inputs.finding_id == '' }}
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Hardcoded URL matches synthesize_finding_descriptions.py's
+          # DEFAULT_SUPABASE_URL (line 109 below). Centralized constants
+          # are a separate cleanup — see [[16 Reconcile scan_queue.source]]
+          # class issue.
+          SUPABASE_URL: "https://bxcvzpbmxsdtalyfanee.supabase.co"
+        run: |
+          set -euo pipefail
+          # Count rows where ANY of the three narrative slots is NULL.
+          #
+          # NO current_status filter — synthesize_finding_descriptions.py
+          # itself doesn't filter on current_status (per its fetch_findings
+          # function), so the precheck MUST NOT filter either, or we'll
+          # silently skip work the script would have done. Pre-flight on
+          # 2026-06-10 caught this: 6 thin findings existed in 'detected'
+          # status only — an 'open'-status precheck would have reported 0
+          # and fail-CLOSED. Fail-OPEN discipline starts with matching the
+          # downstream selection criterion exactly.
+          QUERY='or=(description_synth.is.null,impact.is.null,remediation.is.null)'
+          # HEAD with Prefer: count=exact returns total in Content-Range.
+          # -sS = silent but show errors; -f bails on 4xx/5xx so we don't
+          # silently treat a 500 as "zero findings."
+          HDR=$(curl -sSfI \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Prefer: count=exact" \
+            -H "Range-Unit: items" \
+            -H "Range: 0-0" \
+            "$SUPABASE_URL/rest/v1/findings?$QUERY&select=finding_id" \
+            | tr -d '\r')
+          # Content-Range: 0-0/N — pull the N.
+          THIN=$(echo "$HDR" | awk -F'/' '/^[Cc]ontent-[Rr]ange:/ {print $2}' | head -1)
+          if [ -z "$THIN" ]; then
+            echo "::warning::Could not parse Content-Range from PostgREST response — running synthesis worker anyway (fail-open)."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "thin_count=$THIN"
+          if [ "$THIN" = "0" ]; then
+            echo "::notice::No thin findings — skipping synthesis worker (saved ~30-60s of work)."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$THIN thin finding(s) — running synthesis."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: ${{ steps.precheck.outputs.should_run != 'false' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        if: ${{ steps.precheck.outputs.should_run != 'false' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install anthropic supabase python-dotenv
+
+      - name: Run synthesis worker
+        if: ${{ steps.precheck.outputs.should_run != 'false' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # SUPABASE_URL intentionally NOT set — the script's hardcoded
+          # default (DEFAULT_SUPABASE_URL = https://bxcvzpbmxsdtalyfanee.supabase.co)
+          # kicks in via os.environ.get(..., DEFAULT). Setting it here to an
+          # absent secret would evaluate to "" which the supabase client
+          # rejects with "supabase_url is required".
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+
+          # Build the arg list based on dispatch inputs (empty for scheduled /
+          # workflow_run paths — those scan everything thin).
+          ARGS=()
+          if [[ -n "${{ github.event.inputs.finding_id }}" ]]; then
+            ARGS+=(--finding-id "${{ github.event.inputs.finding_id }}")
+          elif [[ -n "${{ github.event.inputs.severity }}" ]]; then
+            # shellcheck disable=SC2206
+            SEV_ARR=( ${{ github.event.inputs.severity }} )
+            ARGS+=(--severity "${SEV_ARR[@]}")
+          fi
+          if [[ "${{ github.event.inputs.force }}" == "true" ]]; then
+            ARGS+=(--force)
+          fi
+
+          echo "Running with: ${ARGS[*]:-(no args — defaults: all thin findings)}"
+          python scripts/backfill/synthesize_finding_descriptions.py "${ARGS[@]}"
+
+      - name: Summarize
+        if: always()
+        run: |
+          echo "Synthesis job complete."
+          echo "Review pending entries at /admin/finding-descriptions in the portal."
