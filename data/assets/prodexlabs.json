@@ -1,0 +1,3064 @@
+{
+  "schema_version": "3.0",
+  "asset": {
+    "id": "prodexlabs",
+    "type": "apex",
+    "value": "prodexlabs.com",
+    "owner": "unknown",
+    "tags": [],
+    "notes": "",
+    "discovered_via": "manual"
+  },
+  "scan": {
+    "id": "scan_2026-07-03T11:29:07Z_8872ccf0",
+    "started_at": "2026-07-03T11:29:07Z",
+    "completed_at": "2026-07-03T11:36:01Z",
+    "duration_seconds": 414,
+    "engine_version": "3.0.0",
+    "scanner_origin": "github-actions-ubuntu-azure",
+    "tools_run": [
+      "dnsx",
+      "fingerprintx",
+      "httpx",
+      "naabu",
+      "subfinder",
+      "testssl",
+      "wafw00f",
+      "whois"
+    ]
+  },
+  "registration": {},
+  "summary": {
+    "subdomain_count": 26,
+    "live_subdomain_count": 26,
+    "host_count": 19,
+    "service_count": 52,
+    "newest_cert_expiry_days": 41,
+    "top_hosting_org": "Google LLC",
+    "platforms": []
+  },
+  "subdomains": [
+    {
+      "name": "prodexlabs.com",
+      "alive": true,
+      "is_root": true,
+      "discovered_via": "dnsx",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "Prodex Labs"
+      },
+      "hosts": [
+        {
+          "ip": "8.232.147.166",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "166.147.232.8.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "8.232.147.166",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "8.232.147.166",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=cooked.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "cooked.prodexlabs.com",
+              "prodexlabs.com",
+              "www.prodexlabs.com"
+            ],
+            "not_before": "2026-06-23T22:07:00Z",
+            "not_after": "2026-09-21T23:00:53Z",
+            "self_signed": false,
+            "days_to_expiry": 80
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "8.232.147.166"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [
+          "ns-cloud-d1.googledomains.com",
+          "ns-cloud-d2.googledomains.com",
+          "ns-cloud-d3.googledomains.com",
+          "ns-cloud-d4.googledomains.com"
+        ],
+        "txt": [
+          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d",
+          "v=spf1 include:_spf.google.com ~all",
+          "MS=ms22662979"
+        ],
+        "spf": "v=spf1 include:_spf.google.com ~all",
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "Google Frontend",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud Load Balancing",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Tag Manager",
+            "version": null,
+            "category": "tracking"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Next.js",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Node.js",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "React",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Webpack",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "atlantis-gcp.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:01Z",
+      "last_seen": "2026-07-03T11:36:01Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "Sign in - Google Accounts"
+      },
+      "hosts": [
+        {
+          "ip": "34.67.20.186",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Iowa",
+          "city": "Council Bluffs",
+          "reverse_dns": "186.20.67.34.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "34.67.20.186",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "34.67.20.186",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=accounts.google.com",
+            "issuer": "CN=WR2, O=Google Trust Services, C=US",
+            "san": [
+              "accounts.google.com",
+              "*.partner.android.com",
+              "mtls.accounts.google.com"
+            ],
+            "not_before": "2026-06-08T08:39:04Z",
+            "not_after": "2026-08-31T08:39:03Z",
+            "self_signed": false,
+            "days_to_expiry": 58
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "34.67.20.186"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "ESF",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "None",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "azure-demo.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:01Z",
+      "last_seen": "2026-07-03T11:36:01Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 504,
+        "title": "Service unavailable"
+      },
+      "hosts": [
+        {
+          "ip": "150.171.109.229",
+          "asn": "AS8075",
+          "asn_org": "Microsoft Corporation",
+          "country": "US",
+          "region": "Washington",
+          "city": "Redmond",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "150.171.109.230",
+          "asn": "AS8075",
+          "asn_org": "Microsoft Corporation",
+          "country": "US",
+          "region": "Washington",
+          "city": "Redmond",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "2603:1061:14:e4::1",
+          "asn": "AS8075",
+          "asn_org": "Microsoft Corporation",
+          "country": "US",
+          "region": "Washington",
+          "city": "Redmond",
+          "reverse_dns": null,
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "150.171.109.229",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "150.171.109.229",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=azure-demo.prodexlabs.com",
+            "issuer": "CN=GeoTrust TLS RSA CA G1, OU=www.digicert.com, O=DigiCert Inc, C=US",
+            "san": [
+              "azure-demo.prodexlabs.com"
+            ],
+            "not_before": "2026-06-19T00:00:00Z",
+            "not_after": "2026-12-19T23:59:59Z",
+            "self_signed": false,
+            "days_to_expiry": 169
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "150.171.109.230"
+        ],
+        "aaaa": [
+          "2603:1061:14:e4::1"
+        ],
+        "cname": "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net",
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": null,
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Azure",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Azure Front Door",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Azure Front Door",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "cooked.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:01Z",
+      "last_seen": "2026-07-03T11:36:01Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "Prodex Labs"
+      },
+      "hosts": [
+        {
+          "ip": "8.232.147.166",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "166.147.232.8.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "8.232.147.166",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "8.232.147.166",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=cooked.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "cooked.prodexlabs.com",
+              "prodexlabs.com",
+              "www.prodexlabs.com"
+            ],
+            "not_before": "2026-06-23T22:07:00Z",
+            "not_after": "2026-09-21T23:00:53Z",
+            "self_signed": false,
+            "days_to_expiry": 80
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "8.232.147.166"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "Google Frontend",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud Load Balancing",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Tag Manager",
+            "version": null,
+            "category": "tracking"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Next.js",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Node.js",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "React",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Webpack",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "demo.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=demo.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "demo.prodexlabs.com"
+            ],
+            "not_before": "2026-06-09T10:33:39Z",
+            "not_after": "2026-09-07T11:28:13Z",
+            "self_signed": false,
+            "days_to_expiry": 65
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "docs.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "What Is ProDex? - ProDex"
+      },
+      "hosts": [
+        {
+          "ip": "66.33.60.194",
+          "asn": "AS16509",
+          "asn_org": "Amazon.com, Inc.",
+          "country": "US",
+          "region": "California",
+          "city": "Walnut",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "66.33.60.34",
+          "asn": "AS16509",
+          "asn_org": "Amazon.com, Inc.",
+          "country": "US",
+          "region": "California",
+          "city": "Walnut",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "76.76.21.164",
+          "asn": "AS16509",
+          "asn_org": "Amazon.com, Inc.",
+          "country": "US",
+          "region": "California",
+          "city": "Walnut",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "76.76.21.93",
+          "asn": "AS16509",
+          "asn_org": "Amazon.com, Inc.",
+          "country": "US",
+          "region": "California",
+          "city": "Walnut",
+          "reverse_dns": null,
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "66.33.60.194",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "66.33.60.194",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=docs.prodexlabs.com",
+            "issuer": "CN=YR1, O=Let's Encrypt, C=US",
+            "san": [
+              "docs.prodexlabs.com"
+            ],
+            "not_before": "2026-06-25T06:09:26Z",
+            "not_after": "2026-09-23T06:09:25Z",
+            "self_signed": false,
+            "days_to_expiry": 81
+          }
+        },
+        {
+          "ip": "76.76.21.93",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "76.76.21.93",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=docs.prodexlabs.com",
+            "issuer": "CN=YR1, O=Let's Encrypt, C=US",
+            "san": [
+              "docs.prodexlabs.com"
+            ],
+            "not_before": "2026-06-25T06:09:26Z",
+            "not_after": "2026-09-23T06:09:25Z",
+            "self_signed": false,
+            "days_to_expiry": 81
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "76.76.21.164",
+          "66.33.60.34"
+        ],
+        "aaaa": [],
+        "cname": "cname.mintlify-dns.com",
+        "mx": [],
+        "ns": [
+          "ns1.vercel-dns-3.com",
+          "ns2.vercel-dns-3.com",
+          "ns3.vercel-dns-3.com",
+          "ns4.vercel-dns-3.com"
+        ],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "Vercel",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "Vercel",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "None",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "highcom.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=highcom.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "highcom.prodexlabs.com"
+            ],
+            "not_before": "2026-06-28T11:05:59Z",
+            "not_after": "2026-09-26T11:59:33Z",
+            "self_signed": false,
+            "days_to_expiry": 85
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "l3h-ivs.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=l3h-ivs.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "l3h-ivs.prodexlabs.com"
+            ],
+            "not_before": "2026-06-12T02:38:29Z",
+            "not_after": "2026-09-10T03:33:04Z",
+            "self_signed": false,
+            "days_to_expiry": 68
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "l3h-nh.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=l3h-nh.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "l3h-nh.prodexlabs.com"
+            ],
+            "not_before": "2026-06-30T22:33:45Z",
+            "not_after": "2026-09-28T23:26:38Z",
+            "self_signed": false,
+            "days_to_expiry": 87
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "l3h-ss.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=l3h-ss.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "l3h-ss.prodexlabs.com"
+            ],
+            "not_before": "2026-06-02T06:37:51Z",
+            "not_after": "2026-08-31T07:31:26Z",
+            "self_signed": false,
+            "days_to_expiry": 58
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "link.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "SMTP2GO"
+      },
+      "hosts": [
+        {
+          "ip": "170.187.131.209",
+          "asn": "AS63949",
+          "asn_org": "Akamai Connected Cloud",
+          "country": "US",
+          "region": "New Jersey",
+          "city": "Cedar Knolls",
+          "reverse_dns": "170-187-131-209.ip.linodeusercontent.com",
+          "is_private": false
+        },
+        {
+          "ip": "185.3.93.228",
+          "asn": "AS63949",
+          "asn_org": "Akamai Connected Cloud",
+          "country": "GB",
+          "region": "England",
+          "city": "London",
+          "reverse_dns": "185-3-93-228.ip.linodeusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [],
+      "dns": {
+        "a": [
+          "170.187.131.209",
+          "185.3.93.228"
+        ],
+        "aaaa": [],
+        "cname": "track.smtp2go.net",
+        "mx": [],
+        "ns": [],
+        "txt": [
+          "v=spf1 include:spf.smtp2go.com -all"
+        ],
+        "spf": "v=spf1 include:spf.smtp2go.com -all",
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": null,
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "None",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "littleleaffarms.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=littleleaffarms.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "littleleaffarms.prodexlabs.com"
+            ],
+            "not_before": "2026-06-10T10:27:18Z",
+            "not_after": "2026-09-08T11:20:51Z",
+            "self_signed": false,
+            "days_to_expiry": 66
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "oidc-test.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "136.110.176.164",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "164.176.110.136.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "136.110.176.164",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "136.110.176.164",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=oidc-test.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "oidc-test.prodexlabs.com"
+            ],
+            "not_before": "2026-06-27T08:10:47Z",
+            "not_after": "2026-09-25T09:04:20Z",
+            "self_signed": false,
+            "days_to_expiry": 83
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "136.110.176.164"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "panthalassa.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=panthalassa.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "panthalassa.prodexlabs.com"
+            ],
+            "not_before": "2026-06-29T11:05:29Z",
+            "not_after": "2026-09-27T11:59:22Z",
+            "self_signed": false,
+            "days_to_expiry": 86
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "preview.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 404,
+        "title": null
+      },
+      "hosts": [
+        {
+          "ip": "34.54.236.210",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "210.236.54.34.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "34.54.236.210",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "34.54.236.210",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=preview.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "preview.prodexlabs.com",
+              "*.preview.prodexlabs.com"
+            ],
+            "not_before": "2026-05-15T14:37:29Z",
+            "not_after": "2026-08-13T15:33:24Z",
+            "self_signed": false,
+            "days_to_expiry": 41
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "34.54.236.210"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": null,
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "prod.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=prod.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "prod.prodexlabs.com"
+            ],
+            "not_before": "2026-06-08T18:25:09Z",
+            "not_after": "2026-09-06T19:18:23Z",
+            "self_signed": false,
+            "days_to_expiry": 65
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "prosalud-staging.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "34.13.119.70",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "70.119.13.34.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "34.13.119.70",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "34.13.119.70",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=prosalud-staging.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "prosalud-staging.prodexlabs.com"
+            ],
+            "not_before": "2026-06-14T22:49:42Z",
+            "not_after": "2026-09-12T23:43:15Z",
+            "self_signed": false,
+            "days_to_expiry": 71
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "34.13.119.70"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "prosalud.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "34.149.145.200",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "200.145.149.34.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "34.149.145.200",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "34.149.145.200",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=prosalud.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "prosalud.prodexlabs.com"
+            ],
+            "not_before": "2026-06-13T03:13:46Z",
+            "not_after": "2026-09-11T04:08:20Z",
+            "self_signed": false,
+            "days_to_expiry": 69
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "34.149.145.200"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "sandbox.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "136.110.176.164",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "164.176.110.136.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "136.110.176.164",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "136.110.176.164",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=sandbox.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "sandbox.prodexlabs.com"
+            ],
+            "not_before": "2026-06-09T18:02:51Z",
+            "not_after": "2026-09-07T18:57:26Z",
+            "self_signed": false,
+            "days_to_expiry": 66
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "136.110.176.164"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "staging-gpt55.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:02Z",
+      "last_seen": "2026-07-03T11:36:02Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "34.117.3.186",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "186.3.117.34.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "34.117.3.186",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "34.117.3.186",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=staging-gpt55.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "staging-gpt55.prodexlabs.com"
+            ],
+            "not_before": "2026-06-16T21:00:22Z",
+            "not_after": "2026-09-14T21:53:36Z",
+            "self_signed": false,
+            "days_to_expiry": 73
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "34.117.3.186"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "staging.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:03Z",
+      "last_seen": "2026-07-03T11:36:03Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "34.117.3.186",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "186.3.117.34.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "34.117.3.186",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "34.117.3.186",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=staging.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "staging.prodexlabs.com"
+            ],
+            "not_before": "2026-06-08T18:27:56Z",
+            "not_after": "2026-09-06T19:22:31Z",
+            "self_signed": false,
+            "days_to_expiry": 65
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "34.117.3.186"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "time.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:03Z",
+      "last_seen": "2026-07-03T11:36:03Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=time.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "time.prodexlabs.com"
+            ],
+            "not_before": "2026-06-13T10:40:28Z",
+            "not_after": "2026-09-11T11:33:22Z",
+            "self_signed": false,
+            "days_to_expiry": 69
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "trial.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:03Z",
+      "last_seen": "2026-07-03T11:36:03Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "35.227.202.53",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=trial.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "trial.prodexlabs.com"
+            ],
+            "not_before": "2026-06-08T10:32:01Z",
+            "not_after": "2026-09-06T11:25:35Z",
+            "self_signed": false,
+            "days_to_expiry": 64
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "35.227.202.53"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          },
+          {
+            "name": "Unpkg",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "uat.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:03Z",
+      "last_seen": "2026-07-03T11:36:03Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "136.68.149.70",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "70.149.68.136.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "136.68.149.70",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "136.68.149.70",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=uat.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "uat.prodexlabs.com"
+            ],
+            "not_before": "2026-07-01T21:25:41Z",
+            "not_after": "2026-09-29T22:10:09Z",
+            "self_signed": false,
+            "days_to_expiry": 88
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "136.68.149.70"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "valorep.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:03Z",
+      "last_seen": "2026-07-03T11:36:03Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "hosts": [
+        {
+          "ip": "8.233.90.115",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "115.90.233.8.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "8.233.90.115",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "8.233.90.115",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=valorep.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "valorep.prodexlabs.com"
+            ],
+            "not_before": "2026-06-26T00:14:46Z",
+            "not_after": "2026-09-24T01:07:59Z",
+            "self_signed": false,
+            "days_to_expiry": 82
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "8.233.90.115"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "www.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-07-03T11:36:03Z",
+      "last_seen": "2026-07-03T11:36:03Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "Prodex Labs"
+      },
+      "hosts": [
+        {
+          "ip": "8.232.147.166",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "166.147.232.8.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "8.232.147.166",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "8.232.147.166",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=cooked.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "cooked.prodexlabs.com",
+              "prodexlabs.com",
+              "www.prodexlabs.com"
+            ],
+            "not_before": "2026-06-23T22:07:00Z",
+            "not_after": "2026-09-21T23:00:53Z",
+            "self_signed": false,
+            "days_to_expiry": 80
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "8.232.147.166"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "Google Frontend",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud Load Balancing",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Tag Manager",
+            "version": null,
+            "category": "tracking"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Next.js",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Node.js",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "React",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Webpack",
+            "version": null,
+            "category": null
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    }
+  ],
+  "phantom_subdomains": [],
+  "deltas": {
+    "since_scan": null,
+    "added": {
+      "subdomains": [],
+      "services": [],
+      "hosts": []
+    },
+    "removed": {
+      "subdomains": [],
+      "services": [],
+      "hosts": []
+    },
+    "changed": {
+      "fingerprint": [],
+      "cert": [],
+      "reachability": []
+    }
+  },
+  "history": [
+    {
+      "scan_id": "scan_2026-07-03T11:29:07Z_8872ccf0",
+      "started_at": "2026-07-03T11:29:07Z",
+      "completed_at": "2026-07-03T11:36:01Z",
+      "subdomain_count": 26,
+      "live_subdomain_count": 26,
+      "host_count": 19,
+      "service_count": 52,
+      "subdomain_names": [
+        "atlantis-gcp.prodexlabs.com",
+        "azure-demo.prodexlabs.com",
+        "cooked.prodexlabs.com",
+        "demo.prodexlabs.com",
+        "docs.prodexlabs.com",
+        "highcom.prodexlabs.com",
+        "l3h-ivs.prodexlabs.com",
+        "l3h-nh.prodexlabs.com",
+        "l3h-ss.prodexlabs.com",
+        "link.prodexlabs.com",
+        "littleleaffarms.prodexlabs.com",
+        "oidc-test.prodexlabs.com",
+        "panthalassa.prodexlabs.com",
+        "preview.prodexlabs.com",
+        "prod.prodexlabs.com",
+        "prodexlabs.com",
+        "prosalud-staging.prodexlabs.com",
+        "prosalud.prodexlabs.com",
+        "sandbox.prodexlabs.com",
+        "staging-gpt55.prodexlabs.com",
+        "staging.prodexlabs.com",
+        "time.prodexlabs.com",
+        "trial.prodexlabs.com",
+        "uat.prodexlabs.com",
+        "valorep.prodexlabs.com",
+        "www.prodexlabs.com"
+      ],
+      "ports_by_sub": {
+        "prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "atlantis-gcp.prodexlabs.com": {
+          "34.67.20.186": [
+            80,
+            443
+          ]
+        },
+        "azure-demo.prodexlabs.com": {
+          "150.171.109.229": [
+            80,
+            443
+          ]
+        },
+        "cooked.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "demo.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "docs.prodexlabs.com": {
+          "66.33.60.194": [
+            80,
+            443
+          ],
+          "76.76.21.93": [
+            80,
+            443
+          ]
+        },
+        "highcom.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ivs.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-nh.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ss.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "link.prodexlabs.com": {},
+        "littleleaffarms.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "oidc-test.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "panthalassa.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "preview.prodexlabs.com": {
+          "34.54.236.210": [
+            80,
+            443
+          ]
+        },
+        "prod.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "prosalud-staging.prodexlabs.com": {
+          "34.13.119.70": [
+            80,
+            443
+          ]
+        },
+        "prosalud.prodexlabs.com": {
+          "34.149.145.200": [
+            80,
+            443
+          ]
+        },
+        "sandbox.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "staging-gpt55.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
+          ]
+        },
+        "staging.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
+          ]
+        },
+        "time.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "trial.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "uat.prodexlabs.com": {
+          "136.68.149.70": [
+            80,
+            443
+          ]
+        },
+        "valorep.prodexlabs.com": {
+          "8.233.90.115": [
+            80,
+            443
+          ]
+        },
+        "www.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        }
+      },
+      "tech_versions": {}
+    }
+  ]
+}
