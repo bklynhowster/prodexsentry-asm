@@ -199,12 +199,6 @@ jobs:
             echo "::endgroup::"
           done < /tmp/scan_list
 
-      - name: Sync dashboard data
-        if: steps.targets.outputs.mode != 'skipped'
-        run: |
-          chmod +x web/sync-data.sh
-          web/sync-data.sh
-
       - name: Send email alerts (changes only)
         if: steps.targets.outputs.mode != 'skipped'
         # Graceful no-op if SENDGRID_API_KEY isn't set, so workflow doesn't fail
@@ -227,7 +221,7 @@ jobs:
         run: |
           set -uo pipefail
 
-          git add data/assets/ data/state/ web/data/ || true
+          git add data/assets/ || true
           git reset HEAD -- 'data/raw/**' 2>/dev/null || true
 
           if git diff --staged --quiet; then
@@ -264,7 +258,7 @@ jobs:
             # 2026-05-16 after scripts/normalize/run_normalize.py disappeared
             # from a runner commit.
             git reset --mixed origin/main
-            git add data/assets/ data/state/ web/data/
+            git add data/assets/
 
             if git diff --staged --quiet; then
               echo "No changes left to commit after reset (concurrent scan covered it)."
@@ -306,20 +300,6 @@ jobs:
           fi
           python3 -m pip install --break-system-packages --quiet 'psycopg[binary]==3.3.4'
           python3 scripts/db/import_asm_to_surface.py --source-tag asm_cron
-
-      - name: Trigger Netlify deploy (chain past GITHUB_TOKEN anti-recursion)
-        if: success() && steps.targets.outputs.mode != 'skipped'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Only fire deploy if the scan actually produced a new commit
-          LATEST_MSG=$(git log -1 --format=%s)
-          if [[ "$LATEST_MSG" == asm-scan:* ]]; then
-            echo "Found scan commit on HEAD ($LATEST_MSG) — triggering deploy"
-            gh workflow run deploy-netlify.yml
-          else
-            echo "No asm-scan commit on HEAD — skipping deploy trigger"
-          fi
 
       - name: Summarize run
         if: always()
