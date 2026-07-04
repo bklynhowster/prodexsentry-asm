@@ -10,10 +10,10 @@
     "discovered_via": "manual"
   },
   "scan": {
-    "id": "scan_2026-07-04T12:59:45Z_50f0ce01",
-    "started_at": "2026-07-04T12:59:45Z",
-    "completed_at": "2026-07-04T13:05:50Z",
-    "duration_seconds": 365,
+    "id": "scan_2026-07-04T18:56:42Z_91aef5b6",
+    "started_at": "2026-07-04T18:56:42Z",
+    "completed_at": "2026-07-04T19:03:34Z",
+    "duration_seconds": 412,
     "engine_version": "3.0.0",
     "scanner_origin": "github-actions-ubuntu-azure",
     "tools_run": [
@@ -31,9 +31,9 @@
   "summary": {
     "subdomain_count": 26,
     "live_subdomain_count": 26,
-    "host_count": 20,
+    "host_count": 17,
     "service_count": 52,
-    "newest_cert_expiry_days": 40,
+    "newest_cert_expiry_days": 39,
     "top_hosting_org": "Google LLC",
     "platforms": []
   },
@@ -43,8 +43,8 @@
       "alive": true,
       "is_root": true,
       "discovered_via": "dnsx",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -108,9 +108,9 @@
           "ns-cloud-d4.googledomains.com"
         ],
         "txt": [
+          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d",
           "v=spf1 include:_spf.google.com ~all",
-          "MS=ms22662979",
-          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d"
+          "MS=ms22662979"
         ],
         "spf": "v=spf1 include:_spf.google.com ~all",
         "dnssec": false
@@ -177,8 +177,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:34Z",
+      "last_seen": "2026-07-04T19:03:34Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -267,8 +267,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:34Z",
+      "last_seen": "2026-07-04T19:03:34Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -277,7 +277,7 @@
       },
       "hosts": [
         {
-          "ip": "150.171.109.71",
+          "ip": "150.171.110.210",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -287,7 +287,7 @@
           "is_private": false
         },
         {
-          "ip": "150.171.109.74",
+          "ip": "150.171.110.211",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -297,17 +297,7 @@
           "is_private": false
         },
         {
-          "ip": "2603:1061:14:1c0::1",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Washington",
-          "city": "Redmond",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "2603:1061:14:48::1",
+          "ip": "2603:1061:14:1d1::1",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -319,7 +309,7 @@
       ],
       "services": [
         {
-          "ip": "150.171.109.74",
+          "ip": "150.171.110.210",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -327,7 +317,7 @@
           "tls": false
         },
         {
-          "ip": "150.171.109.74",
+          "ip": "150.171.110.210",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -348,10 +338,10 @@
       ],
       "dns": {
         "a": [
-          "150.171.109.71"
+          "150.171.110.211"
         ],
         "aaaa": [
-          "2603:1061:14:1c0::1"
+          "2603:1061:14:1d1::1"
         ],
         "cname": "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net",
         "mx": [],
@@ -387,8 +377,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:34Z",
+      "last_seen": "2026-07-04T19:03:34Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -512,8 +502,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:34Z",
+      "last_seen": "2026-07-04T19:03:34Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -615,8 +605,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:34Z",
+      "last_seen": "2026-07-04T19:03:34Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -625,27 +615,7 @@
       },
       "hosts": [
         {
-          "ip": "66.33.60.193",
-          "asn": "AS16509",
-          "asn_org": "Amazon.com, Inc.",
-          "country": "US",
-          "region": "California",
-          "city": "Walnut",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
           "ip": "66.33.60.194",
-          "asn": "AS16509",
-          "asn_org": "Amazon.com, Inc.",
-          "country": "US",
-          "region": "California",
-          "city": "Walnut",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "76.76.21.241",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -723,8 +693,8 @@
       ],
       "dns": {
         "a": [
-          "76.76.21.241",
-          "66.33.60.193"
+          "76.76.21.93",
+          "66.33.60.194"
         ],
         "aaaa": [],
         "cname": "cname.mintlify-dns.com",
@@ -766,8 +736,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -869,8 +839,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -972,8 +942,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1075,8 +1045,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1178,8 +1148,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:51Z",
-      "last_seen": "2026-07-04T13:05:51Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1246,8 +1216,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1349,8 +1319,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1452,8 +1422,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1555,8 +1525,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1601,7 +1571,7 @@
             "not_before": "2026-05-15T14:37:29Z",
             "not_after": "2026-08-13T15:33:24Z",
             "self_signed": false,
-            "days_to_expiry": 40
+            "days_to_expiry": 39
           }
         }
       ],
@@ -1649,8 +1619,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1752,8 +1722,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1855,8 +1825,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1963,8 +1933,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2008,7 +1978,7 @@
             "not_before": "2026-06-09T18:02:51Z",
             "not_after": "2026-09-07T18:57:26Z",
             "self_signed": false,
-            "days_to_expiry": 65
+            "days_to_expiry": 64
           }
         }
       ],
@@ -2066,8 +2036,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2169,8 +2139,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2272,8 +2242,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2375,8 +2345,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2478,8 +2448,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2581,8 +2551,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2684,8 +2654,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-04T13:05:52Z",
-      "last_seen": "2026-07-04T13:05:52Z",
+      "first_discovered": "2026-07-04T19:03:35Z",
+      "last_seen": "2026-07-04T19:03:35Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2807,8 +2777,39 @@
   ],
   "phantom_subdomains": [],
   "deltas": {
-    "since_scan": "scan_2026-07-04T08:24:17Z_82aad18f",
+    "since_scan": "scan_2026-07-04T12:59:45Z_50f0ce01",
     "added": {
+      "subdomains": [],
+      "services": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.110.210",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.110.210",
+          "port": 443,
+          "protocol": "tcp"
+        }
+      ],
+      "hosts": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.110.210"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.110.211"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "2603:1061:14:1d1::1"
+        }
+      ]
+    },
+    "removed": {
       "subdomains": [],
       "services": [
         {
@@ -2820,30 +2821,6 @@
         {
           "subdomain": "azure-demo.prodexlabs.com",
           "ip": "150.171.109.74",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93",
           "port": 443,
           "protocol": "tcp"
         }
@@ -2867,914 +2844,11 @@
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194"
+          "ip": "66.33.60.193"
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93"
-        }
-      ]
-    },
-    "removed": {
-      "subdomains": [],
-      "services": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.226.69",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.226.69",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.253.69",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.253.69",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.193",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.193",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.241",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.241",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ivs.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1163,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ivs.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 25735,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ivs.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 49159,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1085,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1984,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2068,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 3493,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 4125,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 6502,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 9110,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-nh.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 9900,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 113,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1186,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2047,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2068,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2492,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 5906,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 6502,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 8045,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 8651,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 9929,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "l3h-ss.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 57797,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "oidc-test.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 1107,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "oidc-test.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 5998,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "oidc-test.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 10215,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "panthalassa.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1122,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "panthalassa.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 5510,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "panthalassa.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 5555,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "panthalassa.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 51493,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "preview.prodexlabs.com",
-          "ip": "34.54.236.210",
-          "port": 1078,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "preview.prodexlabs.com",
-          "ip": "34.54.236.210",
-          "port": 3322,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "preview.prodexlabs.com",
-          "ip": "34.54.236.210",
-          "port": 4242,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "preview.prodexlabs.com",
-          "ip": "34.54.236.210",
-          "port": 5544,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "preview.prodexlabs.com",
-          "ip": "34.54.236.210",
-          "port": 6100,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prod.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 51493,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prodexlabs.com",
-          "ip": "8.232.147.166",
-          "port": 1147,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prodexlabs.com",
-          "ip": "8.232.147.166",
-          "port": 2260,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prodexlabs.com",
-          "ip": "8.232.147.166",
-          "port": 9878,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prodexlabs.com",
-          "ip": "8.232.147.166",
-          "port": 55056,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud-staging.prodexlabs.com",
-          "ip": "34.13.119.70",
-          "port": 1024,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud-staging.prodexlabs.com",
-          "ip": "34.13.119.70",
-          "port": 4321,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud-staging.prodexlabs.com",
-          "ip": "34.13.119.70",
-          "port": 5987,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud-staging.prodexlabs.com",
-          "ip": "34.13.119.70",
-          "port": 8600,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud-staging.prodexlabs.com",
-          "ip": "34.13.119.70",
-          "port": 9595,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud-staging.prodexlabs.com",
-          "ip": "34.13.119.70",
-          "port": 10003,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud-staging.prodexlabs.com",
-          "ip": "34.13.119.70",
-          "port": 16016,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 301,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 340,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 711,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 726,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 1863,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 2920,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 3052,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 3871,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 5815,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 9099,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 9103,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "prosalud.prodexlabs.com",
-          "ip": "34.149.145.200",
-          "port": 61900,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 515,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 1049,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 1063,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 1187,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 2000,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 3011,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 3322,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 3828,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 5225,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 7496,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 7741,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 8402,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 9090,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 19101,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 24800,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 40193,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "sandbox.prodexlabs.com",
-          "ip": "136.110.176.164",
-          "port": 49154,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 417,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 900,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 995,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 1192,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 2288,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 2557,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 5214,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 6003,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 8001,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 8031,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 9102,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 9503,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 12000,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 18101,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 26214,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 82,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 1533,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 3052,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 3301,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 5051,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 5950,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 6123,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 6346,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 6567,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 11110,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 726,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1022,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1023,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1068,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1094,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1417,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2004,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2222,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 3878,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 5633,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 5910,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 8290,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 10024,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 16113,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 32768,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 32778,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 49153,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 444,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 726,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1085,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1087,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1723,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2045,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2046,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 2106,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 4550,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 5080,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 5911,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 8031,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 8045,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 8290,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 9040,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 15000,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 16000,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 16113,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 27356,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 48080,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "trial.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 55555,
-          "protocol": "tcp"
-        }
-      ],
-      "hosts": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.226.69"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.253.69"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:95::1"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2620:1ec:29:1::69"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2620:1ec:48:1::69"
+          "ip": "76.76.21.241"
         }
       ]
     },
@@ -4953,6 +4027,201 @@
         },
         "azure-demo.prodexlabs.com": {
           "150.171.109.74": [
+            80,
+            443
+          ]
+        },
+        "cooked.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "demo.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "docs.prodexlabs.com": {
+          "66.33.60.194": [
+            80,
+            443
+          ],
+          "76.76.21.93": [
+            80,
+            443
+          ]
+        },
+        "highcom.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ivs.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-nh.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ss.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "link.prodexlabs.com": {},
+        "littleleaffarms.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "oidc-test.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "panthalassa.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "preview.prodexlabs.com": {
+          "34.54.236.210": [
+            80,
+            443
+          ]
+        },
+        "prod.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "prosalud-staging.prodexlabs.com": {
+          "34.13.119.70": [
+            80,
+            443
+          ]
+        },
+        "prosalud.prodexlabs.com": {
+          "34.149.145.200": [
+            80,
+            443
+          ]
+        },
+        "sandbox.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "staging-gpt55.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
+          ]
+        },
+        "staging.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
+          ]
+        },
+        "time.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "trial.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "uat.prodexlabs.com": {
+          "136.68.149.70": [
+            80,
+            443
+          ]
+        },
+        "valorep.prodexlabs.com": {
+          "8.233.90.115": [
+            80,
+            443
+          ]
+        },
+        "www.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        }
+      },
+      "tech_versions": {}
+    },
+    {
+      "scan_id": "scan_2026-07-04T18:56:42Z_91aef5b6",
+      "started_at": "2026-07-04T18:56:42Z",
+      "completed_at": "2026-07-04T19:03:34Z",
+      "subdomain_count": 26,
+      "live_subdomain_count": 26,
+      "host_count": 17,
+      "service_count": 52,
+      "subdomain_names": [
+        "atlantis-gcp.prodexlabs.com",
+        "azure-demo.prodexlabs.com",
+        "cooked.prodexlabs.com",
+        "demo.prodexlabs.com",
+        "docs.prodexlabs.com",
+        "highcom.prodexlabs.com",
+        "l3h-ivs.prodexlabs.com",
+        "l3h-nh.prodexlabs.com",
+        "l3h-ss.prodexlabs.com",
+        "link.prodexlabs.com",
+        "littleleaffarms.prodexlabs.com",
+        "oidc-test.prodexlabs.com",
+        "panthalassa.prodexlabs.com",
+        "preview.prodexlabs.com",
+        "prod.prodexlabs.com",
+        "prodexlabs.com",
+        "prosalud-staging.prodexlabs.com",
+        "prosalud.prodexlabs.com",
+        "sandbox.prodexlabs.com",
+        "staging-gpt55.prodexlabs.com",
+        "staging.prodexlabs.com",
+        "time.prodexlabs.com",
+        "trial.prodexlabs.com",
+        "uat.prodexlabs.com",
+        "valorep.prodexlabs.com",
+        "www.prodexlabs.com"
+      ],
+      "ports_by_sub": {
+        "prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "atlantis-gcp.prodexlabs.com": {
+          "34.67.20.186": [
+            80,
+            443
+          ]
+        },
+        "azure-demo.prodexlabs.com": {
+          "150.171.110.210": [
             80,
             443
           ]
