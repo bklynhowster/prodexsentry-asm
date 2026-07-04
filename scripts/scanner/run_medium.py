@@ -1400,6 +1400,13 @@ def emit_ffuf_catchall_summary(ctx: ScanContext) -> None:
     """
     if ctx.ffuf_catchall_count <= 0 or not ctx.ffuf_catchall_redirect:
         return
+    # Human-readable form of the baseline: the path-preserving host-rewrite
+    # case is stored as "HOSTREWRITE:<base>"; show "<base>/* (host-preserving
+    # redirect)" instead of leaking the internal marker into a finding.
+    if ctx.ffuf_catchall_redirect.startswith("HOSTREWRITE:"):
+        redir_display = ctx.ffuf_catchall_redirect[len("HOSTREWRITE:"):] + "/* (host-preserving redirect)"
+    else:
+        redir_display = ctx.ffuf_catchall_redirect
     # Slug derived from the redirect URL for stable finding_id semantics
     # — same finding re-emerges across re-scans with the same redirect,
     # so the row matches on re-detect rather than fragmenting into new
@@ -1410,7 +1417,7 @@ def emit_ffuf_catchall_summary(ctx: ScanContext) -> None:
     ctx.findings.append(MediumFinding(
         check_name=f"ffuf-catchall-redirect-{slug}",
         title=(
-            f"Catch-all redirect → {ctx.ffuf_catchall_redirect} "
+            f"Catch-all redirect → {redir_display} "
             f"({ctx.ffuf_catchall_count} paths)"
         ),
         severity="INFO",
@@ -1418,9 +1425,9 @@ def emit_ffuf_catchall_summary(ctx: ScanContext) -> None:
         description=(
             f"{ctx.ffuf_catchall_count} wordlist paths on "
             f"{ctx.hostname} uniformly redirect to "
-            f"{ctx.ffuf_catchall_redirect} regardless of existence — "
+            f"{redir_display} regardless of existence — "
             f"directory discovery is not meaningful on this host "
-            f"(likely a self-hosted login/auth gate). Per-path "
+            f"(e.g. an apex→www or login/auth redirect). Per-path "
             f"results suppressed as non-discriminating. Distinct "
             f"redirects and 200/204/401/403 responses still emit "
             f"individually."
@@ -1428,10 +1435,32 @@ def emit_ffuf_catchall_summary(ctx: ScanContext) -> None:
         tags=["ffuf", "directory", "discovery", "catchall_redirect"],
         raw_excerpt=(
             f"Calibration probe: random path → "
-            f"{ctx.ffuf_catchall_redirect}\n"
+            f"{redir_display}\n"
             f"Suppressed per-path matches: {ctx.ffuf_catchall_count}"
         ),
     ))
+
+
+def _normalize_hostrewrite_redirect(redirect_to: str | None, path: str) -> str | None:
+    """Collapse a path-preserving host-rewrite redirect to a stable baseline.
+
+    Apex→www (and scheme/host-only) redirects preserve the requested path:
+    /<path> -> https://www.host/<path>. Each random calibration path then
+    yields a DIFFERENT Location, so detect_ffuf_catchall's redirect1==redirect2
+    check never fires and every ffuf path leaks a false "Path exists (301)"
+    finding (95 of them on prodexlabs.com, 2026-07-04). When the Location just
+    rewrites the host and keeps our path, fold it to "HOSTREWRITE:<base>".
+    Applied identically to the probe baseline AND each emitted finding, so the
+    EXACT-equality contract in should_suppress_ffuf_redirect is preserved —
+    both sides normalize to the same marker. Non-path-preserving redirects
+    (a fixed target for every path) are untouched.
+    """
+    if not redirect_to or not path:
+        return redirect_to
+    suffix = "/" + path.lstrip("/")
+    if redirect_to.endswith(suffix):
+        return "HOSTREWRITE:" + redirect_to[: -len(suffix)]
+    return redirect_to
 
 
 def _probe_calibration_path(ctx: ScanContext) -> tuple[int, str | None]:
@@ -1468,6 +1497,9 @@ def _probe_calibration_path(ctx: ScanContext) -> tuple[int, str | None]:
     # (we don't use it, but defensive). Anything truthy wins.
     location = data.get("location") or data.get("final_url")
     location_str = str(location).strip() if location else None
+    # Fold path-preserving host-rewrite redirects so two random probes agree.
+    if location_str and status_code in (301, 302, 307):
+        location_str = _normalize_hostrewrite_redirect(location_str, random_path)
     return status_code, (location_str or None)
 
 
@@ -2788,7 +2820,13 @@ def run_ffuf_chunk(ctx: ScanContext, words: list[str],
         # but don't emit a per-path finding; the collapsed summary at
         # end-of-chunked-loop emits ONE INFO covering all of them.
         # EXACT-equality semantic is locked in should_suppress_ffuf_redirect.
-        if should_suppress_ffuf_redirect(redirect_to, ctx.ffuf_catchall_redirect):
+        # Normalize a path-preserving host-rewrite the same way the baseline
+        # was, so the EXACT-equality suppression still fires (2026-07-04).
+        redirect_to_norm = (
+            _normalize_hostrewrite_redirect(redirect_to, word)
+            if status in (301, 302, 307) else redirect_to
+        )
+        if should_suppress_ffuf_redirect(redirect_to_norm, ctx.ffuf_catchall_redirect):
             ctx.ffuf_catchall_count += 1
             continue
 
