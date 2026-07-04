@@ -350,7 +350,7 @@ jobs:
         run: |
           mkdir -p /tmp/wg-download
           gh release download vpn-tools \
-            --repo bklynhowster/commandsentry-asm \
+            --repo ${{ github.repository }} \
             --pattern 'mullvad-wg-configs.tar.gz' \
             --dir /tmp/wg-download
           sudo mkdir -p /etc/wireguard
