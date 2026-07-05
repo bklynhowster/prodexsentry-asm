@@ -45,6 +45,7 @@ EXIT CODES:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -52,6 +53,8 @@ import socket
 import ssl
 import subprocess
 import sys
+import time
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -528,42 +531,195 @@ def check_headers(ctx: ScanContext) -> None:
     mark_tool_ok(ctx, "headers_check")
 
 
+# ── Sensitive-path content verification + catch-all control probe ──────────
+# 4.7 rulings 2026-07-05 (CATCHALL_FP_FIX_SPEC.md). A bare HTTP 200 on /.env is
+# NOT a secret leak on a catch-all / SPA host that serves its index page for
+# every path. Two layered defenses, ordered VERIFY-THEN-SUPPRESS (ruling 4;
+# anchor commit 59ad6a13): the per-file marker check runs on HIGH paths
+# UNCONDITIONALLY — even when the host is a catch-all — so a REAL /.env is never
+# silently suppressed. Catch-all baseline alone drives suppression only for
+# non-HIGH paths. Kept INDEPENDENT of run_medium.detect_ffuf_catchall by design
+# (ruling 2): same SEMANTIC (random-path 2xx with a content-matching baseline),
+# different tool (curl vs httpx) and surface (fixed list vs ffuf wordlist).
+_STATUS_MARKER = "__CS_HTTP_STATUS__"
+_MAX_BODY = 262144  # 256 KB cap for hashing / marker scan (hole 3)
+
+
+def _env_marker(b: str) -> bool:
+    # >= 2 non-comment assignment lines (hole 4): a single `foo=bar` false-
+    # positives on random HTML/JS; lowercase keys DO occur in real .env files.
+    lines = [l for l in b.splitlines()
+             if not l.lstrip().startswith("#")
+             and re.match(r"^\s*[A-Za-z_][A-Za-z0-9_]*=", l)]
+    return len(lines) >= 2
+
+
+# Per-HIGH-path secret markers (holes 4, 6): the body must carry the real
+# secret's shape, not just be a 200. wp-config requires DB_* (a bare <?php is
+# table-stakes on any PHP host and would false-positive).
+_HIGH_SECRET_MARKERS = {
+    "/.env":              _env_marker,
+    "/.git/config":       lambda b: "[core]" in b,
+    "/.git/HEAD":         lambda b: bool(re.search(r"(?m)^ref:\s", b)
+                                         or re.search(r"\b[0-9a-f]{40}\b", b)),
+    "/wp-config.php.bak": lambda b: ("DB_PASSWORD" in b or "DB_NAME" in b),
+}
+
+
+def verify_secret_content(path: str, body: str) -> bool:
+    """True iff `body` carries the real secret content shape for `path` (not
+    merely a 200). Pure function — tested in test_degradation.py."""
+    m = _HIGH_SECRET_MARKERS.get(path)
+    return bool(m and body and m(body))
+
+
+def _body_sha(body: str) -> str:
+    return hashlib.sha256(body[:_MAX_BODY].encode("utf-8", "replace")).hexdigest()
+
+
+def _probe_path_body(ctx: ScanContext, path: str) -> tuple[int, str]:
+    """GET a path, capturing (status, body). Accept-Encoding: identity dodges
+    the gzip-hash trap (hole 3). Returns (0, '') on transport failure."""
+    rc, stdout, _ = run_cmd(
+        ["curl", "-sS", "--max-time", "10",
+         "-H", "Accept-Encoding: identity",
+         "-H", "User-Agent: Mozilla/5.0 (compatible; COMMANDsentry/1.0)",
+         "-w", f"\n{_STATUS_MARKER}%{{http_code}}",
+         f"https://{ctx.hostname}{path}"],
+        timeout=15,
+    )
+    if rc != 0 or _STATUS_MARKER not in stdout:
+        return 0, ""
+    body, _, tail = stdout.rpartition(_STATUS_MARKER)
+    if body.endswith("\n"):
+        body = body[:-1]
+    try:
+        code = int(tail.strip()[:3])
+    except ValueError:
+        code = 0
+    return code, body[:_MAX_BODY]
+
+
+_CATCHALL_2XX = (200, 204, 206)
+
+
+def _is_catchall(codes: tuple[int, int], hashes: tuple[str, str]) -> bool:
+    """Pure catch-all decision (hole 2). True iff BOTH control probes returned
+    2xx AND their body hashes are identical — the host serves one page for any
+    path. Tested in test_catchall_fp.py."""
+    return (codes[0] in _CATCHALL_2XX and codes[1] in _CATCHALL_2XX
+            and hashes[0] == hashes[1])
+
+
+def detect_light_catchall(ctx: ScanContext) -> str | None:
+    """TWO random nonsense probes (hole 2 — a single control probe has the same
+    fragility as the Bug it guards). Catch-all baseline = the shared body hash
+    iff _is_catchall (both 2xx AND hash-match). None otherwise."""
+    c1, b1 = _probe_path_body(ctx, "/cs-ctl-" + uuid.uuid4().hex[:16])
+    c2, b2 = _probe_path_body(ctx, "/" + uuid.uuid4().hex[:20] + "-notreal")
+    h1, h2 = _body_sha(b1), _body_sha(b2)
+    return h1 if _is_catchall((c1, c2), (h1, h2)) else None
+
+
+def resolve_path_disposition(severity: str, marker_match: bool,
+                             matches_baseline: bool) -> str:
+    """Pure VERIFY-THEN-SUPPRESS decision (4.7 ruling 4; anchor commit
+    59ad6a13). Returns one of 'HIGH' | 'INFO' | 'SUPPRESS' | 'EMIT'.
+
+    HIGH severity: a content-marker match ALWAYS wins -> 'HIGH', even on a
+    catch-all host, so a real secret is never suppressed. Only when the marker
+    is absent does the catch-all baseline suppress ('SUPPRESS'); otherwise a
+    2xx-but-not-secret body is 'INFO' (manual review).
+    Non-HIGH: baseline match -> 'SUPPRESS'; else 'EMIT' at declared severity.
+
+    The ordering here is the load-bearing invariant. Inverting it (suppress
+    before verify) reintroduces the 59ad6a13 regression class — pinned by
+    test_resolve_disposition_high_marker_wins_over_catchall."""
+    if severity == "HIGH":
+        if marker_match:
+            return "HIGH"
+        if matches_baseline:
+            return "SUPPRESS"
+        return "INFO"
+    if matches_baseline:
+        return "SUPPRESS"
+    return "EMIT"
+
+
+def _emit_exposed_path(ctx: ScanContext, path: str, severity: str, why: str, code: int) -> None:
+    slug = path.lstrip("/").replace("/", "-").replace(".", "")
+    ctx.findings.append(LightFinding(
+        check_name=f"exposed-path-{slug}",
+        title=f"Exposed path: {path} (HTTP {code})",
+        severity=severity,
+        category="info_disclosure",  # enum remap: 'paths' isn't a valid finding_category_t
+        description=f"The path {path} on {ctx.hostname} returned HTTP {code}. {why}.",
+        tags=["paths", "exposure"],
+        cwe=[538],
+        raw_excerpt=f"GET {path} -> HTTP {code}",
+    ))
+
+
 def check_common_paths(ctx: ScanContext) -> None:
-    """HEAD-probe a list of common leak paths. 200/204/206 = exposed."""
+    """Probe well-known leak paths. VERIFY-THEN-SUPPRESS (4.7 ruling 4; anchor
+    commit 59ad6a13): HIGH paths get a content-marker check UNCONDITIONALLY — a
+    marker match wins over catch-all suppression, so a real /.env is never
+    silently eaten. Non-HIGH paths are suppressed on the catch-all baseline
+    alone. DO NOT let a refactor skip the HIGH marker check on catch-all hosts."""
     ctx.tools_run.append("common_paths")
     results = []
     successful_probes = 0
+    baseline = detect_light_catchall(ctx)   # 2-probe control (hole 2)
+    suppressed = 0
     for path, severity, why in COMMON_PATHS:
-        rc, stdout, stderr = run_cmd(
-            ["curl", "-s", "-o", "/dev/null",
-             "-w", "%{http_code}",
-             "--max-time", "10",
-             "-H", "User-Agent: Mozilla/5.0 (compatible; COMMANDsentry/1.0)",
-             f"https://{ctx.hostname}{path}"],
-            timeout=15,
-        )
-        code = stdout.strip() if rc == 0 else "err"
-        if rc == 0:
+        code, body = _probe_path_body(ctx, path)
+        if code != 0:
             successful_probes += 1
-        results.append({"path": path, "status": code})
-        if code in ("200", "204", "206"):
-            slug = path.lstrip("/").replace("/", "-").replace(".", "")
-            ctx.findings.append(LightFinding(
-                check_name=f"exposed-path-{slug}",
-                title=f"Exposed path: {path} (HTTP {code})",
-                severity=severity,
-                category="info_disclosure",  # enum remap: 'paths' isn't a valid finding_category_t
-                description=f"The path {path} on {ctx.hostname} returned HTTP {code}. {why}.",
-                tags=["paths", "exposure"],
-                cwe=[538],
-                raw_excerpt=f"GET {path} -> HTTP {code}",
-            ))
+        results.append({"path": path, "status": code or "err"})
+        time.sleep(0.25)                     # inter-probe hygiene (hole 7)
+        if code not in (200, 204, 206):
+            continue
+        # 59ad6a13 ANCHOR — VERIFY (HIGH content marker) THEN SUPPRESS (catch-all
+        # baseline), never the reverse: a marker match wins so a REAL secret is
+        # never eaten on a catch-all host. Ordering pinned in test_catchall_fp.py.
+        marker = verify_secret_content(path, body) if severity == "HIGH" else False
+        matches_baseline = bool(baseline and _body_sha(body) == baseline)
+        disp = resolve_path_disposition(severity, marker, matches_baseline)
+        if disp == "HIGH":
+            _emit_exposed_path(ctx, path, "HIGH", why, code)             # real secret
+        elif disp == "INFO":
+            _emit_exposed_path(ctx, path, "INFO",
+                "returned 2xx but the body is not the expected secret "
+                "content — manual review", code)
+        elif disp == "EMIT":
+            _emit_exposed_path(ctx, path, severity, why, code)
+        else:  # SUPPRESS
+            suppressed += 1                                              # catch-all page
 
-    ctx.artifacts.append(("common_paths", "json", json.dumps({"probes": results})))
+    if suppressed > 0:
+        ctx.findings.append(LightFinding(
+            check_name="catchall-suppressed-paths",
+            title=(f"Host serves 2xx to arbitrary paths (catch-all) — "
+                   f"{suppressed} sensitive-path probe(s) suppressed"),
+            severity="INFO",
+            category="info_disclosure",
+            description=(f"{ctx.hostname} returns the same 2xx body to random "
+                         f"nonexistent paths, so path-existence probing is not "
+                         f"meaningful. {suppressed} probe(s) matching the catch-all "
+                         f"baseline were collapsed here instead of emitted per-path. "
+                         f"HIGH secret paths were content-verified regardless, so a "
+                         f"real leak still surfaces."),
+            tags=["paths", "catch-all", "suppressed"],
+            cwe=[],
+            raw_excerpt=f"catch-all baseline body sha256={baseline}",
+        ))
 
-    # If every single probe failed (rc != 0 for all paths), the target
-    # is unreachable — mark degraded. If at least one succeeded, the
-    # check did its job, regardless of whether any path was exposed.
+    ctx.artifacts.append(("common_paths", "json",
+                          json.dumps({"probes": results, "catchall_baseline": baseline})))
+
+    # If every single probe failed (rc != 0 for all paths), the target is
+    # unreachable — mark degraded. If at least one succeeded, the check did its
+    # job, regardless of whether any path was exposed.
     degraded, reason = common_paths_is_degraded(successful_probes, len(COMMON_PATHS))
     if degraded:
         mark_tool_degraded(ctx, "common_paths", reason)

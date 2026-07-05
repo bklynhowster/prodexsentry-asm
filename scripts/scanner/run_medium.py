@@ -472,6 +472,13 @@ def classify_ffuf_severity(word: str, url: str, status: int) -> str:
     in the call site of the helper; promotion logic isn't smeared across
     multiple decision points.
     """
+    # ┌─ DO NOT blanket-downgrade .env/secret → INFO here. That IS the 59ad6a13
+    # │  mistake. A .env+200 only REACHES this function on a DISCRIMINATING host:
+    # │  Fix B (detect_ffuf_catchall + calibration retry, ~L1527) suppresses ffuf
+    # │  ENTIRELY on a 200-catch-all host UPSTREAM, and should_suppress_ffuf_*
+    # │  drops baseline-matching rows before emit. So a 200 landing here is a real
+    # └─ hit → HIGH is correct. (Medium has no body, so no content-verify like
+    #    Light's check_common_paths marker check — that's a logged follow-up.)
     if not word:
         return "INFO"
     # Redirects: stay INFO regardless of path class. The catch-all-redirect
@@ -1463,12 +1470,33 @@ def _normalize_hostrewrite_redirect(redirect_to: str | None, path: str) -> str |
     return redirect_to
 
 
-def _probe_calibration_path(ctx: ScanContext) -> tuple[int, str | None]:
-    """Single calibration probe — fetch a known-random path and return
-    (status_code, redirect_location). Helper for detect_ffuf_catchall.
+# 4.7 hole 5 / ruling 3 (2026-07-05): retry the calibration probe so a single
+# transient httpx miss (common through the VPN under load) does not silently
+# disable catch-all detection — that silent fallthrough IS the prosalud/uat bug.
+CALIB_PROBE_ATTEMPTS = 3
+CALIB_PROBE_DELAY_S = 2
 
-    Returns (0, None) on any failure (rc != 0, no stdout, JSON parse error)
-    so callers can treat failure as "no catch-all detected" without raising.
+
+def _probe_calibration_path(ctx: ScanContext) -> tuple[int, str | None]:
+    """Calibration probe WITH retry (CALIB_PROBE_ATTEMPTS x CALIB_PROBE_DELAY_S).
+    Returns the first probe that lands (status != 0), or (0, None) only after
+    ALL retries fail — which detect_ffuf_catchall treats as calibration FAILURE
+    (fail-closed), never as 'no catch-all'."""
+    import time as _time
+    for attempt in range(CALIB_PROBE_ATTEMPTS):
+        status, loc = _probe_calibration_path_once(ctx)
+        if status != 0:
+            return status, loc
+        if attempt < CALIB_PROBE_ATTEMPTS - 1:
+            _time.sleep(CALIB_PROBE_DELAY_S)
+    return 0, None
+
+
+def _probe_calibration_path_once(ctx: ScanContext) -> tuple[int, str | None]:
+    """Single calibration probe — fetch a known-random path and return
+    (status_code, redirect_location). Helper for _probe_calibration_path.
+
+    Returns (0, None) on any failure (rc != 0, no stdout, JSON parse error).
     Same httpx invocation as the pre-S3 detect_ffuf_catchall_redirect.
     """
     import uuid as _uuid
@@ -1505,7 +1533,7 @@ def _probe_calibration_path(ctx: ScanContext) -> tuple[int, str | None]:
 
 def detect_ffuf_catchall(
     ctx: ScanContext,
-) -> tuple[str | None, int | None]:
+) -> tuple[str | None, int | None, bool]:
     """S3 Part 1 (2026-06-18) ffuf catch-all calibration. Generalizes #33's
     redirect-only catch-all to also detect a uniform non-discriminating
     STATUS (403/401/200/etc) that ffuf would otherwise mint N findings for.
@@ -1531,12 +1559,16 @@ def detect_ffuf_catchall(
     or the trust-layer invariant. Calibration is auxiliary emit-time state;
     its success/failure has no bearing on scan_quality.
     """
+    # Third return element is calib_ok: False iff a probe exhausted its retries
+    # (status 0) — the caller FAILS CLOSED (skips ffuf) rather than treating it
+    # as "no catch-all" and emitting per-path (that silent fallthrough is Bug B,
+    # 4.7 hole 5). True = probes landed; classification below is trustworthy.
     status1, redirect1 = _probe_calibration_path(ctx)
     if status1 == 0:
-        return None, None
+        return None, None, False
     status2, redirect2 = _probe_calibration_path(ctx)
     if status2 == 0:
-        return None, None
+        return None, None, False
 
     # Redirect catch-all (#33 path): both probes 30x AND same Location.
     if (
@@ -1545,7 +1577,7 @@ def detect_ffuf_catchall(
         and redirect1
         and redirect1 == redirect2
     ):
-        return redirect1, None
+        return redirect1, None, True
 
     # Status catch-all (S3 Part 1): both probes same non-404 non-redirect
     # status. 404 is the expected response to a random path, so it indicates
@@ -1555,11 +1587,12 @@ def detect_ffuf_catchall(
         and status1 != 404
         and status1 not in (301, 302, 307)
     ):
-        return None, status1
+        return None, status1, True
 
     # Otherwise: discrimination present (different responses across probes,
-    # or 404 = real not-found behavior). No catch-all.
-    return None, None
+    # or 404 = real not-found behavior). No catch-all — but calibration DID
+    # run cleanly, so calib_ok=True (do not fail-closed).
+    return None, None, True
 
 
 def detect_ffuf_catchall_redirect(ctx: ScanContext) -> str | None:
@@ -1567,7 +1600,7 @@ def detect_ffuf_catchall_redirect(ctx: ScanContext) -> str | None:
     Returns only the redirect Location, dropping the status component.
     Preserved for any external/test caller still using the old name.
     """
-    redirect, _ = detect_ffuf_catchall(ctx)
+    redirect, _, _ = detect_ffuf_catchall(ctx)
     return redirect
 
 
@@ -2974,9 +3007,22 @@ def run_ffuf_chunked(ctx: ScanContext) -> None:
     # 59ad6a13 regression (blanket -fc/-fs/-fr filter that hid real
     # /admin/swagger). Both suppression paths use EXACT-equality, never
     # blanket filtering — distinct statuses (real signal) always survive.
-    ctx.ffuf_catchall_redirect, ctx.ffuf_catchall_status = (
+    ctx.ffuf_catchall_redirect, ctx.ffuf_catchall_status, _calib_ok = (
         detect_ffuf_catchall(ctx)
     )
+    if not _calib_ok:
+        # 4.7 hole 5 — calibration probes exhausted their retries (transient or
+        # dead target). FAIL CLOSED: skip ffuf entirely rather than emit per-path
+        # against an UNDETECTED catch-all (that is Bug B — up to 96 phantom
+        # findings/host). Mirror the auth_gated skip so set-equality holds.
+        log("  ⊘ skip ffuf (all chunks) — catch-all calibration probes failed "
+            "after retries (fail-closed, 4.7 hole 5); per-path emit would risk "
+            "phantom findings")
+        for i, words in enumerate(chunks):
+            chunk_name = f"ffuf[{len(words)}w]#{i+1}"
+            ctx.tools_run.append(chunk_name)
+            mark_tool_skipped(ctx, chunk_name, "catchall_calibration_failed")
+        return
     if ctx.ffuf_catchall_redirect:
         log(f"  ffuf catch-all calibration: host redirects random paths "
             f"→ {ctx.ffuf_catchall_redirect} (per-path matches will be "
