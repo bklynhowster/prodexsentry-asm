@@ -120,7 +120,7 @@ DANGEROUS_METHODS = {
     "PATCH":  ("MODERATE", "PATCH method allowed — may enable unauthorized modification"),
 }
 
-DEFAULT_SUPABASE_URL = "https://hdygktppfvuspnumpfuq.supabase.co"
+DEFAULT_SUPABASE_URL = "https://bxcvzpbmxsdtalyfanee.supabase.co"
 
 
 # ─── ADR-001 — Validated-SHA key (convergent edition) ───────────────────

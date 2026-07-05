@@ -55,7 +55,7 @@ from typing import Optional
 
 # ─── Config ─────────────────────────────────────────────────────────────────
 
-DEFAULT_SUPABASE_URL = "https://hdygktppfvuspnumpfuq.supabase.co"
+DEFAULT_SUPABASE_URL = "https://bxcvzpbmxsdtalyfanee.supabase.co"
 
 # Default base for per-target scan folders on Howie's Mac.
 DEFAULT_SCAN_ROOT = Path.home() / "Downloads" / "ISMS Procedures" / "Vulnerability Scanning"

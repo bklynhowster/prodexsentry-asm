@@ -50,7 +50,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 
-DEFAULT_SUPABASE_URL = "https://hdygktppfvuspnumpfuq.supabase.co"
+DEFAULT_SUPABASE_URL = "https://bxcvzpbmxsdtalyfanee.supabase.co"
 
 NVD_API = "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve}"
 EPSS_API = "https://api.first.org/data/v1/epss?cve={cve}"

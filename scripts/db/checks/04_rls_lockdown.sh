@@ -7,11 +7,11 @@
 # is misconfigured and the data is leaking.
 #
 # Required env vars:
-#   SUPABASE_URL      e.g. https://hdygktppfvuspnumpfuq.supabase.co
+#   SUPABASE_URL      e.g. https://bxcvzpbmxsdtalyfanee.supabase.co
 #   SUPABASE_ANON_KEY the public anon key from Project Settings > API
 #
 # Usage:
-#   export SUPABASE_URL='https://hdygktppfvuspnumpfuq.supabase.co'
+#   export SUPABASE_URL='https://bxcvzpbmxsdtalyfanee.supabase.co'
 #   export SUPABASE_ANON_KEY='eyJhbGciOi...'
 #   ./scripts/db/checks/04_rls_lockdown.sh
 # ============================================================================

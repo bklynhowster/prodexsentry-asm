@@ -107,7 +107,7 @@ def _import_deps() -> Any:
 
 
 # ─── Default Supabase URL (matches other scripts in this repo) ─────────
-DEFAULT_SUPABASE_PROJECT = "hdygktppfvuspnumpfuq"
+DEFAULT_SUPABASE_PROJECT = "bxcvzpbmxsdtalyfanee"
 
 
 # ─── The atomic claim ──────────────────────────────────────────────────

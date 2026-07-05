@@ -893,7 +893,7 @@ def main() -> int:
     name         = _env("ALERTER_NAME", default="daily_digest") or "daily_digest"
     first_hours  = int(_env("ALERTER_FIRST_RUN_HOURS", default="24") or "24")
     dashboard_url= _env("ALERTER_DASHBOARD_URL",
-                        default="https://supabase.com/dashboard/project/hdygktppfvuspnumpfuq")
+                        default="https://supabase.com/dashboard/project/bxcvzpbmxsdtalyfanee")
 
     with psycopg.connect(dsn, autocommit=False) as conn:
         with conn.cursor() as cur:
