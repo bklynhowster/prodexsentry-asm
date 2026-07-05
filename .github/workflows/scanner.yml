@@ -344,15 +344,28 @@ jobs:
           chmod +x scripts/scanner/wg_up_userspace.sh
 
       - name: Fetch + extract WireGuard configs
+        id: fetch_configs
         if: ${{ steps.vpn_decision.outputs.use_vpn == 'true' && github.event.inputs.skip_vpn != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p /tmp/wg-download
-          gh release download vpn-tools \
-            --repo ${{ github.repository }} \
-            --pattern 'mullvad-wg-configs.tar.gz' \
-            --dir /tmp/wg-download
+          # Retry the release download (2026-07-05) — a single transient
+          # GitHub-release blip here used to hard-fail the whole medium scan.
+          for i in 1 2 3; do
+            if gh release download vpn-tools \
+                 --repo ${{ github.repository }} \
+                 --pattern 'mullvad-wg-configs.tar.gz' \
+                 --dir /tmp/wg-download --clobber; then
+              break
+            fi
+            echo "gh release download attempt ${i} failed"
+            if [[ "$i" -eq 3 ]]; then
+              echo "::error::WG config download failed after 3 attempts"
+              exit 1
+            fi
+            sleep $(( i * 3 ))
+          done
           sudo mkdir -p /etc/wireguard
           sudo tar xzf /tmp/wg-download/mullvad-wg-configs.tar.gz -C /tmp/wg-download
           sudo cp /tmp/wg-download/wg-configs/*.conf /etc/wireguard/
@@ -390,7 +403,34 @@ jobs:
           # SCANNER_VPN_REGION can still be set as a workflow var to pin
           # a specific bring-up region for debugging.
           VPN_REGION: ${{ vars.SCANNER_VPN_REGION || '' }}
-        run: scripts/scanner/vpn_bringup.sh
+        run: |
+          # Retry bring-up (2026-07-05) — medium's ONLY hard-fail class was a
+          # single-attempt VPN bring-up: one failed WireGuard handshake nuked
+          # the whole scan (prosalud/highcom: 6-7s, no egress, never scanned).
+          # Retry up to 3x, tearing down + picking a FRESH RANDOM region between
+          # attempts so we don't re-dial the same dead exit. vpn_bringup.sh is a
+          # clean-exit primitive (no hang) so wrapping it is safe.
+          set -uo pipefail
+          ATTEMPTS=3
+          for i in $(seq 1 "$ATTEMPTS"); do
+            echo "── VPN bring-up attempt ${i}/${ATTEMPTS} ──"
+            if [[ "$i" -gt 1 ]]; then
+              scripts/scanner/vpn_teardown.sh || true
+              RETRY_CONF=$(sudo ls /etc/wireguard/ 2>/dev/null | grep '\.conf$' | shuf -n1 || true)
+              if [[ -n "$RETRY_CONF" ]]; then
+                export VPN_REGION="${RETRY_CONF%.conf}"
+                echo "retry with fresh region: $VPN_REGION"
+              fi
+              sleep $(( i * 3 ))
+            fi
+            if scripts/scanner/vpn_bringup.sh; then
+              echo "✓ VPN up on attempt ${i}"
+              exit 0
+            fi
+            echo "✗ VPN bring-up attempt ${i} failed"
+          done
+          echo "::error::VPN bring-up failed after ${ATTEMPTS} attempts"
+          exit 2
 
       # ─── Carve Supabase out of the VPN tunnel ─────────────────────
       # HEAVY_VPN_DB_ROUTING_FIX_SPEC.md. Heavy-v1 runs #831–#835 (5/5)
@@ -543,24 +583,31 @@ jobs:
           SUPABASE_DSN: ${{ secrets.SUPABASE_DSN }}
         run: |
           SCAN_RUN_ID="${{ steps.poll.outputs.scan_run_id }}"
-          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -c "
+          # Name the step that died (2026-07-05) so the orphan sentinel isn't a
+          # black box. Passed to psql via -v + :'reason' (safe quoting).
+          REASON="workflow ended without explicit close-out"
+          if [[ "${{ steps.fetch_configs.outcome }}" == "failure" ]]; then
+            REASON="failed during setup: fetch WireGuard configs (retries exhausted)"
+          elif [[ "${{ steps.vpn.outcome }}" == "failure" ]]; then
+            REASON="failed during setup: VPN bring-up (retries exhausted)"
+          fi
+          echo "orphan-cleanup reason: $REASON"
+          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -v reason="$REASON" -c "
             update public.scan_run
                set status = 'failed',
                    completed_at = now(),
                    duration_seconds = extract(epoch from (now() - started_at))::int,
-                   error_message   = coalesce(error_message,
-                                              'workflow ended without explicit close-out')
+                   error_message   = coalesce(error_message, :'reason')
              where scan_run_id = '$SCAN_RUN_ID'
                and status      = 'running';
           " || true
 
-          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -c "
+          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -v reason="$REASON" -c "
             update public.scan_queue
                set status = 'failed',
                    completed_at = now(),
                    duration_seconds = extract(epoch from (now() - started_at))::int,
-                   error_message   = coalesce(error_message,
-                                              'workflow ended without explicit close-out')
+                   error_message   = coalesce(error_message, :'reason')
              where scan_run_id = '$SCAN_RUN_ID'
                and status      = 'running';
           " || true
