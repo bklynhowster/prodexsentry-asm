@@ -924,6 +924,7 @@ def test_flush_artifacts_per_artifact_isolation_one_bad_blob_does_not_crash():
 from run_medium import (  # noqa: E402
     MARK_DEGRADED_STDERR_ARTIFACT_CAP_BYTES,
     extract_nikto_footer_count,
+    is_nikto_fingerprint_header,
     mark_tool_degraded,
     mark_tool_skipped,
     nikto_is_degraded,
@@ -1564,6 +1565,94 @@ def test_nikto_parser_stable_check_name_slug_for_finding_id_continuity():
     # Slug should start with "nikto-" and include "999992" (the ID)
     assert cert_findings[0].check_name.startswith("nikto-")
     assert "999992" in cert_findings[0].check_name
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Tech-fingerprint header collapse (2026-07-05)
+# Real strings — verbatim from cooked.prodexlabs.com's stored medium findings
+# (scan 2026-07-04). Howie: "the similarities between all of these lows … it's
+# ridiculous." Collapse the framework/CDN/cache header echoes into ONE INFO.
+# ═══════════════════════════════════════════════════════════════════════
+
+# Verbatim descriptions (the parser's group(3), after "[ID] /: ").
+_FP_ALT_SVC = ("An alt-svc header was found which is advertising HTTP/3. "
+               "The endpoint is: ':443'. Nikto cannot test HTTP/3 over QUIC.")
+_FP_NEXTJS_CACHE = "Uncommon header(s) 'x-nextjs-cache' found, with contents: HIT."
+_FP_NEXTJS_PRERENDER = "Uncommon header(s) 'x-nextjs-prerender' found, with contents: 1,1."
+_FP_NEXTJS_STALE = "Uncommon header(s) 'x-nextjs-stale-time' found, with contents: 300."
+_FP_VIA = "Retrieved via header: 1.1 google."
+_FP_XPOWERED = "Retrieved x-powered-by header: Next.js."
+_KEEP_BREACH = ('The Content-Encoding header is set to "deflate" which may mean '
+                "that the server is vulnerable to the BREACH attack.")
+
+_NIKTO_FP_FIXTURE = "\n".join([
+    "- Nikto v2.5.0",
+    "+ Target Host: cooked.prodexlabs.com",
+    f"+ [011799] /: {_FP_ALT_SVC}",
+    f"+ [999100] /: {_FP_NEXTJS_CACHE}",
+    f"+ [999100] /: {_FP_NEXTJS_PRERENDER}",
+    f"+ [999100] /: {_FP_NEXTJS_STALE}",
+    f"+ [999986] /: {_FP_VIA}",
+    f"+ [999986] /: {_FP_XPOWERED}",
+    f"+ [999966] /: {_KEEP_BREACH}",
+    "+ 7 items reported",
+])
+
+
+@pytest.mark.parametrize("desc", [
+    _FP_ALT_SVC, _FP_NEXTJS_CACHE, _FP_NEXTJS_PRERENDER, _FP_NEXTJS_STALE,
+    _FP_VIA, _FP_XPOWERED,
+])
+def test_nikto_fingerprint_classifier_matches_the_class(desc):
+    assert is_nikto_fingerprint_header(desc) is True
+
+
+@pytest.mark.parametrize("desc", [
+    _KEEP_BREACH,                                   # BREACH — substantive, keep
+    "Server may leak inodes via ETags, header found with file /, fields: 0x123",
+    "/admin/: This might be interesting.",
+    "",
+])
+def test_nikto_fingerprint_classifier_spares_real_findings(desc):
+    assert is_nikto_fingerprint_header(desc) is False
+
+
+def test_nikto_parser_collapses_fingerprint_headers():
+    """The 6 tech-fingerprint headers collapse to ONE INFO summary; the BREACH
+    finding survives as its own row. So cooked's 7 nikto lines → 2 findings."""
+    findings, nikto_emitted, we_promoted = parse_nikto_findings(
+        _NIKTO_FP_FIXTURE, "cooked.prodexlabs.com")
+
+    summary = [f for f in findings if f.check_name == "nikto-tech-fingerprint-headers"]
+    assert len(summary) == 1, "expected exactly one collapsed summary finding"
+    assert summary[0].severity == "INFO"
+    assert "(6)" in summary[0].title                       # 6 headers rolled up
+    # every collapsed header is preserved in the summary body for the record
+    for frag in ("x-nextjs-cache", "x-powered-by", "via header", "alt-svc"):
+        assert frag in summary[0].description
+
+    # No per-header row leaks through.
+    leaked = [f for f in findings
+              if is_nikto_fingerprint_header(f.title.split("/: ", 1)[-1])]
+    assert leaked == [], f"fingerprint header emitted per-row: {[f.title for f in leaked]}"
+
+    # BREACH (999966) is NOT collapsed — it stays a standalone finding.
+    assert any("BREACH" in f.title for f in findings)
+
+    # 7 shape-matched lines; 2 emitted objects (summary + BREACH).
+    assert nikto_emitted == 7
+    assert we_promoted == len(findings) == 2
+
+
+def test_nikto_parser_no_fingerprints_emits_no_summary():
+    """A run with zero fingerprint headers must not mint an empty summary."""
+    fixture = "\n".join([
+        "+ [999966] /: " + _KEEP_BREACH,
+        "+ 1 item reported",
+    ])
+    findings, _, _ = parse_nikto_findings(fixture, "host.example.com")
+    assert all(f.check_name != "nikto-tech-fingerprint-headers" for f in findings)
+    assert any("BREACH" in f.title for f in findings)
 
 
 # ═══════════════════════════════════════════════════════════════════════

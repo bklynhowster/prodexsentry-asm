@@ -2519,6 +2519,36 @@ def _nikto_severity_for_id(nikto_id: str) -> str:
     return "INFO" if nikto_id.startswith("999") else "LOW"
 
 
+# Tech-fingerprint header class (2026-07-05) — nikto informational header
+# disclosures that just echo the target's stack (framework / CDN / cache):
+#   999986  "Retrieved <h> header: <v>"                 (x-powered-by, via, …)
+#   999100  "Uncommon header(s) '<h>' found, with …"    (x-nextjs-cache/…)
+#   011799  "An alt-svc header was found …"             (HTTP/3 advertisement)
+# Near-zero signal; a Next.js/CDN host mints one per header, flooding the list
+# (Howie 2026-07-05: "the similarities between all of these lows … it's
+# ridiculous"). Light-tier `tech-disclosure` is already canonical for stack
+# fingerprinting. Collapsed into ONE INFO summary per host — NOT suppressed, so
+# the roll-up keeps the recon-reduction signal without the per-header spam.
+# Substantive nikto checks (BREACH/Content-Encoding 999966, TRACE, dangerous
+# methods, inode/ETag leaks, etc.) do NOT match and emit normally.
+NIKTO_FINGERPRINT_HEADER_RE = re.compile(
+    r"^(?:"
+    r"Retrieved\s+\S+\s+header:"
+    r"|Uncommon header\(s\)"
+    r"|An?\s+alt-svc header was found"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def is_nikto_fingerprint_header(description: str) -> bool:
+    """True iff a nikto finding description is a pure tech-fingerprint header
+    disclosure (framework / CDN / cache header echo). Members are collapsed into
+    one INFO summary rather than emitted per-header. Pure — tested in
+    test_degradation.py."""
+    return bool(NIKTO_FINGERPRINT_HEADER_RE.match(description.strip()))
+
+
 def parse_nikto_findings(
     stdout: str, hostname: str
 ) -> tuple[list[MediumFinding], int, int]:
@@ -2535,6 +2565,7 @@ def parse_nikto_findings(
     findings: list[MediumFinding] = []
     nikto_emitted = 0
     we_promoted = 0
+    fingerprint_headers: list[str] = []   # collapsed tech-fingerprint class
 
     for line in stdout.splitlines():
         line = line.rstrip()
@@ -2554,6 +2585,13 @@ def parse_nikto_findings(
 
         # Q1 — drop header-missing rehash. headers_check owns this slice.
         if NIKTO_HEADER_DEDUP_PATTERN in description:
+            continue
+
+        # Tech-fingerprint header class — collect for one collapsed INFO
+        # (2026-07-05), don't mint per-header. nikto_emitted already counted
+        # this line at the shape gate, so footer reconciliation is unaffected.
+        if is_nikto_fingerprint_header(description):
+            fingerprint_headers.append(description.strip())
             continue
 
         severity = _nikto_severity_for_id(nikto_id)
@@ -2580,6 +2618,32 @@ def parse_nikto_findings(
             tags=["nikto"],
             raw_excerpt=body[:1500],
         ))
+
+    # Collapse the tech-fingerprint header class into ONE INFO summary per host
+    # (stable check_name → re-scans update, not fragment). The per-header rows
+    # that used to exist go STALE on the next scan (parser stops emitting them)
+    # and age out via the finding-display state machine — intended: they're
+    # superseded by this roll-up.
+    if fingerprint_headers:
+        n = len(fingerprint_headers)
+        findings.append(MediumFinding(
+            check_name="nikto-tech-fingerprint-headers",
+            title=f"nikto: Tech fingerprint headers ({n})",
+            severity="INFO",
+            category="dast",
+            description=(
+                f"Nikto observed {n} technology-fingerprint header(s) on "
+                f"{hostname} that disclose the stack (framework / CDN / cache) "
+                f"without being vulnerabilities: {'; '.join(fingerprint_headers)}. "
+                f"Collapsed into one informational finding — each on its own is "
+                f"recon-reduction noise, and light-tier tech-disclosure is already "
+                f"canonical for stack fingerprinting. Strip or rename these headers "
+                f"at the edge to reduce fingerprinting."
+            ),
+            tags=["nikto", "fingerprint", "collapsed"],
+            raw_excerpt="\n".join(fingerprint_headers)[:1500],
+        ))
+        we_promoted += 1
 
     return findings, nikto_emitted, we_promoted
 
