@@ -27,8 +27,10 @@ COMMENT ON COLUMN public.scan_run.parent_run_id IS
   'Linked-runs model (4.7 ruling 6): per-engine child scan_runs reference the '
   'parent. NULL for standalone runs. FK ON DELETE SET NULL.';
 COMMENT ON COLUMN public.scan_run.matrix_version_sha IS
-  'git SHA of roles.yaml at scan-start. Reproducibility: scan = f(git SHA, '
-  'target, matrix SHA). See TARGETED_SCAN_ARCHITECTURE_SPEC.md §5/§8.';
+  'git SHA of the scanner commit at scan-start (GITHUB_SHA). Reproducibility '
+  'guarantee — a scan is f(commit SHA, target); the matrix lives at '
+  'scripts/scanner/matrix/roles.yaml under that SHA. If per-file matrix change '
+  'detection becomes a common need, add a separate matrix_yaml_sha column.';
 COMMENT ON COLUMN public.assets.scan_overrides IS
   'Per-asset knob to disable/enable specific packs; layers on top of the matrix. '
   'Small, auditable via admin_audit_log, reversible. NULL = matrix decides.';

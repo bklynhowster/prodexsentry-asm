@@ -544,6 +544,41 @@ class MediumFinding:
     cwe: list[int] = field(default_factory=list)
     references: list[str] = field(default_factory=list)
     raw_excerpt: str | None = None
+    # Targeted-scan P1a: per-finding source override. None → the write path
+    # uses the scan's default f"commandsentry_{intensity}". Exposure findings
+    # set 'commandsentry_exposure' so they are isolated from medium's
+    # delta_close (source-scoped) AND the note-127 cron (producer-map absent) —
+    # no false-close path. See TARGETED_SCAN_ARCHITECTURE_SPEC.md §6.
+    source: str | None = None
+
+
+def exposure_to_finding(ef, asset_id: str) -> "MediumFinding":
+    """Map a dispatch.ExposureFinding → a MediumFinding row (targeted-scan P1a).
+
+    Module-level + pure so the trust-critical bits are unit-testable WITHOUT
+    running a full scan: source='commandsentry_exposure' (the delta_close + cron
+    isolation that guarantees no false-close), category='info_disclosure', and
+    the exposure/network tags. `ef` is left untyped to avoid a module-load-time
+    import of the decision layer (run() imports dispatch lazily).
+    """
+    return MediumFinding(
+        check_name=ef.check_name,
+        title=ef.title,
+        severity=ef.severity,
+        category="info_disclosure",
+        # 4.7 ruling 1: surface the P1a lifecycle so a portal viewer isn't
+        # confused when a closed port still shows an open exposure row.
+        description=(
+            f"{ef.note} Lifecycle: port-closed remediation is MANUAL in P1a "
+            f"(mark_remediated) — the P3 network engine will drive auto-close."
+        ),
+        tags=["exposure", "network", ef.role],
+        cwe=[668],  # CWE-668 Exposure of Resource to Wrong Sphere
+        references=[],
+        raw_excerpt=(f"port={ef.port} role={ef.role} "
+                     f"severity={ef.severity} asset_id={asset_id}"),
+        source="commandsentry_exposure",
+    )
 
 
 @dataclass
@@ -666,6 +701,15 @@ class ScanContext:
     # default: False (run everything) when the asset_surface read fails
     # or no row exists.
     auth_gated: bool = False
+    # Targeted-scan P1a (TARGETED_SCAN_ARCHITECTURE_SPEC.md §5/§6). Populated
+    # after the discovery read in run(): the per-host ScanPlan (dispatch.py)
+    # and its sorted role-union profile (stamped on scan_run.scan_profile at
+    # close_out, alongside matrix_version_sha). Both stay None on ANY
+    # discovery-read failure → pre-P1 semantics, existing scan unchanged.
+    # Typed `object` (not ScanPlan) to avoid a module-load-time import of the
+    # decision layer into this dataclass; run() imports dispatch lazily.
+    scan_plan: object | None = None
+    scan_profile: list[str] | None = None
 
 
 # ─── Tool-status helpers (ADR-001 Step 4) ───────────────────────────────
@@ -3393,7 +3437,13 @@ SET status            = 'complete',
     -- of the GH Actions log.
     egress_ip         = %(egress_ip)s,
     vpn_config_used   = %(vpn_config_used)s,
-    rotation_log      = %(rotation_log)s
+    rotation_log      = %(rotation_log)s,
+    -- Targeted-scan P1a — per-host role-union profile + matrix git SHA
+    -- (reproducibility: scan = f(SHA, target, matrix)). NULL for pre-P1 runs
+    -- and any run where the discovery read failed (fail-safe) — a NULL here
+    -- reads as "planner didn't run", never as "empty profile".
+    scan_profile       = %(scan_profile)s,
+    matrix_version_sha = %(matrix_version_sha)s
 WHERE scan_run_id     = %(scan_run_id)s;
 """
 
@@ -3441,7 +3491,14 @@ SET status            = 'degraded',
     error_message     = %(error)s,
     egress_ip         = %(egress_ip)s,
     vpn_config_used   = %(vpn_config_used)s,
-    rotation_log      = %(rotation_log)s
+    rotation_log      = %(rotation_log)s,
+    -- Targeted-scan P1a (4.7 ruling 4) — stamp profile + matrix SHA on degraded
+    -- runs too, so "was targeting applied?" is a column read, not a log grep.
+    -- Guarded NULL (planner-didn't-run) stays distinguishable from a real
+    -- profile: a degraded run that DID plan shows its profile; one that never
+    -- reached the planner shows NULL.
+    scan_profile       = %(scan_profile)s,
+    matrix_version_sha = %(matrix_version_sha)s
 WHERE scan_run_id     = %(scan_run_id)s;
 """
 
@@ -3502,7 +3559,11 @@ def write_findings_and_artifacts(conn, ctx: ScanContext, Json) -> tuple[int, int
         f"validation_status={validation_status}")
     with conn.cursor() as cur:
         for f in ctx.findings:
-            finding_id = f"{ctx.asset_id}:medium:{f.check_name}"
+            # Targeted-scan P1a: exposure findings get an ':exposure:' id segment
+            # (not ':medium:') so the P3 network engine re-emits the SAME
+            # finding_id (source-stable) rather than creating a duplicate row.
+            seg = "exposure" if f.source == "commandsentry_exposure" else "medium"
+            finding_id = f"{ctx.asset_id}:{seg}:{f.check_name}"
             params = {
                 "finding_id": finding_id,
                 "asset_id": ctx.asset_id,
@@ -3512,7 +3573,10 @@ def write_findings_and_artifacts(conn, ctx: ScanContext, Json) -> tuple[int, int
                 "description": f.description,
                 "cwe": f.cwe,
                 "references": f.references,
-                "source": f"commandsentry_{ctx.intensity}",
+                # Targeted-scan P1a: honor a per-finding source override
+                # (exposure findings → 'commandsentry_exposure'); default to the
+                # scan's intensity source for every normal tool finding.
+                "source": f.source or f"commandsentry_{ctx.intensity}",
                 "tags": f.tags,
                 "validation_status": validation_status,
                 "scanner_version": scanner_version,
@@ -3690,6 +3754,14 @@ def close_out(conn, ctx: ScanContext, inserted: int, updated: int, Json) -> None
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
+            # Targeted-scan P1a — profile + matrix SHA. Stamped only when the
+            # planner ran (ctx.scan_profile set); NULL otherwise (fail-safe).
+            # Extra keys are harmless for CLOSE_SCAN_QUEUE_SQL (psycopg binds
+            # only the named params that appear in each statement).
+            "scan_profile": ctx.scan_profile,
+            "matrix_version_sha": (
+                get_scanner_version() if ctx.scan_profile is not None else None
+            ),
         }
         cur.execute(CLOSE_SCAN_RUN_SQL, params)
         cur.execute(CLOSE_SCAN_QUEUE_SQL, params)
@@ -3926,6 +3998,11 @@ def degraded_out(conn, ctx: ScanContext, error: str,
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
+            # Targeted-scan P1a (4.7 ruling 4) — same stamp + guard as close_out.
+            "scan_profile": ctx.scan_profile,
+            "matrix_version_sha": (
+                get_scanner_version() if ctx.scan_profile is not None else None
+            ),
         }
         cur.execute(DEGRADED_SCAN_RUN_SQL, params)
         cur.execute(DEGRADED_SCAN_QUEUE_SQL, params)
@@ -4099,6 +4176,83 @@ def run(descriptor_path: str, dsn: str) -> int:
         log(f"asset is auth_gated — will SKIP nikto + ffuf + nuclei attack/cve/"
             f"exposure/wordpress/iis/php/drupal/joomla chunks. Keep wafw00f + "
             f"httpx + nuclei[medium:tech]. Recommend authenticated DAST.")
+
+    # ─── Targeted-scan P1a — discovery read → plan → exposure findings ───
+    # TARGETED_SCAN_ARCHITECTURE_SPEC.md §5/§6, 4.7 ruling 4a/4b. Reads the
+    # cached ports + fingerprint discovery ALREADY captured in
+    # asset_surface.surface_data, builds the per-host plan (dispatch.build_scan_
+    # plan), and emits exposure-is-the-finding rows — internet-exposed
+    # RDP/SMB/DB/... is a finding BY PRESENCE, independent of any CVE.
+    #
+    # PURELY ADDITIVE + FAIL-SAFE. On ANY uncertainty (read error, missing asset
+    # row, unsupported/absent schema_version, no matching subdomain, matrix
+    # import/parse fault) we skip planning entirely: ctx.scan_profile stays None
+    # (pre-P1 semantics) and the existing http scan runs completely unchanged.
+    # We NEVER narrow the existing scan on a discovery-read failure. The whole
+    # block mirrors the auth_gated fail-safe above (transient autocommit conn,
+    # broad except → default-safe).
+    #
+    # TRUST-LAYER: exposure findings are appended to ctx.findings ONLY — no
+    # tools_run / tool_status touch (the set-equality invariant is untouched).
+    # They carry source='commandsentry_exposure' (migration 20260706b) so they
+    # are isolated from medium's delta_close (source-scoped) AND the note-127
+    # cron (producer-map absent) → no false-close path. Port-closed UX is the
+    # STALE/PRESUMED-REMEDIATED display machine; real lifecycle lands with the
+    # P3 network engine (the true producer of this source).
+    #
+    # P1 SCOPE: auth_results=None → every exposure emits at BASE severity (an
+    # open DB is CRITICAL until the P3 auth-probe can downgrade a handshake-gated
+    # one to HIGH). The http phases below are NOT yet gated by http_roles — that
+    # (and the §5 fresh baseline tools) is P1b. P1a only ADDS the plan + exposure
+    # rows + the scan_run stamp.
+    try:
+        from surface_read import extract_signals
+        from matrix_loader import get_matrix
+        from dispatch import build_scan_plan
+        disc_conn = psycopg.connect(dsn, row_factory=dict_row, autocommit=True)
+        try:
+            with disc_conn.cursor() as cur:
+                cur.execute(
+                    "SELECT a.name AS name, a.kind::text AS kind, s.surface_data "
+                    "FROM public.assets a "
+                    "LEFT JOIN public.asset_surface s USING (asset_id) "
+                    "WHERE a.asset_id = %s",
+                    (ctx.asset_id,),
+                )
+                drow = cur.fetchone()
+        finally:
+            disc_conn.close()
+        if drow is None:
+            log("targeted-scan: no asset row for discovery read — skipping "
+                "exposure planning (existing scan unaffected)")
+        else:
+            _name = drow["name"] if isinstance(drow, dict) else drow[0]
+            _kind = drow["kind"] if isinstance(drow, dict) else drow[1]
+            _sd = drow["surface_data"] if isinstance(drow, dict) else drow[2]
+            sig = extract_signals(_sd, _name or ctx.hostname)
+            if sig is None:
+                log("targeted-scan: no usable discovery signals (unsupported "
+                    "schema / no matching sub) — skipping exposure planning "
+                    "(existing scan unaffected)")
+            else:
+                open_ports, fp_tokens, has_http = sig
+                plan = build_scan_plan(
+                    get_matrix(),
+                    open_ports=open_ports,
+                    fingerprint_tokens=fp_tokens,
+                    has_http=has_http,
+                    kind=_kind,
+                    auth_results=None,   # P1: no auth probe yet → base severity
+                )
+                ctx.scan_plan = plan
+                ctx.scan_profile = plan.scan_profile
+                for ef in plan.exposure_findings:
+                    ctx.findings.append(exposure_to_finding(ef, ctx.asset_id))
+                log(f"targeted-scan plan: {plan.summary()}  "
+                    f"exposure_findings_emitted={len(plan.exposure_findings)}")
+    except Exception as e:
+        log(f"targeted-scan planning failed (skipping — existing scan "
+            f"unaffected, fail-safe): {e!r}")
 
     # ─── Validate-mode flag read — actual assert deferred until inside `try` below ─
     # If skip_vpn=true was set on the workflow_dispatch input, the runner

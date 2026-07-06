@@ -51,6 +51,10 @@ from datetime import datetime, timezone
 import psycopg
 
 # ---- constants (spec §5, 4.7 rulings + code-review) ------------------------
+# Mirror of scripts/scanner/surface_read.SUPPORTED_SCHEMA_VERSIONS. Duplicated
+# (not imported) — the scanner Docker image doesn't ship scripts/normalize/. If
+# you bump this, grep the other file and bump there too. Drift = safe direction
+# (unsupported version → skip parsing → existing behavior unaffected). [4.7 R7]
 SUPPORTED_SCHEMA_VERSIONS = {"3.0"}                       # ruling (9)
 DEAD_5XX = {500, 502, 503, 504, 520, 521, 522, 523, 524, 525, 526, 527}  # hole §5.1
 DEAD_CONSECUTIVE_HIGH = 3                                 # ruling (2)
