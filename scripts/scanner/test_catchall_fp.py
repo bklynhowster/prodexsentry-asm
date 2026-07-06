@@ -170,8 +170,8 @@ def test_resolve_disposition_nonhigh_no_baseline_emits():
 # ═══════════════════════════════════════════════════════════════════════
 
 def _seq_probe(results):
-    """Return a stub for _probe_calibration_path_once yielding `results` in
-    order, and a counter list so tests can assert call count."""
+    """Stub for _probe_calibration_path_once yielding `results` — now
+    (status, loc, size) 3-tuples (edit #2) — in order, + a call counter."""
     calls = {"n": 0}
 
     def _stub(ctx):
@@ -183,41 +183,41 @@ def _seq_probe(results):
 
 def test_calib_retry_recovers_after_two_transient_misses(monkeypatch):
     # [0, 0, 200] → the retry rides through two status-0 blips and returns 200.
-    stub, calls = _seq_probe([(0, None), (0, None), (200, None)])
+    stub, calls = _seq_probe([(0, None, None), (0, None, None), (200, None, 870)])
     monkeypatch.setattr(M, "_probe_calibration_path_once", stub)
     monkeypatch.setattr("time.sleep", lambda *a, **k: None)
-    status, loc = M._probe_calibration_path(object())
-    assert status == 200
+    status, loc, size = M._probe_calibration_path(object())
+    assert (status, size) == (200, 870)   # size carried through the retry
     assert calls["n"] == 3
 
 
 def test_calib_retry_exhaustion_returns_zero(monkeypatch):
-    # [0, 0, 0] → all attempts miss → (0, None). The caller MUST treat this as
+    # [0, 0, 0] → all attempts miss → (0, None, None). Caller treats as
     # calibration failure, not "no catch-all".
-    stub, calls = _seq_probe([(0, None), (0, None), (0, None)])
+    stub, calls = _seq_probe([(0, None, None), (0, None, None), (0, None, None)])
     monkeypatch.setattr(M, "_probe_calibration_path_once", stub)
     monkeypatch.setattr("time.sleep", lambda *a, **k: None)
-    status, loc = M._probe_calibration_path(object())
+    status, loc, size = M._probe_calibration_path(object())
     assert status == 0
     assert calls["n"] == M.CALIB_PROBE_ATTEMPTS  # exhausted the full budget
 
 
 def test_calib_retry_first_hit_no_wasted_attempts(monkeypatch):
     # A clean first probe returns immediately — no retry, no sleep.
-    stub, calls = _seq_probe([(403, None)])
+    stub, calls = _seq_probe([(403, None, 500)])
     monkeypatch.setattr(M, "_probe_calibration_path_once", stub)
     monkeypatch.setattr("time.sleep", lambda *a, **k: None)
-    status, loc = M._probe_calibration_path(object())
+    status, loc, size = M._probe_calibration_path(object())
     assert (status, calls["n"]) == (403, 1)
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Fix B — detect_ffuf_catchall calib_ok 3-tuple (hole 5 half 2: FAIL CLOSED)
+# detect_ffuf_catchall 4-tuple: calib_ok (Fix B) + baseline size (edit #2)
 # ═══════════════════════════════════════════════════════════════════════
 
 def _two_probe(first, second):
     """Stub _probe_calibration_path (the RETRYING wrapper) to return `first`
-    then `second` on successive calls."""
+    then `second` — (status, loc, size) 3-tuples — on successive calls."""
     seq = [first, second]
     calls = {"n": 0}
 
@@ -229,54 +229,67 @@ def _two_probe(first, second):
 
 
 def test_detect_ffuf_catchall_probe_exhaustion_is_calib_false(monkeypatch):
-    """THE Fix B point (Hole 5): if the calibration probe exhausts its retries
-    (status 0), detect_ffuf_catchall returns calib_ok=False — the caller
-    fails closed and skips ffuf. It must NOT return (None, None, True), which
-    would let per-path emit run against an undetected catch-all."""
-    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((0, None), (0, None)))
-    redirect, status, calib_ok = M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h"))
-    assert (redirect, status, calib_ok) == (None, None, False)
+    """Hole 5: probe exhaustion (status 0) → calib_ok=False → caller fails
+    closed and skips ffuf. Must NOT return calib_ok=True."""
+    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((0, None, None), (0, None, None)))
+    assert M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h")) == (None, None, None, False)
 
 
-def test_detect_ffuf_catchall_status_catchall_is_calib_true(monkeypatch):
-    # Both probes 200 → status catch-all detected; calib ran clean.
-    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((200, None), (200, None)))
-    redirect, status, calib_ok = M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h"))
-    assert (redirect, status, calib_ok) == (None, 200, True)
+def test_detect_ffuf_catchall_status_catchall_captures_stable_size(monkeypatch):
+    # Both probes 200 AND same size 870 → status catch-all with a STABLE
+    # baseline size (edit #2) carried so real different-size routes can survive.
+    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((200, None, 870), (200, None, 870)))
+    assert M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h")) == (None, 200, 870, True)
+
+
+def test_detect_ffuf_catchall_status_catchall_variable_size_falls_back(monkeypatch):
+    # Both 200 but DIFFERENT sizes → path-variable body → baseline_size None →
+    # suppression falls back to status-only (no regression).
+    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((200, None, 870), (200, None, 915)))
+    assert M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h")) == (None, 200, None, True)
 
 
 def test_detect_ffuf_catchall_redirect_catchall_is_calib_true(monkeypatch):
-    # Both probes 301 → same Location → redirect catch-all (#33 path).
-    monkeypatch.setattr(
-        M, "_probe_calibration_path", _two_probe((301, "/x"), (301, "/x")))
-    redirect, status, calib_ok = M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h"))
-    assert (redirect, status, calib_ok) == ("/x", None, True)
+    # Both probes 301 → same Location → redirect catch-all (size irrelevant).
+    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((301, "/x", None), (301, "/x", None)))
+    assert M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h")) == ("/x", None, None, True)
 
 
 def test_detect_ffuf_catchall_discriminating_host_is_calib_true(monkeypatch):
-    # 200 then 404 → the host discriminates → no catch-all, but calibration
-    # DID run cleanly → calib_ok=True (do NOT fail closed on a healthy host).
-    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((200, None), (404, None)))
-    redirect, status, calib_ok = M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h"))
-    assert (redirect, status, calib_ok) == (None, None, True)
+    # 200 then 404 → host discriminates → no catch-all, calib clean.
+    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((200, None, 870), (404, None, 400)))
+    assert M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h")) == (None, None, None, True)
 
 
 def test_detect_ffuf_catchall_both_404_is_not_catchall(monkeypatch):
-    # 404==404 but 404 is excluded (it's the expected random-path answer) →
-    # host discriminates, calib clean.
-    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((404, None), (404, None)))
-    redirect, status, calib_ok = M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h"))
-    assert (redirect, status, calib_ok) == (None, None, True)
+    # 404==404 but 404 is excluded (expected random-path answer) → discriminates.
+    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((404, None, 400), (404, None, 400)))
+    assert M.detect_ffuf_catchall(types.SimpleNamespace(hostname="h")) == (None, None, None, True)
 
 
-def test_backward_compat_redirect_wrapper_unpacks_3_tuple(monkeypatch):
-    """The #33 thin wrapper detect_ffuf_catchall_redirect must unpack the new
-    3-tuple, not the old 2-tuple (else ValueError at runtime). Returns just the
-    redirect Location on a redirect catch-all."""
-    monkeypatch.setattr(
-        M, "_probe_calibration_path", _two_probe((307, "/go"), (307, "/go")))
-    assert M.detect_ffuf_catchall_redirect(
-        types.SimpleNamespace(hostname="h")) == "/go"
+def test_backward_compat_redirect_wrapper_unpacks_4_tuple(monkeypatch):
+    """The #33 thin wrapper must unpack the new 4-tuple (else ValueError).
+    Returns just the redirect Location on a redirect catch-all."""
+    monkeypatch.setattr(M, "_probe_calibration_path", _two_probe((307, "/go", None), (307, "/go", None)))
+    assert M.detect_ffuf_catchall_redirect(types.SimpleNamespace(hostname="h")) == "/go"
+
+
+# ── edit #2: should_suppress_ffuf_status size discrimination ─────────────
+def test_suppress_status_stable_size_suppresses_only_matching_size():
+    # 200-catch-all, stable soft-404 size 870: the soft-404 (200/870) suppresses;
+    # a real same-status route (200/8) SURVIVES — the whole point of edit #2.
+    assert M.should_suppress_ffuf_status(200, 200, "", result_size=870, baseline_size=870) is True
+    assert M.should_suppress_ffuf_status(200, 200, "", result_size=8, baseline_size=870) is False
+
+
+def test_suppress_status_no_baseline_size_is_status_only():
+    # Path-variable body (baseline_size None) → status-only, pre-edit behavior.
+    assert M.should_suppress_ffuf_status(200, 200, "", result_size=8, baseline_size=None) is True
+    assert M.should_suppress_ffuf_status(200, 200, "") is True  # 3-arg back-compat
+
+
+def test_suppress_status_distinct_status_never_suppressed():
+    assert M.should_suppress_ffuf_status(403, 200, "", result_size=870, baseline_size=870) is False
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -305,6 +318,61 @@ def test_classify_generic_200_is_info():
 
 def test_classify_secret_redirect_is_info():
     assert M.classify_ffuf_severity(".env", "https://h/.env", 301) == "INFO"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Cloud Armor block detection (scanner edit #1, 2026-07-06)
+# Armor blocks with HTTP 400 + a Google body, NOT 403 — the scanner was blind
+# to it. Body below is VERBATIM from prosalud's heavy-probe capture.
+# ═══════════════════════════════════════════════════════════════════════
+
+_ARMOR_400_BODY = (
+    "<html><head>\n"
+    '<meta http-equiv="content-type" content="text/html;charset=utf-8">\n'
+    "<title>400 Bad Request</title>\n</head>\n"
+    "<body text=#000000 bgcolor=#ffffff>\n<h1>Error: Bad Request</h1>\n"
+    "<h2>Your client has issued a malformed or illegal request.</h2>\n</body></html>"
+)
+
+
+def test_is_armor_block_real_body_is_true():
+    assert M.is_armor_block(400, _ARMOR_400_BODY) is True
+
+
+def test_is_armor_block_case_insensitive():
+    assert M.is_armor_block(400, _ARMOR_400_BODY.upper()) is True
+
+
+def test_is_armor_block_bare_400_is_false():
+    # A legit malformed-request 400 from the app is NOT an Armor block.
+    assert M.is_armor_block(400, "<html><body>Bad Request: missing field</body></html>") is False
+
+
+def test_is_armor_block_wrong_status_is_false():
+    # Same body but 403 — Armor's tell is the 400, so this isn't the Armor signature.
+    assert M.is_armor_block(403, _ARMOR_400_BODY) is False
+
+
+def test_is_armor_block_no_body_is_false():
+    assert M.is_armor_block(400, None) is False
+
+
+def test_waf_blocked_classic_ban_codes_need_no_body():
+    for code in (403, 429, 503, 521, 522, 523):
+        assert M.response_is_waf_blocked(code) is True
+
+
+def test_waf_blocked_armor_400_with_body():
+    assert M.response_is_waf_blocked(400, _ARMOR_400_BODY) is True
+
+
+def test_waf_blocked_bare_400_is_not_a_block():
+    assert M.response_is_waf_blocked(400, "ordinary 400") is False
+    assert M.response_is_waf_blocked(400) is False  # no body → status-only signals
+
+
+def test_waf_blocked_clean_200_is_false():
+    assert M.response_is_waf_blocked(200, _ARMOR_400_BODY) is False
 
 
 if __name__ == "__main__":
