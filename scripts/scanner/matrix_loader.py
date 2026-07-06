@@ -70,6 +70,10 @@ def load_matrix(path: str | None = None) -> dict:
         _require(k in base, f"baseline is missing required key '{k}'")
     _require(isinstance(base["staleness_hours"], int) and base["staleness_hours"] > 0,
              "baseline.staleness_hours must be a positive int")
+    _require(isinstance(base["read_from_discovery"], list), "baseline.read_from_discovery must be a list")
+    _require(isinstance(base["fresh"], list), "baseline.fresh must be a list")
+    _require(isinstance(base["light_cache_only"], bool),
+             "baseline.light_cache_only must be a bool (a quoted 'true' silently poisons behavior)")
 
     # unmatched-port fallback — no open port is ever a silent gap.
     unm = m.get("unmatched_port")
@@ -80,6 +84,7 @@ def load_matrix(path: str | None = None) -> dict:
 
     roles = m.get("roles")
     _require(isinstance(roles, dict) and roles, "roles must be a non-empty mapping")
+    port_owner: dict[int, str] = {}
     for name, r in roles.items():
         _require(isinstance(r, dict), f"role '{name}' must be a mapping")
         _require(r.get("engine") in eng_set,
@@ -91,6 +96,22 @@ def load_matrix(path: str | None = None) -> dict:
         if "ports" in match:
             _require(isinstance(match["ports"], list) and all(isinstance(p, int) for p in match["ports"]),
                      f"role '{name}': match.ports must be a list of ints")
+            # Port-collision: a port maps to exactly ONE role, else a host with it
+            # open silently double-emits (the 9200 db/infra clash). Fail LOUD.
+            for p in match["ports"]:
+                _require(p not in port_owner,
+                         f"port {p} is claimed by both '{port_owner.get(p)}' and '{name}' — "
+                         f"a port must map to exactly one role")
+                port_owner[p] = name
+        if "priority" in r:
+            _require(isinstance(r["priority"], int),
+                     f"role '{name}': priority must be an int (a string silently breaks max())")
+        # list-of-string fields (a scalar/typo silently changes selection/tools).
+        for lkey, holder in (("fingerprint_any", match), ("nuclei_tags", r),
+                             ("aux_tools", r), ("probes", r)):
+            if lkey in holder and holder[lkey] is not None:
+                _require(isinstance(holder[lkey], list) and all(isinstance(x, str) for x in holder[lkey]),
+                         f"role '{name}': {lkey} must be a list of strings")
         for skey in ("base_severity", "auth_detected_severity"):
             if skey in r and r[skey] is not None:
                 _require(r[skey] in sev_set, f"role '{name}': {skey} {r[skey]!r} not a valid severity")
@@ -131,13 +152,14 @@ def match_roles(
     if has_http is None:
         has_http = (80 in ports) or (443 in ports)
 
-    if kind in ("redirect", "dead") and kind in roles:
-        return [kind], []
-
     matched: list[str] = []
     covered: set[int] = set()
 
-    # Network roles: union of every role whose port(s) are open.
+    # Network roles: union of every role whose port(s) are open. ALWAYS runs —
+    # even for kind=redirect/dead. 4.7 ruling 2 (biggest silent-narrowing risk):
+    # kind may skip WEB selection but must NEVER drop network coverage/exposure —
+    # a mis-derived 'dead' host with a live 3389 must still fire the RDP exposure.
+    # Coverage-expanding is free; kind only ever removes web depth.
     for name, r in roles.items():
         rp = r.get("match", {}).get("ports")
         if rp:
@@ -146,19 +168,33 @@ def match_roles(
                 matched.append(name)
                 covered |= hit
 
-    # Web roles: pick exactly one (highest priority fingerprint match, else generic).
+    skip_web = kind in ("redirect", "dead")
     if has_http:
-        web_candidates = []
-        for name, r in roles.items():
-            match = r.get("match", {})
-            if not match.get(_WEB_MATCH_KEY):
-                continue
-            fp = match.get("fingerprint_any")
-            if fp is None or _fp_hit(fp, tokens):   # no fp req = always eligible
-                web_candidates.append((r.get("priority", 0), name))
-        if web_candidates:
-            matched.append(max(web_candidates)[1])
+        # http ports are "known" — never let them fall through to unmatched.
         covered |= ports.intersection({80, 443})
+    if has_http and skip_web:
+        # dead/redirect but serving http → record the kind marker, run NO web packs.
+        if kind in roles:
+            matched.append(kind)
+    elif has_http:
+        # 4.7 ruling 2: a dual-stack host (WordPress + React admin) matches BOTH
+        # wordpress and web-spa. Include EVERY web role whose fingerprint
+        # EXPLICITLY matches (union their tools); fall to web-generic (the http
+        # catch-all, no fingerprint requirement) only when none matched.
+        specific = [
+            name for name, r in roles.items()
+            if r.get("match", {}).get(_WEB_MATCH_KEY)
+            and r["match"].get("fingerprint_any")
+            and _fp_hit(r["match"]["fingerprint_any"], tokens)
+        ]
+        if specific:
+            matched.extend(specific)
+        else:
+            for name, r in roles.items():
+                m = r.get("match", {})
+                if m.get(_WEB_MATCH_KEY) and not m.get("fingerprint_any"):
+                    matched.append(name)
+                    break
 
     unmatched = sorted(ports - covered)
     return matched, unmatched

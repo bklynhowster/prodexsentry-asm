@@ -81,33 +81,77 @@ roles:
   # ── network engine (non-HTTP) — MATRIX DATA now, ENGINE lands in P3 ────────
   # Baseline still emits the exposure finding for these ports in P1 (spec §5);
   # the deep protocol packs below run once run_network.py exists.
+  # auth_detection semantic: auth_results[role]=True means the "better" auth
+  # posture was DETECTED → use auth_detected_severity. False/unknown → base
+  # (conservative; never under-reports). auth_results plumbing lands with the
+  # network engine (P3); until then everything emits at base_severity.
   rdp:
     engine: network
     match: { ports: [3389] }
-    base_severity: HIGH               # CRITICAL if NLA not enforced (auth_detection)
-    auth_detected_severity: HIGH
-    auth_detection: nla_required
+    base_severity: HIGH               # exposed RDP is HIGH; P1 ceiling stays HIGH
+    auth_detected_severity: HIGH      # NLA-enforced is still exposed → still HIGH
+    auth_detection: nla_enforced      # a 3rd 'unsafe' column (no-NLA=CRITICAL) is a P2 enhancement
     nuclei_tags: [rdp, network]
 
   smb:
     engine: network
     match: { ports: [445] }
-    base_severity: HIGH
-    auth_detected_severity: HIGH       # still exposed even with signing
-    auth_detection: null_session
+    base_severity: MODERATE-HIGH      # signing-enforced SMB, exposed
+    auth_detected_severity: HIGH      # null-session accessible → worse
+    auth_detection: null_session_open
     nuclei_tags: [smb, network]
 
   ssh:
     engine: network
     match: { ports: [22] }
-    base_severity: MODERATE
-    auth_detected_severity: LOW
-    auth_detection: password_auth_offered
+    base_severity: MODERATE           # password auth allowed (the common weakness)
+    auth_detected_severity: LOW       # key-only auth DETECTED → hardened
+    auth_detection: key_only_auth
     nuclei_tags: [ssh, network]
 
-  db:
+  telnet:
     engine: network
-    match: { ports: [5432, 3306, 1433, 6379, 27017, 9200] }
+    match: { ports: [23] }
+    base_severity: HIGH               # cleartext auth, well-known target
+    auth_detected_severity: HIGH
+    auth_detection: none
+    nuclei_tags: [network]
+
+  ftp:
+    engine: network
+    match: { ports: [21] }
+    base_severity: HIGH               # typically cleartext; anonymous-access risk
+    auth_detected_severity: HIGH
+    auth_detection: none
+    nuclei_tags: [ftp, network]
+
+  vnc:
+    engine: network
+    match: { ports: [5900, 5901] }
+    base_severity: HIGH               # often weak / no auth
+    auth_detected_severity: HIGH
+    auth_detection: none
+    nuclei_tags: [vnc, network]
+
+  nfs:
+    engine: network
+    match: { ports: [2049] }
+    base_severity: HIGH               # remote filesystem access
+    auth_detected_severity: HIGH
+    auth_detection: none
+    nuclei_tags: [network]
+
+  snmp:
+    engine: network
+    match: { ports: [161] }
+    base_severity: HIGH               # community-string enum; 'public' default
+    auth_detected_severity: HIGH
+    auth_detection: none
+    nuclei_tags: [snmp, network]
+
+  db:
+    engine: network                    # incl. Oracle 1521, CouchDB 5984, Memcached 11211, ES 9200
+    match: { ports: [5432, 3306, 1433, 6379, 27017, 9200, 1521, 5984, 11211] }
     base_severity: CRITICAL            # a public DB is a finding on sight
     auth_detected_severity: HIGH       # HIGH when the protocol requires an auth handshake
     auth_detection: db_auth_handshake
@@ -123,8 +167,8 @@ roles:
     probes: [smtp_open_relay, starttls, vrfy_expn]
 
   infra:
-    engine: network
-    match: { ports: [623, 6443, 2375, 9200], fingerprint_any: [ipmi, kubernetes, docker-api] }
+    engine: network                    # 9200 removed → owned by `db` (ES is a datastore, not mgmt)
+    match: { ports: [623, 6443, 2375], fingerprint_any: [ipmi, kubernetes, docker-api] }
     base_severity: HIGH
     auth_detected_severity: HIGH
     auth_detection: default_cred

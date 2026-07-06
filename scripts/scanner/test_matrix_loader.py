@@ -117,14 +117,46 @@ def test_multi_service_host_unions_packs():
 
 
 def test_unmatched_port_is_surfaced_not_swallowed():
-    # 1521 (Oracle) has no matrix row → surfaced for the fallback, never silent.
-    matched, unmatched = match_roles(M, [1521])
-    assert matched == [] and unmatched == [1521]
+    # 1234 has no matrix row → surfaced for the fallback, never silent.
+    matched, unmatched = match_roles(M, [1234])
+    assert matched == [] and unmatched == [1234]
 
 
-def test_dead_kind_short_circuits():
+def test_dead_kind_marks_but_skips_web():
+    # dead host serving http → marker + NO web packs; http ports not "unmatched".
     matched, unmatched = match_roles(M, [80, 443], ["react"], kind="dead")
     assert matched == ["dead"] and unmatched == []
+
+
+def test_dead_kind_STILL_covers_open_network_port():
+    # 4.7 ruling 2 — THE silent-narrowing guard: a 'dead'-labelled host with a
+    # live 3389 must STILL match rdp (mis-derivation can't drop the exposure).
+    matched, unmatched = match_roles(M, [3389, 80], ["react"], kind="dead")
+    assert "rdp" in matched          # network coverage survives the dead label
+    assert "web-spa" not in matched  # web depth is what the label removes
+    assert "dead" in matched and unmatched == []
+
+
+def test_dual_stack_host_unions_web_roles():
+    # 4.7 ruling 2 — WordPress site with a React admin: BOTH web roles, so the
+    # SPA tools (retire.js/trufflehog) aren't lost on the WP host.
+    matched, _ = match_roles(M, [443], ["wordpress", "react"])
+    assert "wordpress" in matched and "web-spa" in matched
+    assert "web-generic" not in matched
+
+
+def test_port_collision_fails_loud(tmp_path):
+    # Two roles claiming 3389 → LOUD (this is the guard that catches a 9200-style clash).
+    body = _MIN_HEAD + \
+        "  a: {engine: network, match: {ports: [3389]}, base_severity: HIGH}\n" \
+        "  b: {engine: network, match: {ports: [3389]}, base_severity: HIGH}\n"
+    with pytest.raises(MatrixError, match="claimed by both"):
+        load_matrix(_write(tmp_path, body))
+
+
+def test_empty_discovery_does_not_crash():
+    # No ports, no fingerprint → no roles, no unmatched. Fail-safe for empty reads.
+    assert match_roles(M, [], []) == ([], [])
 
 
 if __name__ == "__main__":
