@@ -119,7 +119,8 @@ RUN apt-get update -qq \
 RUN pip3 install --break-system-packages --no-cache-dir \
        wafw00f \
        "psycopg[binary]" \
-       requests
+       requests \
+       pyyaml
 
 # ─── yq binary (the apt version is too old for our usage) ──────────
 RUN wget -q -O /usr/local/bin/yq \
