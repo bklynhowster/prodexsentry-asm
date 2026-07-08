@@ -63,6 +63,36 @@ CLOUDFLARE_IP_PREFIXES = (
 )
 AUTORENEW_IP_PREFIXES = PRESSABLE_IP_PREFIXES + WPENGINE_IP_PREFIXES + CLOUDFLARE_IP_PREFIXES
 
+# Rotating cloud/CDN pools (4.7 rulings D7/D10, V3_GUARD_AND_CLOUD_ENDPOINT_SPEC).
+# Assets fronted by these providers rotate across a large IP pool by design, so
+# per-IP add/remove + per-(IP,port) service changes are POOL CHURN, not real
+# events — the 2026-07-07 email.commandcompanies.com "95 surface change(s)" alert
+# (31 O365 IPs "removed" + 64 mail-port "closed", host still up). We suppress
+# those four alert types for these IP ranges only (range-scoped, so a re-point to
+# a NON-cloud/attacker IP still fires). NOTE: Pressable/WPE are managed but STATIC
+# single hosts — an IP change there IS meaningful — so they are deliberately NOT
+# included. (D10: eventual source of truth is scripts/asm/cloud_providers.yaml.)
+O365_IP_PREFIXES = (
+    "52.96.", "52.97.", "52.98.", "52.99.", "52.100.",
+    "40.92.", "40.93.", "40.94.", "40.95.", "40.96.", "40.99.",
+    "40.104.", "40.107.", "104.47.",
+    "2603:1006:", "2603:1016:", "2603:1026:", "2603:1036:", "2603:1046:", "2603:1056:",
+)
+AKAMAI_IP_PREFIXES = (
+    "23.32.", "23.33.", "23.34.", "23.35.", "23.36.", "23.37.", "23.38.", "23.39.",
+    "23.192.", "23.193.", "23.194.", "23.195.", "23.196.", "23.197.", "23.198.", "23.199.",
+    "104.64.", "104.65.", "104.66.", "104.67.", "104.68.", "104.69.", "104.70.", "104.71.",
+    "104.72.", "104.73.", "104.74.", "104.75.", "104.76.", "104.77.", "104.78.", "104.79.",
+    "184.24.", "184.25.", "184.26.", "184.27.", "184.28.", "184.29.", "184.30.", "184.31.",
+)
+CLOUD_ROTATING_IP_PREFIXES = O365_IP_PREFIXES + CLOUDFLARE_IP_PREFIXES + AKAMAI_IP_PREFIXES
+
+
+def is_cloud_rotating_ip(ip: str) -> bool:
+    """True if ip sits in a known rotating cloud/CDN pool (O365 / Cloudflare /
+    Akamai). Per-IP surface changes on these are pool churn, not real events."""
+    return bool(ip) and str(ip).startswith(CLOUD_ROTATING_IP_PREFIXES)
+
 
 # ---------------------------------------------------------------------------
 # Cert-expiry tier-cross helpers
@@ -111,6 +141,48 @@ class Alert:
     __slots__ = ("severity", "asset", "kind", "title", "detail")
     def __init__(self, severity, asset, kind, title, detail=""):
         self.severity, self.asset, self.kind, self.title, self.detail = severity, asset, kind, title, detail
+
+# ─── Surface-change confirmation thresholds (4.7 G4/G5, 2026-07-07) ───────────
+# SINGLE SOURCE OF TRUTH for removal/closure confirmation. Root cause of the
+# false "removed" alerts: a degraded scan (egress/VPN unconfirmed → probes hit
+# network_unreachable while DNS still resolves) produces empty results, and the
+# raw prev−current differ reports every live host/service as gone. Requiring N
+# consecutive scans of absence means a one-scan blip — or a whole-run egress
+# failure — can never fire a removal, because different scans use different
+# runners / tunnels / windows (4.7 G4: cross-scan is the real confirmation, not
+# an in-scan re-probe on the same broken tunnel). The differ-side gate (G1) will
+# import these same constants when it lands.
+HOST_REMOVED_ABSENCE_SCANS   = 3   # match subdomain_gone discipline (4.7 G4)
+SERVICE_CLOSED_ABSENCE_SCANS = 2   # services close more often; smaller blast radius
+SUBDOMAIN_GONE_ABSENCE_SCANS = 3   # centralised (was an inline ABSENCE_THRESHOLD)
+
+def _host_present(entry: dict, sub: str, ip: str) -> bool:
+    """True if host `ip` under `sub` was observed in this scan-history entry.
+    history entry shape: entry['ports_by_sub'] = {sub: {ip: [ports]}}."""
+    return bool(ip) and ip in ((entry.get("ports_by_sub") or {}).get(sub) or {})
+
+def _service_present(entry: dict, sub: str, ip: str, port) -> bool:
+    """True if service `sub`/`port` was observed in this history entry (matched on
+    `ip` when known, else on any ip under `sub`). Unknown shape → assume present
+    (bias against firing a false removal)."""
+    try:
+        submap = (entry.get("ports_by_sub") or {}).get(sub) or {}
+        portlists = [submap.get(ip) or []] if ip else list(submap.values())
+        seen = {str(p) for pl in portlists for p in (pl or [])}
+        return str(port) in seen
+    except Exception:
+        return True
+
+def _absent_streak(history: list, present_fn) -> int:
+    """Consecutive most-recent scans (incl. the current one at history[-1]) in
+    which `present_fn(entry)` is False. history[-1] is the current scan, so a
+    single-scan miss yields streak==1 and never reaches a threshold of 2–3."""
+    streak = 0
+    for entry in reversed(history):
+        if present_fn(entry):
+            break
+        streak += 1
+    return streak
 
 def collect_alerts() -> list[Alert]:
     out: list[Alert] = []
@@ -227,31 +299,65 @@ def collect_alerts() -> list[Alert]:
                 earlier_svcs.update(service_set(entry))
             confirmed_new_services = (current_svcs & prev_svcs) - earlier_svcs
 
+        # 4.7 D7 — is this asset a rotating cloud endpoint? (any current/recent IP
+        # in a known cloud pool.) Used as the per-asset fallback for changes that
+        # don't carry an IP (closed services).
+        _asset_ips = set()
+        for _h in (removed.get("hosts") or []) + (added.get("hosts") or []):
+            if _h.get("ip"):
+                _asset_ips.add(_h["ip"])
+        if history:
+            for _ipmap in (history[-1].get("ports_by_sub") or {}).values():
+                _asset_ips.update((_ipmap or {}).keys())
+        asset_cloud_rotating = any(is_cloud_rotating_ip(ip) for ip in _asset_ips)
+
         # WATCH: new hosts — confirmed by 2 consecutive scans, never seen before
         for (sub, ip) in sorted(confirmed_new_hosts):
+            if is_cloud_rotating_ip(ip):
+                continue  # rotating cloud pool — per-IP churn, not a real change
             out.append(Alert(
                 "watch", aname, "new_host",
                 f"New host IP {ip} on {sub}",
                 "Confirmed by 2 consecutive scans. Hosting expanded or moved."
             ))
-        # Removals still come from deltas — single-scan removal is fine,
-        # the symmetric 'gone' suppression handled below uses its own threshold.
+        # 4.7 G5 (2026-07-07): a "removed" host from ONE scan is NOT trusted. A
+        # degraded/egress-failed scan can't reach a live host and mis-reports it
+        # gone (proven: ftp.unimac + 3 CCC hosts, all live, emailed as removed).
+        # Require absence across N consecutive scans — mirrors subdomain_gone.
         for h in (removed.get("hosts") or []):
+            _hip = h.get("ip") or ""
+            if is_cloud_rotating_ip(_hip):
+                continue  # rotating cloud pool — per-IP churn, not a real change
             sub = h.get("subdomain") or "?"
+            if _absent_streak(history, lambda e, s=sub, i=_hip: _host_present(e, s, i)) < HOST_REMOVED_ABSENCE_SCANS:
+                continue  # not yet absent for N consecutive scans — hold, unconfirmed
             out.append(Alert("notice", aname, "host_removed",
-                             f"Host IP {h.get('ip')} removed from {sub}", ""))
+                             f"Host IP {_hip} removed from {sub}",
+                             f"Absent from the last {HOST_REMOVED_ABSENCE_SCANS} consecutive scans."))
 
         # WATCH: new services — confirmed by 2 consecutive scans, never seen before
         for (sub, ip, port) in sorted(confirmed_new_services):
+            if is_cloud_rotating_ip(ip):
+                continue  # rotating cloud pool — per-(IP,port) flap, not a real change
             out.append(Alert(
                 "watch", aname, "new_service",
                 f"New service open on {sub}: {port}/tcp",
                 f"On host {ip}. Confirmed by 2 consecutive scans."
             ))
+        # 4.7 G5: same confirmation for closed services — a degraded port scan
+        # (naabu network_unreachable) drops every port at once. Require absence
+        # across N consecutive scans before alerting a closure.
         for s in (removed.get("services") or []):
+            _sip = s.get("ip") or ""
+            if (_sip and is_cloud_rotating_ip(_sip)) or (not _sip and asset_cloud_rotating):
+                continue  # rotating cloud pool — per-(IP,port) flap, not a real change
             sub = s.get("subdomain") or "?"
+            _sport = s.get("port")
+            if _absent_streak(history, lambda e, su=sub, i=_sip, p=_sport: _service_present(e, su, i, p)) < SERVICE_CLOSED_ABSENCE_SCANS:
+                continue  # not yet absent for N consecutive scans — hold, unconfirmed
             out.append(Alert("notice", aname, "service_closed",
-                             f"Service closed on {sub}: {s.get('port')}/{s.get('protocol')}", ""))
+                             f"Service closed on {sub}: {_sport}/{s.get('protocol')}",
+                             f"Absent from the last {SERVICE_CLOSED_ABSENCE_SCANS} consecutive scans."))
 
         # NOTICE: new subdomain — confirmed by 2 consecutive scans, never seen before
         for sub in sorted(confirmed_new_subs):
@@ -265,7 +371,7 @@ def collect_alerts() -> list[Alert]:
         # 'missing' from one scan even though it still resolves fine. Requires
         # the new 'subdomain_names' field in each history entry (populated by
         # normalize.py and the backfill script).
-        ABSENCE_THRESHOLD = 3
+        ABSENCE_THRESHOLD = SUBDOMAIN_GONE_ABSENCE_SCANS  # 4.7 G5: centralised SSOT
         history = asset.get("history") or []
         recent = history[-ABSENCE_THRESHOLD:] if len(history) >= ABSENCE_THRESHOLD else history
         for sub in (removed.get("subdomains") or []):
