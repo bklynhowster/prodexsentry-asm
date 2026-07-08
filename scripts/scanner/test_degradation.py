@@ -924,7 +924,6 @@ def test_flush_artifacts_per_artifact_isolation_one_bad_blob_does_not_crash():
 from run_medium import (  # noqa: E402
     MARK_DEGRADED_STDERR_ARTIFACT_CAP_BYTES,
     extract_nikto_footer_count,
-    is_nikto_fingerprint_header,
     mark_tool_degraded,
     mark_tool_skipped,
     nikto_is_degraded,
@@ -1568,10 +1567,14 @@ def test_nikto_parser_stable_check_name_slug_for_finding_id_continuity():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Tech-fingerprint header collapse (2026-07-05)
+# Nikto tech-fingerprint header collapse (4.7 I5, 2026-07-08)
 # Real strings — verbatim from cooked.prodexlabs.com's stored medium findings
-# (scan 2026-07-04). Howie: "the similarities between all of these lows … it's
-# ridiculous." Collapse the framework/CDN/cache header echoes into ONE INFO.
+# (scan 2026-07-04). The 2026-07-05 roll-up (one synthetic INFO) was RETIRED per
+# 4.7 I5: it collapsed by line shape, which swallowed version disclosures (H3)
+# and lost per-header member_finding_ids (I2). Collapse now runs on the shared
+# normalized_key set by the SSOT classifier (unit-tested at the boundary in
+# scripts/normalize/test_nikto_header_classify.py). These tests LOCK the design:
+# no synthetic, per-header rows preserved, versions + security headers NOT swallowed.
 # ═══════════════════════════════════════════════════════════════════════
 
 # Verbatim descriptions (the parser's group(3), after "[ID] /: ").
@@ -1599,60 +1602,57 @@ _NIKTO_FP_FIXTURE = "\n".join([
 ])
 
 
-@pytest.mark.parametrize("desc", [
-    _FP_ALT_SVC, _FP_NEXTJS_CACHE, _FP_NEXTJS_PRERENDER, _FP_NEXTJS_STALE,
-    _FP_VIA, _FP_XPOWERED,
-])
-def test_nikto_fingerprint_classifier_matches_the_class(desc):
-    assert is_nikto_fingerprint_header(desc) is True
-
-
-@pytest.mark.parametrize("desc", [
-    _KEEP_BREACH,                                   # BREACH — substantive, keep
-    "Server may leak inodes via ETags, header found with file /, fields: 0x123",
-    "/admin/: This might be interesting.",
-    "",
-])
-def test_nikto_fingerprint_classifier_spares_real_findings(desc):
-    assert is_nikto_fingerprint_header(desc) is False
-
-
-def test_nikto_parser_collapses_fingerprint_headers():
-    """The 6 tech-fingerprint headers collapse to ONE INFO summary; the BREACH
-    finding survives as its own row. So cooked's 7 nikto lines → 2 findings."""
+def test_nikto_parser_collapses_fingerprints_on_shared_key_not_rollup():
+    """4.7 I5/I8 design lock: the 6 fingerprint headers collapse via a SHARED
+    normalized_key (the dedup view does the visual collapse), NOT the retired
+    roll-up synthetic. Per-header finding_id identity is preserved so
+    member_finding_ids survive (I2). Reintroducing the roll-up breaks this."""
     findings, nikto_emitted, we_promoted = parse_nikto_findings(
         _NIKTO_FP_FIXTURE, "cooked.prodexlabs.com")
 
-    summary = [f for f in findings if f.check_name == "nikto-tech-fingerprint-headers"]
-    assert len(summary) == 1, "expected exactly one collapsed summary finding"
-    assert summary[0].severity == "INFO"
-    assert "(6)" in summary[0].title                       # 6 headers rolled up
-    # every collapsed header is preserved in the summary body for the record
-    for frag in ("x-nextjs-cache", "x-powered-by", "via header", "alt-svc"):
-        assert frag in summary[0].description
+    # Roll-up is dead — no synthetic finding, ever.
+    assert all(f.check_name != "nikto-tech-fingerprint-headers" for f in findings)
 
-    # No per-header row leaks through.
-    leaked = [f for f in findings
-              if is_nikto_fingerprint_header(f.title.split("/: ", 1)[-1])]
-    assert leaked == [], f"fingerprint header emitted per-row: {[f.title for f in leaked]}"
+    # 6 fingerprint rows, each its own check_name, all sharing ONE class key.
+    fp = [f for f in findings if f.normalized_key == "class:tech-header-disclosure"]
+    assert len(fp) == 6
+    assert len({f.check_name for f in fp}) == 6
+    assert all(f.severity == "INFO" for f in fp)
 
-    # BREACH (999966) is NOT collapsed — it stays a standalone finding.
-    assert any("BREACH" in f.title for f in findings)
+    # BREACH (999966) stays Bucket 3 — its own row, no class key.
+    breach = [f for f in findings
+              if "BREACH" in f.title or "Content-Encoding" in f.description]
+    assert breach and all(f.normalized_key is None for f in breach)
 
-    # 7 shape-matched lines; 2 emitted objects (summary + BREACH).
+    # 7 shape-matched lines; 6 fingerprint + 1 BREACH = 7 emitted objects.
     assert nikto_emitted == 7
-    assert we_promoted == len(findings) == 2
+    assert we_promoted == len(findings) == 7
 
 
-def test_nikto_parser_no_fingerprints_emits_no_summary():
-    """A run with zero fingerprint headers must not mint an empty summary."""
+def test_nikto_parser_version_disclosure_not_swallowed():
+    """4.7 H3 boundary lock: a version-bearing header is its OWN LOW finding on
+    class:tech-version-disclosure — never folded into the fingerprint class."""
     fixture = "\n".join([
+        "+ [999002] /: Retrieved server header: nginx/1.14.0",
         "+ [999966] /: " + _KEEP_BREACH,
+        "+ 2 items reported",
+    ])
+    findings, _, _ = parse_nikto_findings(fixture, "host.example.com")
+    ver = [f for f in findings if f.normalized_key == "class:tech-version-disclosure"]
+    assert len(ver) == 1 and ver[0].severity == "LOW"
+    assert all(f.normalized_key != "class:tech-header-disclosure" for f in findings)
+
+
+def test_nikto_parser_security_header_line_not_swallowed():
+    r"""The old roll-up regex `Retrieved \S+ header:` would have swallowed a
+    security-header echo. The SSOT classifier keeps it Bucket 3 (no class key)."""
+    fixture = "\n".join([
+        "+ [000001] /: Retrieved x-frame-options header: ALLOWALL",
         "+ 1 item reported",
     ])
     findings, _, _ = parse_nikto_findings(fixture, "host.example.com")
-    assert all(f.check_name != "nikto-tech-fingerprint-headers" for f in findings)
-    assert any("BREACH" in f.title for f in findings)
+    assert findings, "expected the security-header finding to be emitted"
+    assert all(f.normalized_key is None for f in findings)
 
 
 # ═══════════════════════════════════════════════════════════════════════

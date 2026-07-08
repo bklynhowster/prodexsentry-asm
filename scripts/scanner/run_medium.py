@@ -91,6 +91,21 @@ from degradation import (
 )
 
 
+# ─── 4.7 I1 — nikto header classifier SSOT ──────────────────────────────
+# Lives in the normalize package so BOTH parser paths (cs_parsers/nikto.py and
+# this one) share one boundary. Fail-open: if the import ever breaks, nikto
+# findings simply don't get the class-collapse key (current behaviour) — the
+# scanner must never crash on a classifier import issue.
+try:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "normalize"))
+    from cs_parsers.nikto import classify_nikto_header, extract_header_disclosure
+except Exception:  # pragma: no cover
+    def classify_nikto_header(_n, _v):
+        return ("actionable", None)
+    def extract_header_disclosure(_t):
+        return None
+
+
 # ─── Lazy import psycopg ────────────────────────────────────────────────
 def _import_deps() -> Any:
     try:
@@ -550,6 +565,10 @@ class MediumFinding:
     # delta_close (source-scoped) AND the note-127 cron (producer-map absent) —
     # no false-close path. See TARGETED_SCAN_ARCHITECTURE_SPEC.md §6.
     source: str | None = None
+    # 4.7 I2/I5 — shared class-collapse key (e.g. class:tech-header-disclosure).
+    # None for everything except the nikto fingerprint/version buckets; the dedup
+    # view collapses rows sharing it while finding_id stays per-header.
+    normalized_key: str | None = None
 
 
 def exposure_to_finding(ef, asset_id: str) -> "MediumFinding":
@@ -2618,34 +2637,13 @@ def _nikto_severity_for_id(nikto_id: str) -> str:
     return "INFO" if nikto_id.startswith("999") else "LOW"
 
 
-# Tech-fingerprint header class (2026-07-05) — nikto informational header
-# disclosures that just echo the target's stack (framework / CDN / cache):
-#   999986  "Retrieved <h> header: <v>"                 (x-powered-by, via, …)
-#   999100  "Uncommon header(s) '<h>' found, with …"    (x-nextjs-cache/…)
-#   011799  "An alt-svc header was found …"             (HTTP/3 advertisement)
-# Near-zero signal; a Next.js/CDN host mints one per header, flooding the list
-# (Howie 2026-07-05: "the similarities between all of these lows … it's
-# ridiculous"). Light-tier `tech-disclosure` is already canonical for stack
-# fingerprinting. Collapsed into ONE INFO summary per host — NOT suppressed, so
-# the roll-up keeps the recon-reduction signal without the per-header spam.
-# Substantive nikto checks (BREACH/Content-Encoding 999966, TRACE, dangerous
-# methods, inode/ETag leaks, etc.) do NOT match and emit normally.
-NIKTO_FINGERPRINT_HEADER_RE = re.compile(
-    r"^(?:"
-    r"Retrieved\s+\S+\s+header:"
-    r"|Uncommon header\(s\)"
-    r"|An?\s+alt-svc header was found"
-    r")",
-    re.IGNORECASE,
-)
-
-
-def is_nikto_fingerprint_header(description: str) -> bool:
-    """True iff a nikto finding description is a pure tech-fingerprint header
-    disclosure (framework / CDN / cache header echo). Members are collapsed into
-    one INFO summary rather than emitted per-header. Pure — tested in
-    test_degradation.py."""
-    return bool(NIKTO_FINGERPRINT_HEADER_RE.match(description.strip()))
+# The 2026-07-05 tech-fingerprint-header ROLL-UP (is_nikto_fingerprint_header +
+# NIKTO_FINGERPRINT_HEADER_RE + a synthetic "nikto-tech-fingerprint-headers" INFO)
+# was RETIRED per 4.7 I5 (2026-07-08). It collapsed by line shape, which swallowed
+# version disclosures (H3) and lost per-header member_finding_ids (I2). Fingerprint/
+# version collapse now runs on the shared normalized_key set by the SSOT classifier
+# (classify_nikto_header / extract_header_disclosure, imported at top) inside
+# parse_nikto_findings — identical to Command. See FINDING_COUNT_INFLATION_PRODEX_FORK.md.
 
 
 def parse_nikto_findings(
@@ -2664,7 +2662,6 @@ def parse_nikto_findings(
     findings: list[MediumFinding] = []
     nikto_emitted = 0
     we_promoted = 0
-    fingerprint_headers: list[str] = []   # collapsed tech-fingerprint class
 
     for line in stdout.splitlines():
         line = line.rstrip()
@@ -2686,15 +2683,25 @@ def parse_nikto_findings(
         if NIKTO_HEADER_DEDUP_PATTERN in description:
             continue
 
-        # Tech-fingerprint header class — collect for one collapsed INFO
-        # (2026-07-05), don't mint per-header. nikto_emitted already counted
-        # this line at the shape gate, so footer reconciliation is unaffected.
-        if is_nikto_fingerprint_header(description):
-            fingerprint_headers.append(description.strip())
-            continue
-
         severity = _nikto_severity_for_id(nikto_id)
         we_promoted += 1
+
+        # 4.7 I1/I2/I5 — response-header disclosure buckets (replaces the retired
+        # 2026-07-05 roll-up). fingerprint → collapse INFO via the shared
+        # normalized_key; version → own LOW; else default (Bucket 3, untouched).
+        # check_name stays UNIQUE (drives finding_id) so the dedup view collapses
+        # N distinct findings on the shared key with member_finding_ids intact.
+        norm_key = None
+        title = f"nikto: {body[:120]}"
+        _hd = extract_header_disclosure(description)
+        if _hd:
+            _bucket, _nkey = classify_nikto_header(_hd[0], _hd[1])
+            if _bucket == "fingerprint":
+                norm_key, severity = _nkey, "INFO"
+                title = "Technology disclosed via response headers"
+            elif _bucket == "version":
+                norm_key, severity = _nkey, "LOW"
+                title = f"Technology version disclosed via {_hd[0].lower()} header"
 
         # Slug derived from the full body for stable finding_id semantics.
         # Preserves existing finding identity across the parser refactor —
@@ -2706,7 +2713,7 @@ def parse_nikto_findings(
                f"finding-{we_promoted}"
         findings.append(MediumFinding(
             check_name=f"nikto-{slug}",
-            title=f"nikto: {body[:120]}",
+            title=title,
             severity=severity,
             category="dast",
             description=(
@@ -2716,33 +2723,8 @@ def parse_nikto_findings(
             ),
             tags=["nikto"],
             raw_excerpt=body[:1500],
+            normalized_key=norm_key,
         ))
-
-    # Collapse the tech-fingerprint header class into ONE INFO summary per host
-    # (stable check_name → re-scans update, not fragment). The per-header rows
-    # that used to exist go STALE on the next scan (parser stops emitting them)
-    # and age out via the finding-display state machine — intended: they're
-    # superseded by this roll-up.
-    if fingerprint_headers:
-        n = len(fingerprint_headers)
-        findings.append(MediumFinding(
-            check_name="nikto-tech-fingerprint-headers",
-            title=f"nikto: Tech fingerprint headers ({n})",
-            severity="INFO",
-            category="dast",
-            description=(
-                f"Nikto observed {n} technology-fingerprint header(s) on "
-                f"{hostname} that disclose the stack (framework / CDN / cache) "
-                f"without being vulnerabilities: {'; '.join(fingerprint_headers)}. "
-                f"Collapsed into one informational finding — each on its own is "
-                f"recon-reduction noise, and light-tier tech-disclosure is already "
-                f"canonical for stack fingerprinting. Strip or rename these headers "
-                f"at the edge to reduce fingerprinting."
-            ),
-            tags=["nikto", "fingerprint", "collapsed"],
-            raw_excerpt="\n".join(fingerprint_headers)[:1500],
-        ))
-        we_promoted += 1
 
     return findings, nikto_emitted, we_promoted
 
@@ -3332,13 +3314,13 @@ UPSERT_FINDING_SQL = """
 INSERT INTO public.findings (
     finding_id, asset_id, title, severity, category, description,
     cwe, "references", current_status, first_detected_at,
-    last_observed_at, source, tags,
+    last_observed_at, source, tags, normalized_key,
     validation_status, scanner_version, validated_at,
     first_detected_scan, last_seen_scan_run
 )
 VALUES (%(finding_id)s, %(asset_id)s, %(title)s, %(severity)s, %(category)s,
         %(description)s, %(cwe)s, %(references)s, 'detected',
-        now(), now(), %(source)s, %(tags)s,
+        now(), now(), %(source)s, %(tags)s, %(normalized_key)s,
         %(validation_status)s, %(scanner_version)s,
         CASE WHEN %(validation_status)s = 'validated' THEN now() ELSE NULL END,
         %(scan_run_id)s, %(scan_run_id)s)
@@ -3346,6 +3328,8 @@ ON CONFLICT (finding_id) DO UPDATE SET
     title             = EXCLUDED.title,
     category          = EXCLUDED.category,
     description       = EXCLUDED.description,
+    -- 4.7 I2/I5 — new key wins over NULL, existing non-null preserved.
+    normalized_key    = COALESCE(EXCLUDED.normalized_key, findings.normalized_key),
     current_status = CASE
       WHEN findings.current_status IN (
              'remediated', 'validated_remediated',
@@ -3578,6 +3562,7 @@ def write_findings_and_artifacts(conn, ctx: ScanContext, Json) -> tuple[int, int
                 # scan's intensity source for every normal tool finding.
                 "source": f.source or f"commandsentry_{ctx.intensity}",
                 "tags": f.tags,
+                "normalized_key": f.normalized_key,   # 4.7 I2/I5 class-collapse key
                 "validation_status": validation_status,
                 "scanner_version": scanner_version,
                 # Bug D fix (paired with trust-layer Part 4) — populate
