@@ -61,3 +61,9 @@ Mullvad/
 wg-configs/
 mullvad*
 *.ovpn
+
+# Working design specs / tickets / advisor-review docs live in Obsidian, NOT this
+# (public) repo — keeps internal specs out of git. Ignore root-level markdown
+# except the README. Already-committed docs are unaffected (decide separately).
+/*.md
+!/README.md
