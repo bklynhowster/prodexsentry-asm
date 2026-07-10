@@ -917,6 +917,13 @@ def close_out_heavy(conn, ctx: HeavyScanContext, inserted: int, updated: int, Js
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
+            # CLOSE_SCAN_*_SQL (shared from run_medium — Prodex-first targeted-scan
+            # schema) reference these. Heavy never runs the targeted planner, so both
+            # are NULL ("planner didn't run"). They must be PRESENT as params or
+            # psycopg errors on the missing placeholder — the bug that failed the
+            # first Prodex heavy (run 102, 2026-07-10).
+            "scan_profile": None,
+            "matrix_version_sha": None,
         }
         cur.execute(CLOSE_SCAN_RUN_SQL, params)
         cur.execute(CLOSE_SCAN_QUEUE_SQL, params)
@@ -946,6 +953,10 @@ def degraded_out_heavy(conn, ctx: HeavyScanContext, error: str,
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
+            # See close_out_heavy: DEGRADED_SCAN_*_SQL also stamp these targeted-scan
+            # columns; heavy has no profile → NULL. Must be present as params.
+            "scan_profile": None,
+            "matrix_version_sha": None,
         }
         cur.execute(DEGRADED_SCAN_RUN_SQL, params)
         cur.execute(DEGRADED_SCAN_QUEUE_SQL, params)
