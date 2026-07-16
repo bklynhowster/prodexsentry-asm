@@ -10,10 +10,10 @@
     "discovered_via": "manual"
   },
   "scan": {
-    "id": "scan_2026-07-16T07:55:47Z_c35fed77",
-    "started_at": "2026-07-16T07:55:47Z",
-    "completed_at": "2026-07-16T08:03:08Z",
-    "duration_seconds": 441,
+    "id": "scan_2026-07-16T13:19:39Z_47b8b903",
+    "started_at": "2026-07-16T13:19:39Z",
+    "completed_at": "2026-07-16T13:26:16Z",
+    "duration_seconds": 397,
     "engine_version": "3.0.0",
     "scanner_origin": "github-actions-ubuntu-azure",
     "tools_run": [
@@ -31,8 +31,8 @@
   "summary": {
     "subdomain_count": 27,
     "live_subdomain_count": 27,
-    "host_count": 23,
-    "service_count": 178,
+    "host_count": 20,
+    "service_count": 54,
     "newest_cert_expiry_days": 45,
     "top_hosting_org": "Google LLC",
     "platforms": []
@@ -43,8 +43,8 @@
       "alive": true,
       "is_root": true,
       "discovered_via": "dnsx",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -85,22 +85,6 @@
         },
         {
           "ip": "8.232.147.166",
-          "port": 109,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 425,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -119,382 +103,6 @@
             "self_signed": false,
             "days_to_expiry": 67
           }
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 543,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 783,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1000,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1010,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1044,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1084,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1104,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1110,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1113,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1145,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1533,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 1755,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 2170,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 2382,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 2607,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 2909,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 3369,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 3546,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 3998,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 5221,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 5666,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 5900,
-          "protocol": "tcp",
-          "service": "vnc",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 6000,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 6025,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 6106,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 6547,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 7778,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 7920,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 8086,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 8090,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 9595,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 10000,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 10025,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 10243,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 15004,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 20222,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 25734,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 32783,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 38292,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 44176,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 49152,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 49160,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 49176,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 49400,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 57797,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 61900,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "8.232.147.166",
-          "port": 64623,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
         }
       ],
       "dns": {
@@ -580,8 +188,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:08Z",
-      "last_seen": "2026-07-16T08:03:08Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -638,7 +246,7 @@
             "not_before": "2026-06-29T08:40:14Z",
             "not_after": "2026-09-21T08:40:13Z",
             "self_signed": false,
-            "days_to_expiry": 67
+            "days_to_expiry": 66
           }
         }
       ],
@@ -681,8 +289,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -702,7 +310,7 @@
       },
       "hosts": [
         {
-          "ip": "13.107.226.71",
+          "ip": "150.171.109.183",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -712,7 +320,7 @@
           "is_private": false
         },
         {
-          "ip": "13.107.253.71",
+          "ip": "150.171.109.73",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -722,37 +330,7 @@
           "is_private": false
         },
         {
-          "ip": "150.171.109.151",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Washington",
-          "city": "Redmond",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "2603:1061:14:96::1",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Washington",
-          "city": "Redmond",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "2620:1ec:29:1::71",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Washington",
-          "city": "Redmond",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "2620:1ec:48:1::71",
+          "ip": "2603:1061:14:48::1",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -764,7 +342,7 @@
       ],
       "services": [
         {
-          "ip": "13.107.226.71",
+          "ip": "150.171.109.73",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -772,34 +350,7 @@
           "tls": false
         },
         {
-          "ip": "13.107.226.71",
-          "port": 443,
-          "protocol": "tcp",
-          "service": "https",
-          "banner": null,
-          "tls": true,
-          "cert": {
-            "subject": "CN=azure-demo.prodexlabs.com",
-            "issuer": "CN=GeoTrust TLS RSA CA G1, OU=www.digicert.com, O=DigiCert Inc, C=US",
-            "san": [
-              "azure-demo.prodexlabs.com"
-            ],
-            "not_before": "2026-06-19T00:00:00Z",
-            "not_after": "2026-12-19T23:59:59Z",
-            "self_signed": false,
-            "days_to_expiry": 156
-          }
-        },
-        {
-          "ip": "13.107.253.71",
-          "port": 80,
-          "protocol": "tcp",
-          "service": "http",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "13.107.253.71",
+          "ip": "150.171.109.73",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -820,10 +371,10 @@
       ],
       "dns": {
         "a": [
-          "150.171.109.151"
+          "150.171.109.183"
         ],
         "aaaa": [
-          "2603:1061:14:96::1"
+          "2603:1061:14:48::1"
         ],
         "cname": "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net",
         "mx": [],
@@ -859,8 +410,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -995,8 +546,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1051,7 +602,7 @@
             "not_before": "2026-06-09T10:33:39Z",
             "not_after": "2026-09-07T11:28:13Z",
             "self_signed": false,
-            "days_to_expiry": 53
+            "days_to_expiry": 52
           }
         }
       ],
@@ -1109,8 +660,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1130,7 +681,7 @@
       },
       "hosts": [
         {
-          "ip": "66.33.60.66",
+          "ip": "66.33.60.193",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -1140,7 +691,7 @@
           "is_private": false
         },
         {
-          "ip": "66.33.60.67",
+          "ip": "66.33.60.35",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -1150,7 +701,7 @@
           "is_private": false
         },
         {
-          "ip": "76.76.21.142",
+          "ip": "76.76.21.123",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -1160,7 +711,7 @@
           "is_private": false
         },
         {
-          "ip": "76.76.21.98",
+          "ip": "76.76.21.241",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -1172,7 +723,7 @@
       ],
       "services": [
         {
-          "ip": "66.33.60.66",
+          "ip": "66.33.60.193",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1180,7 +731,7 @@
           "tls": false
         },
         {
-          "ip": "66.33.60.66",
+          "ip": "66.33.60.193",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -1199,7 +750,7 @@
           }
         },
         {
-          "ip": "76.76.21.142",
+          "ip": "76.76.21.241",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1207,7 +758,7 @@
           "tls": false
         },
         {
-          "ip": "76.76.21.142",
+          "ip": "76.76.21.241",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -1228,8 +779,8 @@
       ],
       "dns": {
         "a": [
-          "76.76.21.98",
-          "66.33.60.67"
+          "76.76.21.123",
+          "66.33.60.35"
         ],
         "aaaa": [],
         "cname": "cname.mintlify-dns.com",
@@ -1271,8 +822,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1327,7 +878,7 @@
             "not_before": "2026-06-28T11:05:59Z",
             "not_after": "2026-09-26T11:59:33Z",
             "self_signed": false,
-            "days_to_expiry": 72
+            "days_to_expiry": 71
           }
         }
       ],
@@ -1385,8 +936,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1499,8 +1050,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1613,8 +1164,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1727,8 +1278,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:09Z",
-      "last_seen": "2026-07-16T08:03:09Z",
+      "first_discovered": "2026-07-16T13:26:16Z",
+      "last_seen": "2026-07-16T13:26:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1806,8 +1357,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1862,7 +1413,7 @@
             "not_before": "2026-06-10T10:27:18Z",
             "not_after": "2026-09-08T11:20:51Z",
             "self_signed": false,
-            "days_to_expiry": 54
+            "days_to_expiry": 53
           }
         }
       ],
@@ -1920,8 +1471,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1976,7 +1527,7 @@
             "not_before": "2026-06-27T08:10:47Z",
             "not_after": "2026-09-25T09:04:20Z",
             "self_signed": false,
-            "days_to_expiry": 71
+            "days_to_expiry": 70
           }
         }
       ],
@@ -2034,8 +1585,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2090,7 +1641,7 @@
             "not_before": "2026-06-29T11:05:29Z",
             "not_after": "2026-09-27T11:59:22Z",
             "self_signed": false,
-            "days_to_expiry": 73
+            "days_to_expiry": 72
           }
         }
       ],
@@ -2148,8 +1699,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2182,22 +1733,6 @@
       "services": [
         {
           "ip": "34.54.236.210",
-          "port": 3,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 23,
-          "protocol": "tcp",
-          "service": "telnet",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -2221,192 +1756,8 @@
             "not_before": "2026-07-08T07:56:52Z",
             "not_after": "2026-10-06T08:52:47Z",
             "self_signed": false,
-            "days_to_expiry": 82
+            "days_to_expiry": 81
           }
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 1083,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 1085,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 1151,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 1717,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 2047,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 2099,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 3517,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 3659,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 3800,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 3827,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 5555,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 5859,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 6580,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 6669,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 8081,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 8652,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 9595,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 9968,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 10009,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 10629,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 16992,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 19842,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.54.236.210",
-          "port": 22939,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
         }
       ],
       "dns": {
@@ -2453,8 +1804,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2495,46 +1846,6 @@
         },
         {
           "ip": "35.227.202.53",
-          "port": 90,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 100,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 212,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 256,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 427,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -2551,326 +1862,6 @@
             "self_signed": false,
             "days_to_expiry": 52
           }
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 616,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 720,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 749,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 787,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 902,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1032,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1033,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1075,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1078,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1113,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1122,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1137,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 1163,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 2038,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 2382,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 3077,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 3211,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 3809,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 3918,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 4001,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 4445,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 5009,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 5560,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 5801,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 6001,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 6005,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 6839,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 7920,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 8045,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 9103,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 9200,
-          "protocol": "tcp",
-          "service": "elasticsearch",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 9878,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 9943,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 9968,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 14441,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 16001,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 16080,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 19842,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 50003,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "35.227.202.53",
-          "port": 61900,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
         }
       ],
       "dns": {
@@ -2927,8 +1918,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3019,11 +2010,6 @@
             "category": "security"
           },
           {
-            "name": "HTTP/3",
-            "version": null,
-            "category": "transport"
-          },
-          {
             "name": "Nginx",
             "version": null,
             "category": "webserver"
@@ -3041,8 +2027,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3160,8 +2146,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3274,8 +2260,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3388,8 +2374,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3430,14 +2416,6 @@
         },
         {
           "ip": "34.117.3.186",
-          "port": 135,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.117.3.186",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -3454,22 +2432,6 @@
             "self_signed": false,
             "days_to_expiry": 52
           }
-        },
-        {
-          "ip": "34.117.3.186",
-          "port": 1122,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "34.117.3.186",
-          "port": 5718,
-          "protocol": "tcp",
-          "service": "unknown",
-          "banner": null,
-          "tls": false
         }
       ],
       "dns": {
@@ -3526,8 +2488,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3582,7 +2544,7 @@
             "not_before": "2026-06-13T10:40:28Z",
             "not_after": "2026-09-11T11:33:22Z",
             "self_signed": false,
-            "days_to_expiry": 57
+            "days_to_expiry": 56
           }
         }
       ],
@@ -3640,8 +2602,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3759,8 +2721,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3815,7 +2777,7 @@
             "not_before": "2026-06-08T10:32:01Z",
             "not_after": "2026-09-06T11:25:35Z",
             "self_signed": false,
-            "days_to_expiry": 52
+            "days_to_expiry": 51
           }
         }
       ],
@@ -3873,8 +2835,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3987,8 +2949,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -4101,8 +3063,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-16T08:03:10Z",
-      "last_seen": "2026-07-16T08:03:10Z",
+      "first_discovered": "2026-07-16T13:26:17Z",
+      "last_seen": "2026-07-16T13:26:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -4235,8 +3197,79 @@
   ],
   "phantom_subdomains": [],
   "deltas": {
-    "since_scan": "scan_2026-07-16T01:42:55Z_6a06b9b5",
+    "since_scan": "scan_2026-07-16T07:55:47Z_c35fed77",
     "added": {
+      "subdomains": [],
+      "services": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.73",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.73",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.193",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.193",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.241",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.241",
+          "port": 443,
+          "protocol": "tcp"
+        }
+      ],
+      "hosts": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.183"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.73"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "2603:1061:14:48::1"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.193"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.35"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.123"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.241"
+        }
+      ]
+    },
+    "removed": {
       "subdomains": [],
       "services": [
         {
@@ -5047,126 +4080,19 @@
         },
         {
           "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.66"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
           "ip": "66.33.60.67"
         },
         {
           "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.142"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
           "ip": "76.76.21.98"
-        }
-      ]
-    },
-    "removed": {
-      "subdomains": [],
-      "services": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.110.211",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.110.211",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging-gpt55.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 1054,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 1054,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "staging.prodexlabs.com",
-          "ip": "34.117.3.186",
-          "port": 1063,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 1434,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 10616,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "time.prodexlabs.com",
-          "ip": "35.227.202.53",
-          "port": 49163,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "tour.prodexlabs.com",
-          "ip": "34.36.153.196",
-          "port": 5405,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "tour.prodexlabs.com",
-          "ip": "34.36.153.196",
-          "port": 49175,
-          "protocol": "tcp"
-        }
-      ],
-      "hosts": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.110.210"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.110.211"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:1d1::1"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:b5::1"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93"
         }
       ]
     },
@@ -17485,6 +16411,208 @@
             443,
             1122,
             5718
+          ]
+        },
+        "time.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "tour.prodexlabs.com": {
+          "34.36.153.196": [
+            80,
+            443
+          ]
+        },
+        "trial.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "uat.prodexlabs.com": {
+          "136.68.149.70": [
+            80,
+            443
+          ]
+        },
+        "valorep.prodexlabs.com": {
+          "8.233.90.115": [
+            80,
+            443
+          ]
+        },
+        "www.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        }
+      },
+      "tech_versions": {}
+    },
+    {
+      "scan_id": "scan_2026-07-16T13:19:39Z_47b8b903",
+      "started_at": "2026-07-16T13:19:39Z",
+      "completed_at": "2026-07-16T13:26:16Z",
+      "subdomain_count": 27,
+      "live_subdomain_count": 27,
+      "host_count": 20,
+      "service_count": 54,
+      "subdomain_names": [
+        "atlantis-gcp.prodexlabs.com",
+        "azure-demo.prodexlabs.com",
+        "cooked.prodexlabs.com",
+        "demo.prodexlabs.com",
+        "docs.prodexlabs.com",
+        "highcom.prodexlabs.com",
+        "l3h-ivs.prodexlabs.com",
+        "l3h-nh.prodexlabs.com",
+        "l3h-ss.prodexlabs.com",
+        "link.prodexlabs.com",
+        "littleleaffarms.prodexlabs.com",
+        "oidc-test.prodexlabs.com",
+        "panthalassa.prodexlabs.com",
+        "preview.prodexlabs.com",
+        "prod.prodexlabs.com",
+        "prodexlabs.com",
+        "prosalud-staging.prodexlabs.com",
+        "prosalud.prodexlabs.com",
+        "sandbox.prodexlabs.com",
+        "staging-gpt55.prodexlabs.com",
+        "staging.prodexlabs.com",
+        "time.prodexlabs.com",
+        "tour.prodexlabs.com",
+        "trial.prodexlabs.com",
+        "uat.prodexlabs.com",
+        "valorep.prodexlabs.com",
+        "www.prodexlabs.com"
+      ],
+      "ports_by_sub": {
+        "prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "atlantis-gcp.prodexlabs.com": {
+          "34.67.20.186": [
+            80,
+            443
+          ]
+        },
+        "azure-demo.prodexlabs.com": {
+          "150.171.109.73": [
+            80,
+            443
+          ]
+        },
+        "cooked.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "demo.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "docs.prodexlabs.com": {
+          "66.33.60.193": [
+            80,
+            443
+          ],
+          "76.76.21.241": [
+            80,
+            443
+          ]
+        },
+        "highcom.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ivs.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-nh.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ss.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "link.prodexlabs.com": {},
+        "littleleaffarms.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "oidc-test.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "panthalassa.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "preview.prodexlabs.com": {
+          "34.54.236.210": [
+            80,
+            443
+          ]
+        },
+        "prod.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "prosalud-staging.prodexlabs.com": {
+          "34.13.119.70": [
+            80,
+            443
+          ]
+        },
+        "prosalud.prodexlabs.com": {
+          "34.149.145.200": [
+            80,
+            443
+          ]
+        },
+        "sandbox.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "staging-gpt55.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
+          ]
+        },
+        "staging.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
           ]
         },
         "time.prodexlabs.com": {
