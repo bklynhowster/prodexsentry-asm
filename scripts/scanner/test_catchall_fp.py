@@ -59,109 +59,229 @@ def test_is_catchall_redirect_is_not_2xx_is_false():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Fix A — verify_secret_content (per-file secret markers; holes 4, 6)
-# A 200 is NOT a leak: the body must carry the real secret's shape.
+# Fix A — verify_secret_content (per-file markers + Content-Type gate)
+# A 200 is NOT a leak: the body must carry the real secret's shape AND not be
+# app-rendered HTML. Returns a verdict (VERIFY_SECRET / VERIFY_APP_HTML /
+# VERIFY_NO_MATCH) since the 2026-07-21 Content-Type discriminator (Obsidian
+# 152). A text/plain body carrying the marker is a real secret → VERIFY_SECRET.
 # ═══════════════════════════════════════════════════════════════════════
 
-def test_verify_env_two_assignment_lines_is_true():
-    assert L.verify_secret_content("/.env", "API_KEY=abc\nDB_URL=xyz") is True
+def test_verify_env_two_assignment_lines_is_secret():
+    assert L.verify_secret_content(
+        "/.env", "API_KEY=abc\nDB_URL=xyz", "text/plain") == L.VERIFY_SECRET
 
 
-def test_verify_env_html_body_is_false():
-    # The catch-all SPA index served for /.env — not a secret.
-    assert L.verify_secret_content("/.env", "<html>Loading…</html>") is False
+def test_verify_env_html_body_is_no_match():
+    # The catch-all SPA index served for /.env — marker fails on the HTML.
+    assert L.verify_secret_content(
+        "/.env", "<html>Loading…</html>", "text/html") == L.VERIFY_NO_MATCH
 
 
-def test_verify_env_single_line_is_false():
+def test_verify_env_single_line_is_no_match():
     # >= 2 assignment lines required (hole 4): a lone `foo=bar` false-positives
     # on random HTML/JS.
-    assert L.verify_secret_content("/.env", "single_var=lonely") is False
+    assert L.verify_secret_content("/.env", "single_var=lonely") == L.VERIFY_NO_MATCH
 
 
 def test_verify_env_ignores_comment_lines():
     # Comments don't count toward the 2-line floor, but two real vars do.
-    assert L.verify_secret_content("/.env", "# comment\nAPI_KEY=abc\nDB=1") is True
-
-
-def test_verify_git_config_core_marker_is_true():
     assert L.verify_secret_content(
-        "/.git/config", "[core]\n\trepositoryformatversion = 0") is True
+        "/.env", "# comment\nAPI_KEY=abc\nDB=1", "text/plain") == L.VERIFY_SECRET
 
 
-def test_verify_git_config_html_is_false():
-    assert L.verify_secret_content("/.git/config", "<html>nope</html>") is False
-
-
-def test_verify_git_head_ref_is_true():
-    assert L.verify_secret_content("/.git/HEAD", "ref: refs/heads/main") is True
-
-
-def test_verify_git_head_detached_sha_is_true():
+def test_verify_git_config_core_marker_is_secret():
     assert L.verify_secret_content(
-        "/.git/HEAD", "0123456789abcdef0123456789abcdef01234567\n") is True
+        "/.git/config", "[core]\n\trepositoryformatversion = 0",
+        "text/plain") == L.VERIFY_SECRET
 
 
-def test_verify_git_head_html_is_false():
-    assert L.verify_secret_content("/.git/HEAD", "<html>404</html>") is False
-
-
-def test_verify_wpconfig_bak_db_marker_is_true():
+def test_verify_git_config_html_is_no_match():
     assert L.verify_secret_content(
-        "/wp-config.php.bak", "<?php define('DB_PASSWORD', 'hunter2');") is True
+        "/.git/config", "<html>nope</html>", "text/html") == L.VERIFY_NO_MATCH
 
 
-def test_verify_wpconfig_bak_bare_php_is_false():
+def test_verify_git_head_ref_is_secret():
+    assert L.verify_secret_content(
+        "/.git/HEAD", "ref: refs/heads/main", "text/plain") == L.VERIFY_SECRET
+
+
+def test_verify_git_head_detached_sha_is_secret():
+    assert L.verify_secret_content(
+        "/.git/HEAD", "0123456789abcdef0123456789abcdef01234567\n",
+        "text/plain") == L.VERIFY_SECRET
+
+
+def test_verify_git_head_html_is_no_match():
+    assert L.verify_secret_content(
+        "/.git/HEAD", "<html>404</html>", "text/html") == L.VERIFY_NO_MATCH
+
+
+def test_verify_wpconfig_bak_db_marker_is_secret():
+    assert L.verify_secret_content(
+        "/wp-config.php.bak", "<?php define('DB_PASSWORD', 'hunter2');",
+        "text/plain") == L.VERIFY_SECRET
+
+
+def test_verify_wpconfig_bak_bare_php_is_no_match():
     # A bare <?php is table-stakes on any PHP host; require DB_* (hole 6).
-    assert L.verify_secret_content("/wp-config.php.bak", "<?php echo 1; ?>") is False
+    assert L.verify_secret_content(
+        "/wp-config.php.bak", "<?php echo 1; ?>") == L.VERIFY_NO_MATCH
 
 
 def test_verify_unknown_path_never_matches():
     # Path not in the marker table → cannot be a verified HIGH.
-    assert L.verify_secret_content("/robots.txt", "API_KEY=abc\nB=2") is False
+    assert L.verify_secret_content(
+        "/robots.txt", "API_KEY=abc\nB=2", "text/plain") == L.VERIFY_NO_MATCH
 
 
-def test_verify_empty_body_is_false():
-    assert L.verify_secret_content("/.env", "") is False
+def test_verify_empty_body_is_no_match():
+    assert L.verify_secret_content("/.env", "", "text/plain") == L.VERIFY_NO_MATCH
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Content-Type discriminator (4.7 rulings 2026-07-21, Obsidian 152)
+# _is_app_html two-signal gate + the verify APP_HTML / SECRET split. A real
+# dotfile secret is served text/plain — never as app HTML; a text/html /.env is
+# the SPA / error page, not a leak. TWO-SIGNAL so a misconfigured server serving
+# a real .env as text/html (non-HTML body) still fires HIGH.
+# ═══════════════════════════════════════════════════════════════════════
+
+# The observed FP body, reconstructed: an SPA index that (a) opens with an HTML
+# token and (b) carries >=2 line-start `word=` lines, so the OLD marker-only
+# gate wrongly fired HIGH. Regression fixture for tour.prodexlabs.com /.env
+# (confirmed FALSE POSITIVE by external probe, 2026-07-21).
+_FLAGSHIP_SPA_INDEX = (
+    "<!DOCTYPE html>\n"
+    "<html><head><script>\n"
+    "window_env=production\n"
+    "build_hash=9f3a21c\n"
+    "</script></head><body><div id=\"app\">PRODEX</div></body></html>"
+)
+
+
+def test_is_app_html_text_html_with_html_body_is_true():
+    assert L._is_app_html("text/html; charset=utf-8", "<!DOCTYPE html><html>…") is True
+
+
+def test_is_app_html_text_html_with_env_body_is_false():
+    # LOAD-BEARING (ruling 1 correction): a real .env served with a wrong
+    # text/html Content-Type has a non-HTML body shape → NOT app HTML → stays a
+    # secret. Deleting this test must never merge.
+    assert L._is_app_html("text/html", "API_KEY=abc\nDB_URL=xyz") is False
+
+
+def test_is_app_html_plain_ctype_is_false():
+    # Only app-markup content-types can be app HTML; text/plain never is.
+    assert L._is_app_html("text/plain", "<!DOCTYPE html>") is False
+
+
+def test_is_app_html_json_ctype_is_false():
+    # ruling 3: application/json is NEVER downgraded (firebase.json-style leaks).
+    assert L._is_app_html("application/json", "<!DOCTYPE html>") is False
+
+
+def test_is_app_html_none_ctype_is_false():
+    assert L._is_app_html(None, "<!DOCTYPE html>") is False
+
+
+def test_is_app_html_xhtml_is_true():
+    assert L._is_app_html("application/xhtml+xml", "<html><head></head></html>") is True
+
+
+def test_verify_env_text_html_spa_is_app_html():
+    # The exact observed FP: marker matches (>=2 word= lines) BUT text/html +
+    # HTML body → APP_HTML, so the caller downgrades to INFO instead of HIGH.
+    assert L.verify_secret_content(
+        "/.env", _FLAGSHIP_SPA_INDEX, "text/html; charset=utf-8") == L.VERIFY_APP_HTML
+
+
+def test_verify_env_misconfig_html_ctype_plain_body_stays_secret():
+    # LOAD-BEARING (ruling 1 + Q6): server misconfigured to serve the REAL .env
+    # as text/html; body is KEY=value (not HTML-shaped) → still a secret → HIGH.
+    assert L.verify_secret_content(
+        "/.env", "API_KEY=abc\nDB_URL=xyz", "text/html") == L.VERIFY_SECRET
+
+
+def test_verify_env_missing_ctype_is_secret():
+    # Server omits Content-Type entirely (None) → cannot be app HTML → secret.
+    assert L.verify_secret_content(
+        "/.env", "API_KEY=abc\nDB=1", None) == L.VERIFY_SECRET
+
+
+def test_verify_env_unknown_ctype_not_downgraded():
+    # ruling 3: an unusual Content-Type is NOT app-markup → not suppressed →
+    # stays a secret (emitted HIGH with the ctype noted in evidence).
+    assert L.verify_secret_content(
+        "/.env", "API_KEY=abc\nDB=1", "application/vnd.custom") == L.VERIFY_SECRET
+
+
+def test_flagship_spa_env_probe_regression():
+    """Regression for the observed tour.prodexlabs.com /.env FP (2026-07-21):
+    catch-all SPA served text/html for /.env. Must resolve APP_HTML (→ INFO),
+    never SECRET (→ HIGH)."""
+    assert L.verify_secret_content(
+        "/.env", _FLAGSHIP_SPA_INDEX, "text/html") == L.VERIFY_APP_HTML
+
+
+def test_is_known_secret_ctype_taxonomy():
+    # ruling 3 allow-list: known secret types + None are "known"; app-markup and
+    # unusual types are not (drives the unusual-ctype evidence note).
+    assert L._is_known_secret_ctype("text/plain") is True
+    assert L._is_known_secret_ctype("application/json") is True
+    assert L._is_known_secret_ctype(None) is True
+    assert L._is_known_secret_ctype("text/html") is False
+    assert L._is_known_secret_ctype("application/vnd.custom") is False
 
 
 # ═══════════════════════════════════════════════════════════════════════
 # Fix A — resolve_path_disposition (VERIFY-THEN-SUPPRESS ordering)
-# 4.7 BIGGEST RISK: this ordering getting inverted. Anchored here.
+# 4.7 BIGGEST RISK: this ordering getting inverted. Anchored here. Now takes a
+# verify verdict (VERIFY_SECRET / VERIFY_APP_HTML / VERIFY_NO_MATCH) instead of
+# a bool, since the Content-Type discriminator (Obsidian 152).
 # ═══════════════════════════════════════════════════════════════════════
 
-def test_resolve_disposition_high_marker_wins_over_catchall():
+def test_resolve_disposition_high_secret_wins_over_catchall():
     """THE anchor (4.7 biggest-risk / commit 59ad6a13). On a catch-all host
-    (matches_baseline=True) a verified HIGH secret STILL emits HIGH — verify
+    (matches_baseline=True) a CONFIRMED HIGH secret STILL emits HIGH — verify
     beats suppress. If this ever returns 'SUPPRESS', a real /.env is being
     eaten and the 59ad6a13 regression is back."""
-    assert L.resolve_path_disposition("HIGH", marker_match=True,
+    assert L.resolve_path_disposition("HIGH", L.VERIFY_SECRET,
                                       matches_baseline=True) == "HIGH"
 
 
-def test_resolve_disposition_high_marker_no_baseline_is_high():
-    assert L.resolve_path_disposition("HIGH", marker_match=True,
+def test_resolve_disposition_high_secret_no_baseline_is_high():
+    assert L.resolve_path_disposition("HIGH", L.VERIFY_SECRET,
                                       matches_baseline=False) == "HIGH"
 
 
+def test_resolve_disposition_high_app_html_is_info_even_on_catchall():
+    # ruling 5: marker matched but body is the app page → INFO_APP_HTML (an
+    # auditable downgrade), NOT silent SUPPRESS — even on a catch-all baseline.
+    assert L.resolve_path_disposition("HIGH", L.VERIFY_APP_HTML,
+                                      matches_baseline=True) == "INFO_APP_HTML"
+    assert L.resolve_path_disposition("HIGH", L.VERIFY_APP_HTML,
+                                      matches_baseline=False) == "INFO_APP_HTML"
+
+
 def test_resolve_disposition_high_no_marker_on_catchall_suppresses():
-    assert L.resolve_path_disposition("HIGH", marker_match=False,
+    assert L.resolve_path_disposition("HIGH", L.VERIFY_NO_MATCH,
                                       matches_baseline=True) == "SUPPRESS"
 
 
 def test_resolve_disposition_high_no_marker_no_baseline_is_info():
     # 2xx but body isn't the secret shape and isn't the catch-all page →
     # INFO for manual review, NOT HIGH.
-    assert L.resolve_path_disposition("HIGH", marker_match=False,
+    assert L.resolve_path_disposition("HIGH", L.VERIFY_NO_MATCH,
                                       matches_baseline=False) == "INFO"
 
 
 def test_resolve_disposition_nonhigh_on_catchall_suppresses():
-    assert L.resolve_path_disposition("MODERATE", marker_match=False,
+    assert L.resolve_path_disposition("MODERATE", L.VERIFY_NO_MATCH,
                                       matches_baseline=True) == "SUPPRESS"
 
 
 def test_resolve_disposition_nonhigh_no_baseline_emits():
-    assert L.resolve_path_disposition("INFO", marker_match=False,
+    assert L.resolve_path_disposition("INFO", L.VERIFY_NO_MATCH,
                                       matches_baseline=False) == "EMIT"
 
 
