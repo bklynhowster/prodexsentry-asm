@@ -85,12 +85,16 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import secrets
 import subprocess
 import sys
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 # ─── Reuse run_medium scaffolding wholesale ─────────────────────────────
 # Per spec "Reuse, don't reinvent." Helpers we share with the medium
@@ -124,6 +128,14 @@ from run_medium import (
 )
 from finding_history_writer import write_finding_history_for_scan_run
 from run_light import derive_hostname
+
+# Pure differential WAF-presence logic (4.7 Cloud Armor Q1–Q8). No I/O — the
+# collector below does the HTTP (benign baseline + payload GETs) and hands the
+# captured responses to the classifier. Same-dir module, imported like run_medium.
+from waf_differential import classify_waf_differential, INDEPENDENT_CLASSES
+# Pure safe proof-of-exploitation logic (4.7 rulings, Obsidian 150 §6; build-order #2.1).
+# No I/O — run_safe_exploit_phase does the HTTP + guardrails, hands captured responses here.
+import safe_exploit as se
 
 # Degradation primitives (SPEC_SCANNER_DEGRADATION_HARDENING.md).
 from degradation import (
@@ -1163,6 +1175,446 @@ def run_fwbbot_check_probe_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
 
 
 # ============================================================================
+# Active probe — differential WAF-presence (4.7 Cloud Armor Q1–Q8; presence-only)
+#
+# The GFE lesson carried forward: a "WAF present" claim is EARNED BY BEHAVIOUR —
+# >=2 of 3 INDEPENDENT payload classes (SQLi/XSS/LFI) blocked vs a clean benign
+# baseline — never by a hosting fingerprint, and it NEVER names a vendor (Q3/Q8:
+# not even Cloud Armor on a GCP asset). The pure decision lives in
+# waf_differential.classify_waf_differential; this collector only fires the HTTP
+# and shapes the responses for it. The INVERSE — a clean baseline that blocks
+# NOTHING — is the affirmative "no enforcing WAF" signal, emitted HIGH
+# (PCI DSS 6.4.2 / NIST SP 800-53 SC-7).
+#
+# Safety (4.7 Q4): GET-only, ONE random query param, a self-identifying
+# X-CS-Stack-ID-Probe header, detect-only (redirects read from headers, never
+# followed/executed), URL-encoded LFI, fixed pacing between requests. Per-asset
+# opt-in + egress + DRY-RUN default reuse the fwbbot rig verbatim (Q5); DRY-RUN
+# (ACTIVE_PROBE_LIVE unset) fires nothing. Persist-only artifact + one
+# active_probe_audit row, exactly like run_fwbbot_check_probe_phase.
+# ============================================================================
+
+_WAF_PROBE_HEADER = "X-CS-Stack-ID-Probe: 1"                   # Q4 self-identifying probe marker
+_WAF_PROBE_PACING_S = float(os.environ.get("WAF_PROBE_PACING_S", "5") or "5")   # Q4 pacing between requests
+_WAF_BENIGN_VALUE = "commandsentry-baseline"                   # benign baseline query value
+_WAF_TOKEN_CAP = 40                                            # bound the app-context token set
+# Q4 payloads: signature-tripping but INERT as GET query values. LFI is pre-percent-
+# encoded (sent as-is); sqli/xss are URL-encoded at send time. Fixed (reproducible).
+_WAF_PAYLOADS = (
+    ("sqli", "1' OR '1'='1"),
+    ("xss",  "<script>alert(1)</script>"),
+    ("lfi",  "..%2f..%2f..%2f..%2fetc%2fpasswd"),
+)
+_WAF_LFI_PREENCODED = {"lfi"}                                  # already %-encoded per Q4 — don't double-encode
+
+
+def _read_text_safe(p: Path) -> str:
+    """Read a probe body file, tolerant of binary / missing (never fatal)."""
+    try:
+        return p.read_text(errors="replace")
+    except Exception:
+        return ""
+
+
+def _waf_cookie_names(raw_headers: str) -> set:
+    """Set of Set-Cookie cookie-NAMES (lowercased) from the header dump. App sessions set
+    named cookies; a generic edge deny rarely re-sets the app's cookies, so an overlap with
+    the baseline's cookies marks an app-rendered deny — NOT an edge block (Q2 gate 5)."""
+    names = set()
+    for line in (raw_headers or "").splitlines():
+        s = line.strip()
+        if s.lower().startswith("set-cookie:"):
+            name = s.split(":", 1)[1].strip().split("=", 1)[0].strip().lower()
+            if name:
+                names.add(name)
+    return names
+
+
+def _waf_body_tokens(body: str) -> set:
+    """A bounded app-context fingerprint of a response body: the <title> words (len>=4) plus
+    a capped set of CSS class names. These recur on the app's OWN error page but not on a
+    generic edge deny, so an intersection with the baseline's tokens is the tell that a deny
+    was app-rendered, not edge-blocked (Q2 gate 4). Prefixed (t:/c:) so a title word and a
+    class of the same spelling stay distinct."""
+    b = (body or "")[:20000].lower()
+    toks: set = set()
+    mt = re.search(r"<title[^>]*>(.*?)</title>", b, re.S)
+    if mt:
+        for w in re.findall(r"[a-z0-9]{4,}", mt.group(1)):
+            toks.add("t:" + w)
+    for attr in re.findall(r'class="([^"]{1,160})"', b):
+        for c in attr.split():
+            if len(c) >= 4:
+                toks.add("c:" + c)
+                if len(toks) >= _WAF_TOKEN_CAP:
+                    return toks
+    return toks
+
+
+def _parse_waf_probe(stdout: str, body: str) -> dict:
+    """One probe response -> the classifier's shape {status, size, tokens, headers}. status
+    and size come from curl's OWN -w sentinel (CS_STATUS/CS_SIZE) — ground truth, not a header
+    re-parse. headers = app Set-Cookie names; tokens = app-context body fingerprints."""
+    status, size = 0, len(body or "")
+    m = re.search(r"CS_STATUS:(\d+)\s+CS_SIZE:(\d+)", stdout or "")
+    if m:
+        status, size = int(m.group(1)), int(m.group(2))
+    return {"status": status, "size": size,
+            "tokens": _waf_body_tokens(body or ""),
+            "headers": _waf_cookie_names(stdout or "")}
+
+
+def _waf_probe_curl_args(hostname: str, param: str, value: str, preencoded: bool,
+                         body_sink: str, egress_mode: str, interface: str) -> list[str]:
+    """Pure argv builder (unit-tested). 4.7 Q4 — ONE detect-only GET with the probe value in a
+    single query param + the self-identifying probe header; no browser Accept*/cookie/Referer;
+    redirect NOT followed (no -L — we read the edge deny, never execute it). Headers dumped to
+    stdout (-D -), body to `body_sink` (-o), status+size via a -w sentinel. sqli/xss are
+    URL-encoded here; a pre-encoded value (LFI) is sent as-is (Q4). 'direct' egress binds curl
+    to `interface` to bypass the VPN tunnel."""
+    qv = value if preencoded else quote(value, safe="")
+    args = ["curl", "-sSk", "-o", body_sink, "-D", "-",
+            "-w", "\nCS_STATUS:%{http_code} CS_SIZE:%{size_download}",
+            "--max-time", "15", "-A", _PROBE_BOT_UA,
+            "-H", "Accept:", "-H", "Accept-Language:", "-H", "Accept-Encoding:",
+            "-H", _WAF_PROBE_HEADER]
+    if egress_mode == "direct" and interface:
+        args += ["--interface", interface]
+    args.append(f"https://{hostname}/?{param}={qv}")
+    return args
+
+
+def _fire_waf_differential_probe(ctx: HeavyScanContext, work_dir: Path,
+                                 egress: str) -> tuple[dict, list, dict]:
+    """Fire the benign baseline + one GET per independent payload class through the asset's
+    egress, pace-limited (Q4). Returns (baseline, payloads, details) — baseline/payloads are
+    classifier-shaped dicts. Detect-only: a redirect is captured from headers, never followed."""
+    param = "q" + secrets.token_hex(3)             # Q4 per-run random param name
+    base_sink = work_dir / "waf_probe_baseline.body"
+    _rc, out, _ = run_cmd(
+        _waf_probe_curl_args(ctx.hostname, param, _WAF_BENIGN_VALUE, False,
+                             str(base_sink), egress, _PROBE_EGRESS_INTERFACE), timeout=25)
+    baseline = _parse_waf_probe(out, _read_text_safe(base_sink))
+    fired = [{"cls": "benign", "status": baseline["status"], "size": baseline["size"]}]
+    payloads = []
+    for cls, val in _WAF_PAYLOADS:
+        time.sleep(_WAF_PROBE_PACING_S)            # Q4 pacing between requests
+        sink = work_dir / f"waf_probe_{cls}.body"
+        _rc, pout, _ = run_cmd(
+            _waf_probe_curl_args(ctx.hostname, param, val, cls in _WAF_LFI_PREENCODED,
+                                 str(sink), egress, _PROBE_EGRESS_INTERFACE), timeout=25)
+        resp = _parse_waf_probe(pout, _read_text_safe(sink))
+        resp["cls"] = cls
+        payloads.append(resp)
+        fired.append({"cls": cls, "status": resp["status"], "size": resp["size"]})
+    details = {"param": param, "egress_mode": egress,
+               "egress_interface": _PROBE_EGRESS_INTERFACE or None,
+               "pacing_s": _WAF_PROBE_PACING_S, "fired": fired}
+    return baseline, payloads, details
+
+
+def _no_waf_proven(baseline: dict, verdict: dict) -> bool:
+    """Affirmative 'no enforcing WAF' gate. True ONLY when the benign baseline was clean
+    (2xx/3xx) AND the classifier blocked ZERO classes — the one False-verdict shape that proves
+    ABSENCE. A non-2xx baseline is inconclusive (dead origin) and a single-class block is
+    ambiguous (app input-validator); NEITHER earns the finding (the empirical bar)."""
+    if verdict.get("waf_present"):
+        return False
+    if not (200 <= int(baseline.get("status") or 0) < 400):
+        return False
+    return len(verdict.get("blocked") or []) == 0
+
+
+def _maybe_emit_no_waf_finding(ctx: HeavyScanContext, baseline: dict, verdict: dict) -> None:
+    """Emit the affirmative 'no enforcing WAF in front of a live app' HIGH finding when proven
+    (PCI DSS 6.4.2 / NIST SP 800-53 SC-7). The positive 'Behind a WAF' verdict is device-class
+    metadata (persisted artifact); the ABSENCE of a compensating control is a security finding
+    in its own right. source='commandsentry_heavy'; presence-only (names no product)."""
+    if not _no_waf_proven(baseline, verdict):
+        return
+    now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ctx.findings.append(FindingEvent(
+        finding_id=stable_finding_id(ctx.asset_id, "commandsentry_heavy",
+                                     "waf-absent-differential", ctx.hostname),
+        asset_id=ctx.asset_id, scan_id=ctx.scan_run_id, source="commandsentry_heavy",
+        title="No enforcing WAF in front of live application",
+        severity="HIGH", category="config", observed_at=now_iso, matched_at=ctx.hostname,
+        description=(
+            f"Differential probe: a benign baseline returned HTTP {baseline.get('status')} and "
+            f"all {len(INDEPENDENT_CLASSES)} independent attack-payload classes (SQLi, XSS, LFI) "
+            "passed through to the origin unblocked — no payload-inspecting WAF is enforcing in "
+            "front of this live application. A WAF is a required compensating control (PCI DSS "
+            "6.4.2) and boundary protection (NIST SP 800-53 SC-7); its absence leaves the origin "
+            "directly exposed to application-layer attacks. Presence-only method: this asserts "
+            "the ABSENCE of blocking and names no product."),
+        subdomain=ctx.hostname, port=TESTSSL_PORT, protocol="https",
+    ))
+    log("  waf_differential probe: NO ENFORCING WAF proven -> HIGH finding (PCI 6.4.2 / SC-7)")
+
+
+def run_waf_differential_probe_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
+    """Differential WAF-presence active probe (4.7 Cloud Armor Q1–Q8). Same rig as
+    run_fwbbot_check_probe_phase: per-asset opt-in (assets.active_probe_authorized) + per-asset
+    egress, DRY-RUN default (ACTIVE_PROBE_LIVE unset fires nothing), persist-only
+    stack_id_waf_differential artifact + one active_probe_audit row. Presence-only — NEVER names
+    a vendor (Q3/Q8). On a clean baseline that blocks NOTHING, emits the affirmative 'no
+    enforcing WAF' HIGH finding (PCI 6.4.2 / SC-7). gather_observations turning a POSITIVE
+    presence verdict into the waf_present_differential device-class observation is the follow-up."""
+    authorized, egress, egress_reason = _read_active_probe_policy(ctx)
+    fire = authorized and _ACTIVE_PROBE_LIVE
+    waf_present = None
+    blocked: list = []
+    reason = ""
+    details: dict = {"live_flag": _ACTIVE_PROBE_LIVE, "egress_mode": egress}
+    if egress_reason:
+        details["egress_reason"] = egress_reason[:200]
+    if not authorized:
+        log("  waf_differential probe: SKIP — asset not active_probe_authorized (opt-in false / kill switch)")
+    elif not _ACTIVE_PROBE_LIVE:
+        log(f"  waf_differential probe: authorized but DRY-RUN (ACTIVE_PROBE_LIVE unset), egress={egress} "
+            f"— would fire baseline+{len(_WAF_PAYLOADS)} payload classes, firing nothing")
+    else:
+        baseline, payloads, pd = _fire_waf_differential_probe(ctx, work_dir, egress)
+        details.update(pd)
+        verdict = classify_waf_differential(baseline, payloads)
+        waf_present, blocked, reason = verdict["waf_present"], verdict["blocked"], verdict["reason"]
+        details.update({"baseline_status": baseline["status"], "baseline_size": baseline["size"],
+                        "blocked": blocked, "classify_reason": reason,
+                        "evidence_class": verdict["evidence_class"]})
+        log(f"  waf_differential probe: LIVE egress={egress} — waf_present={waf_present} "
+            f"blocked={blocked} ({reason})")
+        _maybe_emit_no_waf_finding(ctx, baseline, verdict)
+    v = {"schema": 1, "probe_class": "waf_differential", "authorized": authorized,
+         "dry_run": not fire,
+         "observed": (None if not fire else True),
+         "corroborated": (None if not fire else bool(waf_present)),
+         "details": details}
+    # persist-only stack-id artifact (parity with fwbbot) — gather_observations reads
+    # waf_present_differential from here (follow-up wiring). NULL until a live run classifies.
+    ctx.artifacts.append(("stack_id_waf_differential", "json", json.dumps({
+        "schema": 1, "probe_class": "waf_differential",
+        "waf_present_differential": (None if waf_present is None else bool(waf_present)),
+        "blocked": blocked, "reason": reason, "details": details})))
+    _write_active_probe_audit(ctx, v)
+
+
+# ============================================================================
+# Active probe — safe proof-of-exploitation (4.7 rulings, Obsidian 150 §6; #2.1)
+#
+# Per EXISTING finding, attempt a NON-DESTRUCTIVE proof of exploitability and STOP at
+# the proof (never the damage). Pure per-class verdicts live in safe_exploit.py; this
+# collector does the HTTP + the guardrails: a SEPARATE per-asset gate
+# (assets.exploit_authorized, distinct from active_probe_authorized — 4.7 Q5) AND a
+# SEPARATE EXPLOIT_LIVE env, owned-only, DRY-RUN default (fires NOTHING until BOTH are
+# set), the rate ceiling (Q5), the two-tier kill-switch (Q8), capture-time redaction
+# (A), attribution headers (B), and one exploit_attempts row per attempt (Q3).
+#
+# #2.1 wires ONE class live — sensitive-path (finding-driven, needs no param) — scaffolding
+# general for all five. Finding-driven + EXISTING-findings-only keeps the
+# exploit_attempts.finding_id FK satisfied (the finding row already exists); we prove
+# weaknesses the scanner already recorded, we never invent one. SSRF/redirect/CORS/traversal
+# come online as the finding->param mapping lands; SQLi/XSS are #2.2.
+# ============================================================================
+
+_EXPLOIT_LIVE = os.environ.get("EXPLOIT_LIVE", "").strip().lower() in ("1", "true", "yes")
+_EXPLOIT_RATE_CEILING = int(os.environ.get("EXPLOIT_RATE_CEILING", "10") or "10")   # 4.7 Q5: attempts/asset/24h
+_EXPLOIT_CONTACT = os.environ.get("EXPLOIT_CONTACT", "").strip()   # 4.7 B: instance-appropriate (Command=Dave, Prodex=Howie)
+
+
+def _read_exploit_policy(ctx: HeavyScanContext) -> tuple[bool, str]:
+    """Per-asset exploit gate (4.7 Q5) — SEPARATE from active_probe_authorized. Returns
+    (authorized, egress); reuses active_probe_egress for the vantage. Fail-closed on any error."""
+    if not ctx.dsn:
+        return False, _ACTIVE_PROBE_EGRESS
+    try:
+        psycopg, dict_row, _ = _import_deps()
+        with psycopg.connect(ctx.dsn, autocommit=True, connect_timeout=10) as c:
+            with c.cursor(row_factory=dict_row) as cur:
+                cur.execute("select exploit_authorized, active_probe_egress "
+                            "from public.assets where asset_id=%s", (ctx.asset_id,))
+                r = cur.fetchone()
+        if not r:
+            return False, _ACTIVE_PROBE_EGRESS
+        egress = (r.get("active_probe_egress") or _ACTIVE_PROBE_EGRESS).strip().lower()
+        return bool(r.get("exploit_authorized")), (egress if egress in ("vpn", "direct") else _ACTIVE_PROBE_EGRESS)
+    except Exception as e:
+        log(f"  safe-exploit: policy read failed ({e}) — treating as unauthorized")
+        return False, _ACTIVE_PROBE_EGRESS
+
+
+def _exploit_recent_count(ctx: HeavyScanContext) -> int:
+    """4.7 Q5 rate ceiling: exploit attempts against this asset's findings in the last 24h.
+    Fail-closed (return the ceiling) if we can't count, so an unknown count never lets a probe fire."""
+    if not ctx.dsn:
+        return 0
+    try:
+        psycopg, _dict_row, _ = _import_deps()
+        with psycopg.connect(ctx.dsn, autocommit=True, connect_timeout=10) as c:
+            with c.cursor() as cur:
+                cur.execute("select count(*) from public.exploit_attempts "
+                            "where attempted_at > now() - interval '24 hours' "
+                            "and finding_id in (select finding_id from public.findings where asset_id=%s)",
+                            (ctx.asset_id,))
+                return int((cur.fetchone() or [0])[0])
+    except Exception as e:
+        log(f"  safe-exploit: rate-count read failed ({e}) — treating as ceiling reached (fail-closed)")
+        return _EXPLOIT_RATE_CEILING
+
+
+def _select_exploit_findings(ctx: HeavyScanContext) -> list:
+    """Existing OPEN findings for this asset (finding-driven, existing-only -> FK-safe), each with
+    its latest finding_history.matched_at, for the safe_exploit selector. Open set is the canonical
+    ('detected','confirmed','open','regressed') (schema.sql / 20260528c). Class-agnostic read;
+    #2.1 filters to sensitive-path downstream."""
+    if not ctx.dsn:
+        return []
+    try:
+        psycopg, dict_row, _ = _import_deps()
+        with psycopg.connect(ctx.dsn, autocommit=True, connect_timeout=10) as c:
+            with c.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    "select f.finding_id, f.title, "
+                    "  (select fh.matched_at from public.finding_history fh "
+                    "     where fh.finding_id = f.finding_id and fh.matched_at is not null "
+                    "     order by fh.observed_at desc nulls last limit 1) as matched_at "
+                    "from public.findings f "
+                    "where f.asset_id = %s "
+                    "  and f.current_status in ('detected','confirmed','open','regressed')",
+                    (ctx.asset_id,))
+                return [dict(r) for r in (cur.fetchall() or [])]
+    except Exception as e:
+        log(f"  safe-exploit: finding read failed ({e}) — nothing to attempt")
+        return []
+
+
+def _write_exploit_attempt(ctx: HeavyScanContext, finding_id: str, exploit_class: str,
+                           status: str, reason: str, poc, probe_shape: dict) -> None:
+    """One exploit_attempts row per attempt (4.7 Q3). Non-fatal on any error. `poc` is already
+    redacted (4.7 A — capture-time); `probe_shape` carries NO raw body (only class/path/probe-id)."""
+    if not ctx.dsn:
+        return
+    try:
+        psycopg, _dict_row, _ = _import_deps()
+        with psycopg.connect(ctx.dsn, autocommit=True, connect_timeout=10) as c:
+            with c.cursor() as cur:
+                cur.execute(
+                    "insert into public.exploit_attempts (finding_id, scan_run_id, exploit_class, "
+                    "status, status_reason, poc, egress_ip, probe_shape) "
+                    "values (%s,%s,%s,%s,%s,%s::jsonb,%s,%s::jsonb)",
+                    (finding_id, ctx.scan_run_id, exploit_class, status, (reason or "")[:500],
+                     json.dumps(poc) if poc is not None else None,
+                     ctx.egress_ip_initial, json.dumps(probe_shape or {})))
+    except Exception as e:
+        log(f"  safe-exploit: attempt write failed ({e}) — non-fatal")
+
+
+def _fire_exploit_get(ctx: HeavyScanContext, work_dir: Path, url: str, probe_id: str, egress: str) -> dict:
+    """ONE detect-only GET, attribution-headed (4.7 B), body captured for classification. Returns the
+    safe_exploit captured shape {status, headers, body, time, size}. 4.7 A — the body is REDACTED at
+    capture; the raw body is never persisted (only classify's redacted PoC reaches the DB)."""
+    sink = work_dir / f"exploit_{probe_id}.body"
+    args = (["curl", "-sSk", "-o", str(sink), "-D", "-",
+             "-w", "\nCS_STATUS:%{http_code} CS_SIZE:%{size_download} CS_TIME:%{time_total}",
+             "--max-time", "15", "-A", _PROBE_BOT_UA]
+            + se.exploit_headers(probe_id, _EXPLOIT_CONTACT))
+    if egress == "direct" and _PROBE_EGRESS_INTERFACE:
+        args += ["--interface", _PROBE_EGRESS_INTERFACE]
+    args.append(url)
+    _rc, out, _ = run_cmd(args, timeout=25)
+    body_raw = ""
+    try:
+        body_raw = sink.read_text(errors="replace")
+    except Exception:
+        pass
+    status, size, ttime = 0, len(body_raw), 0.0
+    m = re.search(r"CS_STATUS:(\d+) CS_SIZE:(\d+) CS_TIME:([\d.]+)", out or "")
+    if m:
+        status, size, ttime = int(m.group(1)), int(m.group(2)), float(m.group(3))
+    headers: dict = {}
+    for line in (out or "").splitlines():
+        s = line.strip()
+        if not s or s.upper().startswith("HTTP/") or s.startswith("CS_STATUS"):
+            continue
+        if ":" in s:
+            k, _sep, val = s.partition(":")
+            headers[k.strip().lower()] = val.strip()
+    return {"status": status, "headers": headers, "body": se.redact(body_raw), "time": ttime, "size": size}
+
+
+def _run_sensitive_path_live(ctx: HeavyScanContext, work_dir: Path, targets: list,
+                             egress: str, recent: int, details: dict) -> None:
+    """LIVE sensitive-path proof loop with the 4.7 Q8 two-tier kill-switch + Q5 rate budget.
+    GLOBAL abort (whole phase) on a dead/unhealthy baseline, any 5xx, oversized body, or >10s."""
+    # dead-baseline global trigger (Q8): if the benign root is unhealthy, prove nothing.
+    base = _fire_exploit_get(ctx, work_dir, f"https://{ctx.hostname}/", "cse-baseline", egress)
+    ga = se.global_abort_reason(base) or (None if 0 < base["status"] < 500 else f"baseline status {base['status']}")
+    if ga:
+        log(f"  safe-exploit: GLOBAL ABORT before firing — baseline unhealthy ({ga})")
+        details["global_abort"] = f"baseline: {ga}"
+        return
+    budget = max(0, _EXPLOIT_RATE_CEILING - recent)
+    fired = proven = blocked = 0
+    for t in targets:
+        if fired >= budget:
+            log(f"  safe-exploit: remaining 24h budget exhausted ({budget}) — deferring rest to next scan")
+            break
+        probe_id = "cse-" + secrets.token_hex(6)
+        url = t["url"] or f"https://{ctx.hostname}{t['path']}"
+        probe = _fire_exploit_get(ctx, work_dir, url, probe_id, egress)
+        # 4.7 Q8 GLOBAL kill-switch: 5xx / oversized / >10s on the target -> abort the WHOLE phase.
+        ga = se.global_abort_reason(probe) or (f"response time {probe['time']}s > 10s" if probe["time"] > 10.0 else None)
+        if ga:
+            log(f"  safe-exploit: GLOBAL ABORT — {ga}")
+            details["global_abort"] = ga
+            _write_exploit_attempt(ctx, t["finding_id"], "sensitive-path", se.NOT_ATTEMPTED,
+                                   f"global abort: {ga}", None, {"path": t["path"], "probe_id": probe_id})
+            break
+        bogus = _fire_exploit_get(ctx, work_dir,
+                                  f"https://{ctx.hostname}/{secrets.token_hex(8)}.cs-nope",
+                                  probe_id + "b", egress)
+        verdict = se.classify("sensitive-path", {"probe": probe, "bogus": bogus, "path": t["path"]})
+        _write_exploit_attempt(ctx, t["finding_id"], "sensitive-path", verdict["exploit_status"],
+                               verdict["reason"], verdict["poc"],
+                               {"path": t["path"], "url": url, "probe_id": probe_id})
+        fired += 1
+        proven += verdict["exploit_status"] == se.PROVEN
+        blocked += verdict["exploit_status"] == se.BLOCKED
+        time.sleep(_WAF_PROBE_PACING_S)     # reuse the presence-probe pacing between attempts
+    details.update({"fired": fired, "proven": proven, "attempted_blocked": blocked})
+    log(f"  safe-exploit: LIVE sensitive-path — fired={fired} proven={proven} attempted_blocked={blocked}")
+
+
+def run_safe_exploit_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
+    """Safe proof-of-exploitation phase (4.7 rulings, Obsidian 150 §6; #2.1). Gated on
+    assets.exploit_authorized (SEPARATE from active_probe_authorized, Q5) AND EXPLOIT_LIVE
+    (SEPARATE env), owned-only, DRY-RUN default (fires nothing until BOTH). #2.1 attempts
+    sensitive-path only (finding-driven, existing-findings-only -> FK-safe). Persist-only:
+    exploit_attempts rows + a summary artifact; two-tier kill-switch (Q8); rate ceiling (Q5);
+    capture-time redaction (A); attribution headers (B)."""
+    authorized, egress = _read_exploit_policy(ctx)
+    fire = authorized and _EXPLOIT_LIVE
+    targets = se.select_sensitive_path_targets(_select_exploit_findings(ctx))   # #2.1: sensitive-path only
+    details: dict = {"live_flag": _EXPLOIT_LIVE, "egress": egress, "candidates": len(targets)}
+
+    if not authorized:
+        log("  safe-exploit: SKIP — asset not exploit_authorized (opt-in false / kill switch)")
+    elif not _EXPLOIT_LIVE:
+        log(f"  safe-exploit: authorized but DRY-RUN (EXPLOIT_LIVE unset), egress={egress} — "
+            f"would attempt {len(targets)} sensitive-path finding(s), firing nothing")
+    else:
+        recent = _exploit_recent_count(ctx)
+        if se.rate_ceiling_exceeded(recent, _EXPLOIT_RATE_CEILING):
+            log(f"  safe-exploit: rate ceiling reached ({recent}/{_EXPLOIT_RATE_CEILING} in 24h) — deferring")
+            details["deferred_rate_ceiling"] = recent
+        else:
+            _run_sensitive_path_live(ctx, work_dir, targets, egress, recent, details)
+
+    ctx.artifacts.append(("exploit_phase_summary", "json", json.dumps({
+        "schema": 1, "class_increment": "2.1", "authorized": authorized,
+        "dry_run": not fire, "details": details})))
+
+
+# ============================================================================
 # Heavy Phase 1 — net depth (naabu port discovery + fingerprintx service ID)
 # Spec: HEAVY_PHASE1_NETDEPTH_SPEC v2 + HEAVY_PHASE1_BUILD_DELTA (4.7 D1-D5).
 #
@@ -1718,6 +2170,18 @@ def run(descriptor_path: str, dsn: str) -> int:
         # (opt-in + kill switch); persist-only + audited to active_probe_audit.
         # gather_observations reads the artifact only in Phase D (with the gen-4 reset).
         run_fwbbot_check_probe_phase(ctx, work_dir)
+
+        # Active-probe tier — differential WAF-presence probe (4.7 Cloud Armor Q1–Q6).
+        # Same rig: DRY-RUN default, per-asset opt-in + egress, persist-only + audited.
+        # Benign baseline vs >=2 independent payload classes -> "Behind a WAF" (presence
+        # only). gather_observations wiring (obs waf_present_differential) is the follow-up.
+        run_waf_differential_probe_phase(ctx, work_dir)
+
+        # Active-probe tier — safe proof-of-exploitation (4.7 rulings, Obsidian 150 §6; #2.1).
+        # SEPARATE exploit_authorized gate + EXPLOIT_LIVE env, owned-only, DRY-RUN default (fires
+        # nothing). Finding-driven (existing findings only). Persist-only exploit_attempts +
+        # summary artifact; two-tier kill-switch, rate ceiling, capture-time redaction, attribution.
+        run_safe_exploit_phase(ctx, work_dir)
 
         # Phase 2 — naabu + fingerprintx net depth (Heavy Phase 1). PAIR with
         # all-or-nothing tools_run credit (4.7 D1): both names enter tools_run
