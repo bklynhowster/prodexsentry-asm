@@ -3341,13 +3341,13 @@ UPSERT_FINDING_SQL = """
 INSERT INTO public.findings (
     finding_id, asset_id, title, severity, category, description,
     cwe, "references", current_status, first_detected_at,
-    last_observed_at, source, tags, normalized_key,
+    last_observed_at, source, tags, normalized_key, params,
     validation_status, scanner_version, validated_at,
     first_detected_scan, last_seen_scan_run
 )
 VALUES (%(finding_id)s, %(asset_id)s, %(title)s, %(severity)s, %(category)s,
         %(description)s, %(cwe)s, %(references)s, 'detected',
-        now(), now(), %(source)s, %(tags)s, %(normalized_key)s,
+        now(), now(), %(source)s, %(tags)s, %(normalized_key)s, %(params)s::jsonb,
         %(validation_status)s, %(scanner_version)s,
         CASE WHEN %(validation_status)s = 'validated' THEN now() ELSE NULL END,
         %(scan_run_id)s, %(scan_run_id)s)
@@ -3357,6 +3357,10 @@ ON CONFLICT (finding_id) DO UPDATE SET
     description       = EXCLUDED.description,
     -- 4.7 I2/I5 — new key wins over NULL, existing non-null preserved.
     normalized_key    = COALESCE(EXCLUDED.normalized_key, findings.normalized_key),
+    -- #2.05 (Obsidian 160) — per-class target context. New non-empty wins; an empty '{}'
+    -- re-emit preserves any existing params, mirroring the normalized_key rule directly above.
+    params            = CASE WHEN EXCLUDED.params = '{}'::jsonb
+                             THEN findings.params ELSE EXCLUDED.params END,
     current_status = CASE
       WHEN findings.current_status IN (
              'remediated', 'validated_remediated',
@@ -3590,6 +3594,9 @@ def write_findings_and_artifacts(conn, ctx: ScanContext, Json) -> tuple[int, int
                 "source": f.source or f"commandsentry_{ctx.intensity}",
                 "tags": f.tags,
                 "normalized_key": f.normalized_key,   # 4.7 I2/I5 class-collapse key
+                # #2.05 (Obsidian 160) — per-class target context. Medium findings carry no
+                # params; default '{}' matches the findings.params column default.
+                "params": Json(getattr(f, "params", None) or {}),
                 "validation_status": validation_status,
                 "scanner_version": scanner_version,
                 # Bug D fix (paired with trust-layer Part 4) — populate
