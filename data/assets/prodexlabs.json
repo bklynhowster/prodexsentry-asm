@@ -10,10 +10,10 @@
     "discovered_via": "manual"
   },
   "scan": {
-    "id": "scan_2026-07-24T19:25:32Z_e1f865bd",
-    "started_at": "2026-07-24T19:25:32Z",
-    "completed_at": "2026-07-24T19:32:41Z",
-    "duration_seconds": 429,
+    "id": "scan_2026-07-24T19:33:54Z_377cc0f8",
+    "started_at": "2026-07-24T19:33:54Z",
+    "completed_at": "2026-07-24T19:41:00Z",
+    "duration_seconds": 426,
     "engine_version": "3.0.0",
     "scanner_origin": "github-actions-ubuntu-azure",
     "tools_run": [
@@ -43,8 +43,8 @@
       "alive": true,
       "is_root": true,
       "discovered_via": "dnsx",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -110,9 +110,9 @@
           "ns-cloud-d4.googledomains.com"
         ],
         "txt": [
-          "v=spf1 include:_spf.google.com ~all",
+          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d",
           "MS=ms22662979",
-          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d"
+          "v=spf1 include:_spf.google.com ~all"
         ],
         "spf": "v=spf1 include:_spf.google.com ~all",
         "dnssec": false
@@ -179,8 +179,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:41Z",
-      "last_seen": "2026-07-24T19:32:41Z",
+      "first_discovered": "2026-07-24T19:41:00Z",
+      "last_seen": "2026-07-24T19:41:00Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -280,8 +280,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:42Z",
-      "last_seen": "2026-07-24T19:32:42Z",
+      "first_discovered": "2026-07-24T19:41:00Z",
+      "last_seen": "2026-07-24T19:41:00Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -301,7 +301,17 @@
       },
       "hosts": [
         {
-          "ip": "13.107.226.57",
+          "ip": "150.171.110.210",
+          "asn": "AS8075",
+          "asn_org": "Microsoft Corporation",
+          "country": "US",
+          "region": "Illinois",
+          "city": "Chicago",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "150.171.110.211",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -311,7 +321,7 @@
           "is_private": false
         },
         {
-          "ip": "13.107.253.57",
+          "ip": "2603:1061:14:1d2::1",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -321,17 +331,7 @@
           "is_private": false
         },
         {
-          "ip": "150.171.109.229",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Colorado",
-          "city": "Denver",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "2603:1061:14:e0::1",
+          "ip": "2603:1061:14:b5::1",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -343,7 +343,7 @@
       ],
       "services": [
         {
-          "ip": "150.171.109.229",
+          "ip": "150.171.110.211",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -351,7 +351,7 @@
           "tls": false
         },
         {
-          "ip": "150.171.109.229",
+          "ip": "150.171.110.211",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -372,11 +372,10 @@
       ],
       "dns": {
         "a": [
-          "13.107.253.57",
-          "13.107.226.57"
+          "150.171.110.210"
         ],
         "aaaa": [
-          "2603:1061:14:e0::1"
+          "2603:1061:14:1d2::1"
         ],
         "cname": "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net",
         "mx": [],
@@ -412,8 +411,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:42Z",
-      "last_seen": "2026-07-24T19:32:42Z",
+      "first_discovered": "2026-07-24T19:41:00Z",
+      "last_seen": "2026-07-24T19:41:00Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -548,8 +547,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:42Z",
-      "last_seen": "2026-07-24T19:32:42Z",
+      "first_discovered": "2026-07-24T19:41:00Z",
+      "last_seen": "2026-07-24T19:41:00Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -662,8 +661,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:42Z",
-      "last_seen": "2026-07-24T19:32:42Z",
+      "first_discovered": "2026-07-24T19:41:00Z",
+      "last_seen": "2026-07-24T19:41:00Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -683,7 +682,7 @@
       },
       "hosts": [
         {
-          "ip": "66.33.60.35",
+          "ip": "66.33.60.129",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -703,7 +702,7 @@
           "is_private": false
         },
         {
-          "ip": "76.76.21.123",
+          "ip": "76.76.21.22",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -725,7 +724,7 @@
       ],
       "services": [
         {
-          "ip": "66.33.60.35",
+          "ip": "66.33.60.67",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -733,7 +732,7 @@
           "tls": false
         },
         {
-          "ip": "66.33.60.35",
+          "ip": "66.33.60.67",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -752,7 +751,7 @@
           }
         },
         {
-          "ip": "76.76.21.123",
+          "ip": "76.76.21.98",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -760,7 +759,7 @@
           "tls": false
         },
         {
-          "ip": "76.76.21.123",
+          "ip": "76.76.21.98",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -781,8 +780,8 @@
       ],
       "dns": {
         "a": [
-          "66.33.60.67",
-          "76.76.21.98"
+          "66.33.60.129",
+          "76.76.21.22"
         ],
         "aaaa": [],
         "cname": "cname.mintlify-dns.com",
@@ -824,8 +823,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -938,8 +937,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1052,8 +1051,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1166,8 +1165,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1280,8 +1279,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1359,8 +1358,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1473,8 +1472,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1587,8 +1586,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1701,8 +1700,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1806,8 +1805,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1920,8 +1919,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2034,8 +2033,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2153,8 +2152,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2267,8 +2266,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2381,8 +2380,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2495,8 +2494,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2609,8 +2608,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:01Z",
+      "last_seen": "2026-07-24T19:41:01Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2728,8 +2727,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:02Z",
+      "last_seen": "2026-07-24T19:41:02Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2842,8 +2841,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:43Z",
-      "last_seen": "2026-07-24T19:32:43Z",
+      "first_discovered": "2026-07-24T19:41:02Z",
+      "last_seen": "2026-07-24T19:41:02Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2956,8 +2955,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:44Z",
-      "last_seen": "2026-07-24T19:32:44Z",
+      "first_discovered": "2026-07-24T19:41:02Z",
+      "last_seen": "2026-07-24T19:41:02Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3070,8 +3069,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-07-24T19:32:44Z",
-      "last_seen": "2026-07-24T19:32:44Z",
+      "first_discovered": "2026-07-24T19:41:02Z",
+      "last_seen": "2026-07-24T19:41:02Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3210,37 +3209,37 @@
       "services": [
         {
           "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.229",
+          "ip": "150.171.110.211",
           "port": 80,
           "protocol": "tcp"
         },
         {
           "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.229",
+          "ip": "150.171.110.211",
           "port": 443,
           "protocol": "tcp"
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.35",
+          "ip": "66.33.60.67",
           "port": 80,
           "protocol": "tcp"
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.35",
+          "ip": "66.33.60.67",
           "port": 443,
           "protocol": "tcp"
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.123",
+          "ip": "76.76.21.98",
           "port": 80,
           "protocol": "tcp"
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.123",
+          "ip": "76.76.21.98",
           "port": 443,
           "protocol": "tcp"
         }
@@ -3248,23 +3247,31 @@
       "hosts": [
         {
           "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.226.57"
+          "ip": "150.171.110.210"
         },
         {
           "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "13.107.253.57"
+          "ip": "150.171.110.211"
         },
         {
           "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.229"
+          "ip": "2603:1061:14:1d2::1"
         },
         {
           "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:e0::1"
+          "ip": "2603:1061:14:b5::1"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.129"
         },
         {
           "subdomain": "docs.prodexlabs.com",
           "ip": "66.33.60.67"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.22"
         },
         {
           "subdomain": "docs.prodexlabs.com",
@@ -3332,6 +3339,14 @@
         {
           "subdomain": "docs.prodexlabs.com",
           "ip": "66.33.60.194"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.35"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.123"
         },
         {
           "subdomain": "docs.prodexlabs.com",
@@ -23015,9 +23030,9 @@
       "tech_versions": {}
     },
     {
-      "scan_id": "scan_2026-07-24T19:25:32Z_e1f865bd",
-      "started_at": "2026-07-24T19:25:32Z",
-      "completed_at": "2026-07-24T19:32:41Z",
+      "scan_id": "scan_2026-07-24T19:33:54Z_377cc0f8",
+      "started_at": "2026-07-24T19:33:54Z",
+      "completed_at": "2026-07-24T19:41:00Z",
       "subdomain_count": 27,
       "live_subdomain_count": 27,
       "host_count": 21,
@@ -23065,7 +23080,7 @@
           ]
         },
         "azure-demo.prodexlabs.com": {
-          "150.171.109.229": [
+          "150.171.110.211": [
             80,
             443
           ]
@@ -23083,11 +23098,11 @@
           ]
         },
         "docs.prodexlabs.com": {
-          "66.33.60.35": [
+          "66.33.60.67": [
             80,
             443
           ],
-          "76.76.21.123": [
+          "76.76.21.98": [
             80,
             443
           ]
