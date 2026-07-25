@@ -788,7 +788,18 @@ def _emit_exposed_path(ctx: ScanContext, path: str, severity: str, why: str,
     ct = content_type or "none"
     ctx.findings.append(LightFinding(
         check_name=f"exposed-path-{slug}",
-        title=f"Exposed path: {path} (HTTP {code})",
+        title=(
+            # PLAIN-ENGLISH TITLE (2026-07-25, Howie reviewing littleleaffarms). An
+            # INFO row titled "Exposed path: /.env (HTTP 200)" next to "host serves
+            # 2xx to arbitrary paths — N probes suppressed" reads as a flat
+            # contradiction: is /.env exposed or isn't it? The LOGIC is right and
+            # 4.7-ratified — a HIGH path is content-verified even on a catch-all
+            # host and DOWNGRADED to INFO rather than suppressed, so a real secret
+            # is never silently eaten. Only the wording was wrong.
+            f"Checked {path} — no secret found (catch-all host returned HTTP {code})"
+            if severity == "INFO"
+            else f"Exposed path: {path} (HTTP {code})"
+        ),
         severity=severity,
         category="info_disclosure",  # enum remap: 'paths' isn't a valid finding_category_t
         description=f"The path {path} on {ctx.hostname} returned HTTP {code} "
