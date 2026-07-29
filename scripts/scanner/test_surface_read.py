@@ -11,6 +11,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from surface_read import extract_signals, pick_sub, SUPPORTED_SCHEMA_VERSIONS  # noqa: E402
@@ -160,8 +162,34 @@ def test_e2e_dead_host_with_live_rdp_still_exposes():
 
 
 # ── exposure_to_finding: the trust-critical source tag + mapping ─────────
+#
+# COMMAND, 2026-07-29 (4.7 ruling Q3): these two tests exercise
+# `run_medium.exposure_to_finding`, which is part of the PR 2 WIRING and is
+# deliberately absent from Command in PR 1 (modules land inert). They are
+# skipped here — but the skip is keyed on the FUNCTION EXISTING, not on a
+# hand-set flag or a version marker.
+#
+# That matters. A plain `@pytest.mark.skip("until PR 2")` would have to be
+# manually removed, and a skip nobody removes is a permanently disabled test —
+# the same "passes by never running" failure mode that produced today's CI
+# floors and the soak's empty red-flag check. Keying on the import means the
+# moment PR 2 adds exposure_to_finding to Command's run_medium.py, these two
+# tests start running by themselves. Nothing to remember, nothing to rot.
+#
+# On Prodex the function is present, so both tests run there normally and this
+# block is a no-op — the file stays byte-identical across instances.
+def _wiring_or_skip():
+    """Return (exposure_to_finding, MediumFinding), or skip if the wiring is absent."""
+    try:
+        from run_medium import exposure_to_finding, MediumFinding
+    except ImportError:
+        pytest.skip("run_medium.exposure_to_finding not present — PR 2 wiring not landed "
+                    "on this instance yet; this test self-enables when it is")
+    return exposure_to_finding, MediumFinding
+
+
 def test_exposure_to_finding_carries_isolation_source():
-    from run_medium import exposure_to_finding  # heavy import; deps present
+    exposure_to_finding, _MediumFinding = _wiring_or_skip()
     ef = ExposureFinding(port=5432, role="db", severity="CRITICAL",
                          check_name="exposure-db-5432",
                          title="DB exposed", note="open db")
@@ -183,7 +211,7 @@ def test_exposure_to_finding_carries_isolation_source():
 def test_exposure_finding_id_segment_is_exposure_not_medium():
     # The write path derives an ':exposure:' id segment from source, so the P3
     # network engine re-emits the SAME finding_id (no duplicate row).
-    from run_medium import exposure_to_finding, MediumFinding
+    exposure_to_finding, MediumFinding = _wiring_or_skip()
     ef = ExposureFinding(port=3389, role="rdp", severity="HIGH",
                          check_name="exposure-rdp-3389", title="t", note="n")
     mf = exposure_to_finding(ef, "asset-9")
