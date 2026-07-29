@@ -892,7 +892,7 @@ def main() -> int:
         or _env("RESEND_API_KEY", required=not args.dry_run)
         or ""
     )
-    # PER-INSTANCE IDENTITY — NO CROSS-TENANT DEFAULTS (2026-07-26).
+    # PER-INSTANCE IDENTITY — NO CROSS-TENANT DEFAULTS (2026-07-29).
     from_addr    = _env("ALERTER_FROM", default="")
     from_name    = _env("ALERTER_FROM_NAME", default="")
     to_raw       = _env("ALERTER_TO", default="")
