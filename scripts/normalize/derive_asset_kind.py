@@ -35,7 +35,7 @@ then plumb `redirect` derivation + the scan_url ownership guard (ruling ④).
 Usage:
   SUPABASE_DSN=... python scripts/normalize/derive_asset_kind.py --dry-run
   SUPABASE_DSN=... python scripts/normalize/derive_asset_kind.py --apply
-  SUPABASE_DSN=... python scripts/normalize/derive_asset_kind.py --apply --asset preview.prodexlabs.com
+  SUPABASE_DSN=... python scripts/normalize/derive_asset_kind.py --apply --asset <hostname>
 
 Environment:
   SUPABASE_DSN — Postgres DSN (same var the scanner uses). Required.
