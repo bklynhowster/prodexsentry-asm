@@ -22,11 +22,13 @@ Required env vars:
   SENDGRID_API_KEY   from Walter @ Command's SendGrid account
                        (legacy RESEND_API_KEY still honored as fallback
                        during the 2026-05-28 cutover transition)
-  ALERTER_FROM       verified Command sender; default
-                       CommandSentry@commandcompanies.com
-  ALERTER_FROM_NAME  display name; default "COMMANDsentry"
-  ALERTER_TO         comma-separated recipient list, e.g.
-                       hschneider@commandcompanies.com,howiehow@mac.com
+  ALERTER_FROM       verified sender for THIS instance. NO DEFAULT.
+  ALERTER_FROM_NAME  product display name (COMMANDsentry / PRODEXsentry).
+                       NO DEFAULT — also the subject prefix + footer.
+  ALERTER_TO         comma-separated recipient list. NO DEFAULT.
+
+  These had Command values as defaults in BOTH scanner repos, so an unset
+  env silently sent as/to the wrong tenant. Unset now refuses to send.
 
 Optional env vars:
   ALERTER_NAME             default 'daily_digest' — keys the runs table
@@ -474,6 +476,7 @@ def render_html(
     deepscan_stale_hours: int,
     baseline: dict,
     dashboard_url: str,
+    product_name: str,
 ) -> str:
     today = window_end.strftime("%Y-%m-%d")
     win = (
@@ -700,7 +703,7 @@ def render_html(
 <html><body style="font-family:-apple-system,Segoe UI,sans-serif;background:#f6f6f6;margin:0;padding:24px;color:#1a1a1a;">
 <div style="max-width:780px;margin:0 auto;background:#fff;padding:32px;border-radius:8px;border:1px solid #e2e2e2;">
   <div style="border-bottom:1px solid #e2e2e2;padding-bottom:16px;margin-bottom:24px;">
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#888;">COMMANDsentry</div>
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#888;">{product_name}</div>
     <h1 style="margin:4px 0 0;font-size:22px;color:#1a1a1a;">Daily posture digest — {today}</h1>
     <div style="margin-top:6px;font-size:12px;color:#888;">Window: {win}</div>
   </div>
@@ -743,9 +746,10 @@ def render_text(
     discovery_stale_hours: int,
     deepscan_stale_hours: int,
     baseline: dict,
+    product_name: str,
 ) -> str:
     lines: list[str] = []
-    lines.append(f"COMMANDsentry — Daily posture digest — {window_end:%Y-%m-%d}")
+    lines.append(f"{product_name} — Daily posture digest — {window_end:%Y-%m-%d}")
     lines.append(f"Window: {window_start:%Y-%m-%d %H:%M UTC} -> {window_end:%Y-%m-%d %H:%M UTC}")
     lines.append("")
 
@@ -874,7 +878,7 @@ def send_via_sendgrid(
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type":  "application/json",
-            "User-Agent":    "COMMANDsentry-alerter/1.0 (+https://github.com/bklynhowster/commandsentry-asm)",
+            "User-Agent":    "asm-alerter/1.0",
         },
     )
     try:
@@ -907,15 +911,23 @@ def main() -> int:
         or _env("RESEND_API_KEY", required=not args.dry_run)
         or ""
     )
-    from_addr    = _env("ALERTER_FROM", default="CommandSentry@commandcompanies.com")
-    from_name    = _env("ALERTER_FROM_NAME", default="COMMANDsentry")
-    to_raw       = _env("ALERTER_TO",
-                        default="hschneider@commandcompanies.com,howiehow@mac.com")
+    # PER-INSTANCE IDENTITY — NO CROSS-TENANT DEFAULTS (2026-07-26).
+    from_addr    = _env("ALERTER_FROM", default="")
+    from_name    = _env("ALERTER_FROM_NAME", default="")
+    to_raw       = _env("ALERTER_TO", default="")
     to_addrs     = [a.strip() for a in (to_raw or "").split(",") if a.strip()]
+
+    if not args.dry_run and not (from_addr and from_name and to_addrs):
+        _missing = [n for n, v in (("ALERTER_FROM", from_addr),
+                                   ("ALERTER_FROM_NAME", from_name),
+                                   ("ALERTER_TO", to_addrs)) if not v]
+        print(f"::warning::{', '.join(_missing)} not set — refusing to send the digest "
+              f"rather than send as/to another instance. Set them per repo.",
+              file=sys.stderr)
+        return 0
     name         = _env("ALERTER_NAME", default="daily_digest") or "daily_digest"
     first_hours  = int(_env("ALERTER_FIRST_RUN_HOURS", default="24") or "24")
-    dashboard_url= _env("ALERTER_DASHBOARD_URL",
-                        default="https://supabase.com/dashboard/project/bxcvzpbmxsdtalyfanee")
+    dashboard_url= _env("ALERTER_DASHBOARD_URL", default="")
 
     with psycopg.connect(dsn, autocommit=False) as conn:
         with conn.cursor() as cur:
@@ -1020,7 +1032,7 @@ def main() -> int:
         subject_tail = ", ".join(subject_parts) if subject_parts else "0 changes"
         watchdog_prefix = "(!) " if (canary_violations or stale_assets) else ""
         subject = (
-            f"[COMMANDsentry] {watchdog_prefix}Daily posture digest — "
+            f"[{from_name}] {watchdog_prefix}Daily posture digest — "
             f"{window_end:%Y-%m-%d} ({subject_tail})"
         )
         html = render_html(
@@ -1031,6 +1043,7 @@ def main() -> int:
             discovery_stale_hours=discovery_stale_hours,
             deepscan_stale_hours=deepscan_stale_hours,
             baseline=baseline, dashboard_url=dashboard_url,
+            product_name=from_name,
         )
         text = render_text(
             window_start=window_start, window_end=window_end,
@@ -1040,6 +1053,7 @@ def main() -> int:
             discovery_stale_hours=discovery_stale_hours,
             deepscan_stale_hours=deepscan_stale_hours,
             baseline=baseline,
+            product_name=from_name,
         )
 
         if args.dry_run:
