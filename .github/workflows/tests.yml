@@ -1,0 +1,213 @@
+name: tests
+
+# Added 2026-07-29. Until now NOTHING in either repo ran a test — ~37 test
+# files, `pytest` appeared zero times across .github/workflows/. The gate
+# regression tests exist specifically to catch a fail-open coming back, and
+# nothing ran them, which is not a control.
+#
+# What the first run of this workflow found, against code that was fine:
+#   - 5 stale tests asserting contracts renamed on 07-24/07-25
+#   - test_ledger_gate_mechanism.py had NEVER been runnable (committed
+#     without its fixtures; died on IndexError before assertion one)
+#   - 3 "unit" tests making live socket calls to demo.example.com
+#   - a production function (testssl_is_degraded) collected as a test case
+#   - a live-DB write tool named test_* that pytest would happily execute
+#
+# All of it had been sitting there for days. That is the argument for this file.
+
+on:
+  push:
+    branches: [main]
+    # Scans commit asset JSON back to main constantly. Testing those commits
+    # wastes minutes and trains everyone to ignore the badge.
+    paths-ignore:
+      - 'data/**'
+      - 'web/data/**'
+      - '**.md'
+  pull_request:
+  workflow_dispatch:
+
+# A newer push supersedes an in-flight run on the same ref.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      # Both suites import modules by bare name (`import gate_retry`,
+      # `import roe_gate`) rather than as a package. Set the path once here
+      # instead of making every test file guess.
+      PYTHONPATH: >-
+        ${{ github.workspace }}/scripts/common:${{ github.workspace }}/scripts/scanner:${{
+        github.workspace }}/scripts/db:${{ github.workspace }}/scripts/normalize
+      # Belt and braces: no DSN is available to this job, and nothing here
+      # should ever want one. If a test starts failing for want of a DSN it is
+      # an integration test in the wrong lane — move it, don't add a secret.
+      SUPABASE_DSN: ""
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'   # matches the scanner container image
+
+      - name: Install test deps
+        # psycopg IS required, and the first CI run is what proved it.
+        #
+        # This step originally installed pytest only, on the reasoning that the
+        # tests stub psycopg and installing it "invites a test to open a real
+        # connection." That was clever and wrong. Ten production modules do:
+        #
+        #     try: import psycopg
+        #     except ImportError: print(...); sys.exit(1)
+        #
+        # — a sensible fail-fast for a CLI, but it runs at IMPORT time. And
+        # scripts/db/test_auth_gated.py imports import_asm_to_surface for real
+        # rather than stubbing it. So collection called sys.exit(1) inside a
+        # module import, pytest raised INTERNALERROR, and the whole session
+        # died with exit 3 before a single test ran.
+        #
+        # It passed locally only because the sandbox had psycopg installed
+        # system-wide. A "clean checkout" repro is not clean if the
+        # INTERPRETER still has the packages.
+        #
+        # The real guard against a live connection is that this job has no DSN:
+        # SUPABASE_DSN is empty and no secret is in scope. An installed driver
+        # with nothing to connect to cannot reach a database.
+        #
+        # pyyaml is required for the same class of reason, found on run #2:
+        # 34 tests failed with "PyYAML required to read device_fingerprints.yaml".
+        # Note the difference in failure mode, which is worth understanding —
+        # scanner/normalize.py imports yaml LAZILY and returns {} on failure by
+        # design (K4-safe: a missing registry leaks phantoms rather than
+        # dropping real ports) with a loud WARN. So no INTERNALERROR, just a
+        # silently descoped cloud-phantom filter and 34 red tests.
+        #
+        # This list was then derived properly instead of one dep per CI run:
+        # every third-party import across scripts/ and scanner/ was enumerated,
+        # then each candidate was BLOCKED with a raising stub module to see
+        # what actually breaks. Results:
+        #   psycopg blocked -> 1 error   (INTERNALERROR — matches run #1)
+        #   yaml    blocked -> 34 failed (exactly matches run #2)
+        #   requests blocked -> 580 passed  (imported lazily; NOT needed)
+        # anthropic and supabase appear only in backfill scripts with no tests.
+        # The list lives in requirements-test.txt so it is a versioned artifact
+        # you can install locally to reproduce CI exactly, rather than a string
+        # buried in a workflow file.
+        run: python -m pip install --quiet -r requirements-test.txt
+
+      # ── Lane 0: preflight — can every test module even be imported? ──
+      # pytest collects by IMPORTING. Ten production modules in scripts/db do
+      # `except ImportError: sys.exit(1)` at module scope, so one missing
+      # dependency doesn't fail one test — it raises SystemExit inside
+      # collection, which pytest reports as INTERNALERROR and the entire
+      # session dies with exit 3 before anything runs. That is what happened on
+      # run #1: 580 tests reported as a 60-line traceback that never named the
+      # module at fault.
+      #
+      # This step imports each test module in its OWN subprocess, so a
+      # SystemExit is contained and attributable. It prints the offending file
+      # and the exit code, then fails. Cheap, and it turns the worst failure
+      # mode in this pipeline into one readable line.
+      - name: Preflight — every test module imports cleanly
+        run: |
+          set -uo pipefail
+          bad=0
+          while IFS= read -r f; do
+            mod_dir=$(dirname "$f"); mod=$(basename "$f" .py)
+            if ! out=$(cd "$mod_dir" && python3 -c "import $mod" 2>&1); then
+              echo "::error file=$f::cannot be imported — pytest collection would INTERNALERROR here"
+              echo "$out" | tail -5
+              bad=1
+            fi
+          done < <(find scanner scripts -name 'test_*.py' -not -path '*/common/tests/*')
+          [ $bad -eq 0 ] && echo "all test modules import cleanly"
+          exit $bad
+
+      # ── Lane 1: pytest-style (~580 tests, 27 files) ──
+      - name: pytest suites
+        run: python -m pytest scanner scripts --ignore=scripts/common/tests
+
+      # ── Lane 2: script-style mechanism tests ──
+      # scripts/common/tests/* are standalone scripts, not pytest modules:
+      # zero `def test_` functions, module-level execution, sys.exit() at the
+      # end. pytest cannot collect them — importing one runs it and the
+      # SystemExit aborts the whole session with INTERNALERROR. They are run
+      # as programs, which is what they are.
+      # ::warning:: in EXPECTED test output is neutralised, deliberately.
+      # The gate suites simulate DB blips on purpose, and the retry path prints
+      # "::warning::roe_gate ownership lookup attempt 1/3 failed" — which
+      # Actions parses out of the log stream and attaches to the run. Result:
+      # run #4 passed while displaying 8 warning annotations, all of them tests
+      # succeeding at proving the retry works. A green build that looks like it
+      # has 8 problems is how people learn to stop reading annotations, and
+      # then a real one goes unnoticed.
+      #
+      # Rewriting the prefix keeps the line fully visible in the log while
+      # stopping Actions from treating it as a build-level warning. Chosen over
+      # ::stop-commands:: because that disables command parsing job-wide and
+      # stays disabled if a step exits before re-enabling it.
+      - name: gate + mail mechanism suites
+        run: |
+          set -uo pipefail
+          fail=0
+          run_one() {  # run_one <cmd> <file>
+            if "$1" "$2" 2>&1 | sed -u 's/^::warning::/[expected-by-test] /'; then
+              echo "  -> PASS"
+            else
+              echo "  -> FAIL"; return 1
+            fi
+          }
+          for f in scripts/common/tests/test_*.py; do
+            echo "::group::$f"
+            run_one python3 "$f" || fail=1
+            echo "::endgroup::"
+          done
+          for f in scripts/common/tests/test_*.sh; do
+            echo "::group::$f"
+            run_one bash "$f" || fail=1
+            echo "::endgroup::"
+          done
+          exit $fail
+
+      # ── Lane 3: the safety-gate regression checks, called out by name ──
+      # These already ran in lane 2. Re-running them as a named step is
+      # deliberate: when this job goes red, the failed step name should say
+      # which control broke, not "gate + mail mechanism suites". A fail-open
+      # returning to a SAFETY gate deserves its own line in the UI.
+      - name: SAFETY gate regression (fail-open must stay closed)
+        run: |
+          set -euo pipefail
+          # Same ::warning:: neutralisation as the previous step — roe_gate's
+          # retry path prints one per simulated blip. set -e + pipefail still
+          # fail the step on a real failure; verified by running a deliberately
+          # failing suite through the same pipe.
+          bash scripts/common/tests/test_vpn_egress_gate_mechanism.sh 2>&1 \
+            | sed -u 's/^::warning::/[expected-by-test] /'
+          python3 scripts/common/tests/test_active_probe_policy_gate_mechanism.py 2>&1 \
+            | sed -u 's/^::warning::/[expected-by-test] /'
+          python3 scripts/common/tests/test_roe_gate_mechanism.py 2>&1 \
+            | sed -u 's/^::warning::/[expected-by-test] /'
+
+      # ── Lane 4: every test file is reachable by one of the lanes ──
+      # The failure mode this prevents: a new test lands in a directory no
+      # lane globs, goes green forever by never running, and nobody notices —
+      # which is exactly how this repo arrived at a suite it could not run.
+      - name: no orphaned test files
+        run: |
+          set -euo pipefail
+          orphans=0
+          while IFS= read -r f; do
+            case "$f" in
+              ./scanner/*|./scripts/db/*|./scripts/normalize/*|./scripts/scanner/*|./scripts/common/tests/*) ;;
+              *) echo "::error file=$f::test file is in no CI lane — add its directory to tests.yml"; orphans=1 ;;
+            esac
+          done < <(find . -name 'test_*.py' -not -path './.venv/*' -not -path './node_modules/*')
+          exit $orphans
