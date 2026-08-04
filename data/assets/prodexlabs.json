@@ -10,10 +10,10 @@
     "discovered_via": "manual"
   },
   "scan": {
-    "id": "scan_2026-08-04T08:19:57Z_f661ad78",
-    "started_at": "2026-08-04T08:19:57Z",
-    "completed_at": "2026-08-04T08:35:10Z",
-    "duration_seconds": 913,
+    "id": "scan_2026-08-04T13:47:39Z_9eddb7eb",
+    "started_at": "2026-08-04T13:47:39Z",
+    "completed_at": "2026-08-04T14:02:16Z",
+    "duration_seconds": 877,
     "engine_version": "3.0.0",
     "scanner_origin": "github-actions-ubuntu-azure",
     "tools_run": [
@@ -31,10 +31,10 @@
   "summary": {
     "subdomain_count": 28,
     "live_subdomain_count": 28,
-    "host_count": 20,
+    "host_count": 21,
     "service_count": 60,
     "newest_cert_expiry_days": 36,
-    "top_hosting_org": "Google LLC",
+    "top_hosting_org": null,
     "platforms": []
   },
   "subdomains": [
@@ -43,8 +43,8 @@
       "alive": true,
       "is_root": true,
       "discovered_via": "dnsx",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -65,12 +65,6 @@
       "hosts": [
         {
           "ip": "8.232.147.166",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "166.147.232.8.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -110,9 +104,9 @@
           "ns-cloud-d4.googledomains.com"
         ],
         "txt": [
+          "MS=ms22662979",
           "v=spf1 include:_spf.google.com ~all",
-          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d",
-          "MS=ms22662979"
+          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d"
         ],
         "spf": "v=spf1 include:_spf.google.com ~all",
         "dnssec": false
@@ -179,8 +173,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:10Z",
-      "last_seen": "2026-08-04T08:35:10Z",
+      "first_discovered": "2026-08-04T14:02:16Z",
+      "last_seen": "2026-08-04T14:02:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -201,12 +195,6 @@
       "hosts": [
         {
           "ip": "34.67.20.186",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Iowa",
-          "city": "Council Bluffs",
-          "reverse_dns": "186.20.67.34.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -237,7 +225,7 @@
             "not_before": "2026-06-29T08:40:14Z",
             "not_after": "2026-09-21T08:40:13Z",
             "self_signed": false,
-            "days_to_expiry": 48
+            "days_to_expiry": 47
           }
         }
       ],
@@ -280,8 +268,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:10Z",
-      "last_seen": "2026-08-04T08:35:10Z",
+      "first_discovered": "2026-08-04T14:02:16Z",
+      "last_seen": "2026-08-04T14:02:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -301,39 +289,25 @@
       },
       "hosts": [
         {
-          "ip": "150.171.109.183",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Washington",
-          "city": "Redmond",
-          "reverse_dns": null,
+          "ip": "150.171.109.178",
           "is_private": false
         },
         {
-          "ip": "150.171.110.210",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Illinois",
-          "city": "Chicago",
-          "reverse_dns": null,
+          "ip": "150.171.110.211",
           "is_private": false
         },
         {
-          "ip": "2603:1061:14:b6::1",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Washington",
-          "city": "Redmond",
-          "reverse_dns": null,
+          "ip": "2603:1061:14:1d0::1",
+          "is_private": false
+        },
+        {
+          "ip": "2603:1061:14:1d1::1",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "150.171.109.183",
+          "ip": "150.171.109.178",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -341,7 +315,7 @@
           "tls": false
         },
         {
-          "ip": "150.171.109.183",
+          "ip": "150.171.109.178",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -362,10 +336,10 @@
       ],
       "dns": {
         "a": [
-          "150.171.110.210"
+          "150.171.110.211"
         ],
         "aaaa": [
-          "2603:1061:14:b6::1"
+          "2603:1061:14:1d1::1"
         ],
         "cname": "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net",
         "mx": [],
@@ -401,8 +375,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:10Z",
-      "last_seen": "2026-08-04T08:35:10Z",
+      "first_discovered": "2026-08-04T14:02:16Z",
+      "last_seen": "2026-08-04T14:02:16Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -423,12 +397,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -515,8 +483,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:10Z",
-      "last_seen": "2026-08-04T08:35:10Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -537,12 +505,6 @@
       "hosts": [
         {
           "ip": "8.232.147.166",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "166.147.232.8.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -651,8 +613,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:10Z",
-      "last_seen": "2026-08-04T08:35:10Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -673,12 +635,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -765,8 +721,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:10Z",
-      "last_seen": "2026-08-04T08:35:10Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -786,43 +742,19 @@
       },
       "hosts": [
         {
+          "ip": "66.33.60.130",
+          "is_private": false
+        },
+        {
           "ip": "66.33.60.194",
-          "asn": "AS16509",
-          "asn_org": "Amazon.com, Inc.",
-          "country": "US",
-          "region": "California",
-          "city": "Walnut",
-          "reverse_dns": null,
           "is_private": false
         },
         {
-          "ip": "66.33.60.66",
-          "asn": "AS16509",
-          "asn_org": "Amazon.com, Inc.",
-          "country": "US",
-          "region": "California",
-          "city": "Walnut",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "76.76.21.142",
-          "asn": "AS16509",
-          "asn_org": "Amazon.com, Inc.",
-          "country": "US",
-          "region": "California",
-          "city": "Walnut",
-          "reverse_dns": null,
+          "ip": "76.76.21.61",
           "is_private": false
         },
         {
           "ip": "76.76.21.93",
-          "asn": "AS16509",
-          "asn_org": "Amazon.com, Inc.",
-          "country": "US",
-          "region": "California",
-          "city": "Walnut",
-          "reverse_dns": null,
           "is_private": false
         }
       ],
@@ -884,8 +816,8 @@
       ],
       "dns": {
         "a": [
-          "76.76.21.142",
-          "66.33.60.66"
+          "76.76.21.61",
+          "66.33.60.130"
         ],
         "aaaa": [],
         "cname": "cname.mintlify-dns.com",
@@ -927,8 +859,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -949,12 +881,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -983,7 +909,7 @@
             "not_before": "2026-06-28T11:05:59Z",
             "not_after": "2026-09-26T11:59:33Z",
             "self_signed": false,
-            "days_to_expiry": 53
+            "days_to_expiry": 52
           }
         }
       ],
@@ -1041,8 +967,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1063,12 +989,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -1155,8 +1075,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1177,12 +1097,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -1269,8 +1183,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1291,12 +1205,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -1383,8 +1291,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1405,22 +1313,10 @@
       "hosts": [
         {
           "ip": "170.187.131.209",
-          "asn": "AS63949",
-          "asn_org": "Akamai Connected Cloud",
-          "country": "US",
-          "region": "New Jersey",
-          "city": "Cedar Knolls",
-          "reverse_dns": "170-187-131-209.ip.linodeusercontent.com",
           "is_private": false
         },
         {
           "ip": "185.3.93.228",
-          "asn": "AS63949",
-          "asn_org": "Akamai Connected Cloud",
-          "country": "GB",
-          "region": "England",
-          "city": "London",
-          "reverse_dns": "185-3-93-228.ip.linodeusercontent.com",
           "is_private": false
         }
       ],
@@ -1482,8 +1378,8 @@
       ],
       "dns": {
         "a": [
-          "185.3.93.228",
-          "170.187.131.209"
+          "170.187.131.209",
+          "185.3.93.228"
         ],
         "aaaa": [],
         "cname": "track.smtp2go.net",
@@ -1517,8 +1413,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1539,12 +1435,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -1631,8 +1521,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1653,12 +1543,6 @@
       "hosts": [
         {
           "ip": "136.110.176.164",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "164.176.110.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -1687,7 +1571,7 @@
             "not_before": "2026-06-27T08:10:47Z",
             "not_after": "2026-09-25T09:04:20Z",
             "self_signed": false,
-            "days_to_expiry": 52
+            "days_to_expiry": 51
           }
         }
       ],
@@ -1745,8 +1629,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1767,12 +1651,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -1801,7 +1679,7 @@
             "not_before": "2026-06-29T11:05:29Z",
             "not_after": "2026-09-27T11:59:22Z",
             "self_signed": false,
-            "days_to_expiry": 54
+            "days_to_expiry": 53
           }
         }
       ],
@@ -1859,8 +1737,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1881,12 +1759,6 @@
       "hosts": [
         {
           "ip": "34.54.236.210",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "210.236.54.34.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -1916,7 +1788,7 @@
             "not_before": "2026-07-08T07:56:52Z",
             "not_after": "2026-10-06T08:52:47Z",
             "self_signed": false,
-            "days_to_expiry": 63
+            "days_to_expiry": 62
           }
         }
       ],
@@ -1964,8 +1836,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1986,12 +1858,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2020,7 +1886,7 @@
             "not_before": "2026-08-02T11:45:44Z",
             "not_after": "2026-10-31T12:39:37Z",
             "self_signed": false,
-            "days_to_expiry": 88
+            "days_to_expiry": 87
           }
         }
       ],
@@ -2078,8 +1944,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2100,12 +1966,6 @@
       "hosts": [
         {
           "ip": "34.13.119.70",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "70.119.13.34.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2192,8 +2052,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2214,12 +2074,6 @@
       "hosts": [
         {
           "ip": "34.149.145.200",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "200.145.149.34.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2306,8 +2160,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2328,12 +2182,6 @@
       "hosts": [
         {
           "ip": "136.110.176.164",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "164.176.110.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2420,8 +2268,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2442,12 +2290,6 @@
       "hosts": [
         {
           "ip": "34.117.3.186",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "186.3.117.34.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2534,8 +2376,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2556,12 +2398,6 @@
       "hosts": [
         {
           "ip": "34.117.3.186",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "186.3.117.34.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2648,8 +2484,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2670,12 +2506,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2704,7 +2534,7 @@
             "not_before": "2026-06-13T10:40:28Z",
             "not_after": "2026-09-11T11:33:22Z",
             "self_signed": false,
-            "days_to_expiry": 38
+            "days_to_expiry": 37
           }
         }
       ],
@@ -2762,8 +2592,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:11Z",
-      "last_seen": "2026-08-04T08:35:11Z",
+      "first_discovered": "2026-08-04T14:02:17Z",
+      "last_seen": "2026-08-04T14:02:17Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2784,12 +2614,6 @@
       "hosts": [
         {
           "ip": "34.36.153.196",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "196.153.36.34.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2881,8 +2705,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:12Z",
-      "last_seen": "2026-08-04T08:35:12Z",
+      "first_discovered": "2026-08-04T14:02:18Z",
+      "last_seen": "2026-08-04T14:02:18Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2903,12 +2727,6 @@
       "hosts": [
         {
           "ip": "35.227.202.53",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -2995,8 +2813,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:12Z",
-      "last_seen": "2026-08-04T08:35:12Z",
+      "first_discovered": "2026-08-04T14:02:18Z",
+      "last_seen": "2026-08-04T14:02:18Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3017,12 +2835,6 @@
       "hosts": [
         {
           "ip": "136.68.149.70",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "70.149.68.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -3109,8 +2921,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:12Z",
-      "last_seen": "2026-08-04T08:35:12Z",
+      "first_discovered": "2026-08-04T14:02:18Z",
+      "last_seen": "2026-08-04T14:02:18Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3131,12 +2943,6 @@
       "hosts": [
         {
           "ip": "8.233.90.115",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "115.90.233.8.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -3223,8 +3029,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-08-04T08:35:12Z",
-      "last_seen": "2026-08-04T08:35:12Z",
+      "first_discovered": "2026-08-04T14:02:18Z",
+      "last_seen": "2026-08-04T14:02:18Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3245,12 +3051,6 @@
       "hosts": [
         {
           "ip": "8.232.147.166",
-          "asn": "AS396982",
-          "asn_org": "Google LLC",
-          "country": "US",
-          "region": "Missouri",
-          "city": "Kansas City",
-          "reverse_dns": "166.147.232.8.bc.googleusercontent.com",
           "is_private": false
         }
       ],
@@ -3357,8 +3157,51 @@
   ],
   "phantom_subdomains": [],
   "deltas": {
-    "since_scan": "scan_2026-08-04T01:26:25Z_ef9d1512",
+    "since_scan": "scan_2026-08-04T08:19:57Z_f661ad78",
     "added": {
+      "subdomains": [],
+      "services": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.178",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.178",
+          "port": 443,
+          "protocol": "tcp"
+        }
+      ],
+      "hosts": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.178"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.110.211"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "2603:1061:14:1d0::1"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "2603:1061:14:1d1::1"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.130"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.61"
+        }
+      ]
+    },
+    "removed": {
       "subdomains": [],
       "services": [
         {
@@ -3370,30 +3213,6 @@
         {
           "subdomain": "azure-demo.prodexlabs.com",
           "ip": "150.171.109.183",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93",
           "port": 443,
           "protocol": "tcp"
         }
@@ -3413,94 +3232,11 @@
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.194"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
           "ip": "66.33.60.66"
         },
         {
           "subdomain": "docs.prodexlabs.com",
           "ip": "76.76.21.142"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.93"
-        }
-      ]
-    },
-    "removed": {
-      "subdomains": [],
-      "services": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.114",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.114",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.67",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.67",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.98",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.98",
-          "port": 443,
-          "protocol": "tcp"
-        }
-      ],
-      "hosts": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.114"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.74"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:41::1"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:70::1"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.130"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.67"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.61"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.98"
         }
       ]
     },
@@ -3511,211 +3247,6 @@
     }
   },
   "history": [
-    {
-      "scan_id": "scan_2026-07-08T11:14:33Z_bc8a7d84",
-      "started_at": "2026-07-08T11:14:33Z",
-      "completed_at": "2026-07-08T11:21:17Z",
-      "subdomain_count": 27,
-      "live_subdomain_count": 27,
-      "host_count": 21,
-      "service_count": 57,
-      "subdomain_names": [
-        "atlantis-gcp.prodexlabs.com",
-        "azure-demo.prodexlabs.com",
-        "cooked.prodexlabs.com",
-        "demo-tour.prodexlabs.com",
-        "demo.prodexlabs.com",
-        "docs.prodexlabs.com",
-        "highcom.prodexlabs.com",
-        "l3h-ivs.prodexlabs.com",
-        "l3h-nh.prodexlabs.com",
-        "l3h-ss.prodexlabs.com",
-        "link.prodexlabs.com",
-        "littleleaffarms.prodexlabs.com",
-        "oidc-test.prodexlabs.com",
-        "panthalassa.prodexlabs.com",
-        "preview.prodexlabs.com",
-        "prod.prodexlabs.com",
-        "prodexlabs.com",
-        "prosalud-staging.prodexlabs.com",
-        "prosalud.prodexlabs.com",
-        "sandbox.prodexlabs.com",
-        "staging-gpt55.prodexlabs.com",
-        "staging.prodexlabs.com",
-        "time.prodexlabs.com",
-        "trial.prodexlabs.com",
-        "uat.prodexlabs.com",
-        "valorep.prodexlabs.com",
-        "www.prodexlabs.com"
-      ],
-      "ports_by_sub": {
-        "prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        },
-        "atlantis-gcp.prodexlabs.com": {
-          "34.67.20.186": [
-            80,
-            443
-          ]
-        },
-        "azure-demo.prodexlabs.com": {
-          "150.171.109.77": [
-            80,
-            443
-          ]
-        },
-        "cooked.prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        },
-        "demo-tour.prodexlabs.com": {
-          "34.36.153.196": [
-            80,
-            89,
-            125,
-            443,
-            1186
-          ]
-        },
-        "demo.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "docs.prodexlabs.com": {
-          "66.33.60.34": [
-            80,
-            443
-          ],
-          "76.76.21.164": [
-            80,
-            443
-          ]
-        },
-        "highcom.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "l3h-ivs.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "l3h-nh.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "l3h-ss.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "link.prodexlabs.com": {},
-        "littleleaffarms.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "oidc-test.prodexlabs.com": {
-          "136.110.176.164": [
-            80,
-            443
-          ]
-        },
-        "panthalassa.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "preview.prodexlabs.com": {
-          "34.54.236.210": [
-            80,
-            443
-          ]
-        },
-        "prod.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "prosalud-staging.prodexlabs.com": {
-          "34.13.119.70": [
-            80,
-            443
-          ]
-        },
-        "prosalud.prodexlabs.com": {
-          "34.149.145.200": [
-            80,
-            443
-          ]
-        },
-        "sandbox.prodexlabs.com": {
-          "136.110.176.164": [
-            80,
-            443
-          ]
-        },
-        "staging-gpt55.prodexlabs.com": {
-          "34.117.3.186": [
-            80,
-            443
-          ]
-        },
-        "staging.prodexlabs.com": {
-          "34.117.3.186": [
-            80,
-            443
-          ]
-        },
-        "time.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "trial.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "uat.prodexlabs.com": {
-          "136.68.149.70": [
-            80,
-            443
-          ]
-        },
-        "valorep.prodexlabs.com": {
-          "8.233.90.115": [
-            80,
-            443
-          ]
-        },
-        "www.prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        }
-      },
-      "tech_versions": {}
-    },
     {
       "scan_id": "scan_2026-07-08T13:30:52Z_14da88a2",
       "started_at": "2026-07-08T13:30:52Z",
@@ -28251,6 +27782,224 @@
         },
         "azure-demo.prodexlabs.com": {
           "150.171.109.183": [
+            80,
+            443
+          ]
+        },
+        "bitec.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "cooked.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "demo.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "docs.prodexlabs.com": {
+          "66.33.60.194": [
+            80,
+            443
+          ],
+          "76.76.21.93": [
+            80,
+            443
+          ]
+        },
+        "highcom.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ivs.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-nh.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "l3h-ss.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "link.prodexlabs.com": {
+          "170.187.131.209": [
+            80,
+            443
+          ],
+          "185.3.93.228": [
+            80,
+            443
+          ]
+        },
+        "littleleaffarms.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "oidc-test.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "panthalassa.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "preview.prodexlabs.com": {
+          "34.54.236.210": [
+            80,
+            443
+          ]
+        },
+        "prod.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "prosalud-staging.prodexlabs.com": {
+          "34.13.119.70": [
+            80,
+            443
+          ]
+        },
+        "prosalud.prodexlabs.com": {
+          "34.149.145.200": [
+            80,
+            443
+          ]
+        },
+        "sandbox.prodexlabs.com": {
+          "136.110.176.164": [
+            80,
+            443
+          ]
+        },
+        "staging-gpt55.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
+          ]
+        },
+        "staging.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443
+          ]
+        },
+        "time.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "tour.prodexlabs.com": {
+          "34.36.153.196": [
+            80,
+            443
+          ]
+        },
+        "trial.prodexlabs.com": {
+          "35.227.202.53": [
+            80,
+            443
+          ]
+        },
+        "uat.prodexlabs.com": {
+          "136.68.149.70": [
+            80,
+            443
+          ]
+        },
+        "valorep.prodexlabs.com": {
+          "8.233.90.115": [
+            80,
+            443
+          ]
+        },
+        "www.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        }
+      },
+      "tech_versions": {}
+    },
+    {
+      "scan_id": "scan_2026-08-04T13:47:39Z_9eddb7eb",
+      "started_at": "2026-08-04T13:47:39Z",
+      "completed_at": "2026-08-04T14:02:16Z",
+      "subdomain_count": 28,
+      "live_subdomain_count": 28,
+      "host_count": 21,
+      "service_count": 60,
+      "subdomain_names": [
+        "atlantis-gcp.prodexlabs.com",
+        "azure-demo.prodexlabs.com",
+        "bitec.prodexlabs.com",
+        "cooked.prodexlabs.com",
+        "demo.prodexlabs.com",
+        "docs.prodexlabs.com",
+        "highcom.prodexlabs.com",
+        "l3h-ivs.prodexlabs.com",
+        "l3h-nh.prodexlabs.com",
+        "l3h-ss.prodexlabs.com",
+        "link.prodexlabs.com",
+        "littleleaffarms.prodexlabs.com",
+        "oidc-test.prodexlabs.com",
+        "panthalassa.prodexlabs.com",
+        "preview.prodexlabs.com",
+        "prod.prodexlabs.com",
+        "prodexlabs.com",
+        "prosalud-staging.prodexlabs.com",
+        "prosalud.prodexlabs.com",
+        "sandbox.prodexlabs.com",
+        "staging-gpt55.prodexlabs.com",
+        "staging.prodexlabs.com",
+        "time.prodexlabs.com",
+        "tour.prodexlabs.com",
+        "trial.prodexlabs.com",
+        "uat.prodexlabs.com",
+        "valorep.prodexlabs.com",
+        "www.prodexlabs.com"
+      ],
+      "ports_by_sub": {
+        "prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "atlantis-gcp.prodexlabs.com": {
+          "34.67.20.186": [
+            80,
+            443
+          ]
+        },
+        "azure-demo.prodexlabs.com": {
+          "150.171.109.178": [
             80,
             443
           ]
