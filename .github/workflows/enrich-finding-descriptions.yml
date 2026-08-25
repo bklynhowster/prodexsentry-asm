@@ -116,7 +116,7 @@ jobs:
           # DEFAULT_SUPABASE_URL (line 109 below). Centralized constants
           # are a separate cleanup — see [[16 Reconcile scan_queue.source]]
           # class issue.
-          SUPABASE_URL: "https://hdygktppfvuspnumpfuq.supabase.co"
+          SUPABASE_URL: "https://bxcvzpbmxsdtalyfanee.supabase.co"
         run: |
           set -euo pipefail
           # Count rows where ANY of the three narrative slots is NULL.
@@ -180,7 +180,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           # SUPABASE_URL intentionally NOT set — the script's hardcoded
-          # default (DEFAULT_SUPABASE_URL = https://hdygktppfvuspnumpfuq.supabase.co)
+          # default (DEFAULT_SUPABASE_URL = https://bxcvzpbmxsdtalyfanee.supabase.co)
           # kicks in via os.environ.get(..., DEFAULT). Setting it here to an
           # absent secret would evaluate to "" which the supabase client
           # rejects with "supabase_url is required".
