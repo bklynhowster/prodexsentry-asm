@@ -1,6 +1,6 @@
 name: Enrich finding descriptions
 
-# PRODEXsentry — auto-enrichment for finding §1 / §2 / §3 narrative.
+# COMMANDsentry — auto-enrichment for finding §1 / §2 / §3 narrative.
 #
 # The portal's finding detail page renders three narrative slots:
 #   §1 What is this?            → findings.description_synth
@@ -116,7 +116,7 @@ jobs:
           # DEFAULT_SUPABASE_URL (line 109 below). Centralized constants
           # are a separate cleanup — see [[16 Reconcile scan_queue.source]]
           # class issue.
-          SUPABASE_URL: "https://bxcvzpbmxsdtalyfanee.supabase.co"
+          SUPABASE_URL: "https://hdygktppfvuspnumpfuq.supabase.co"
         run: |
           set -euo pipefail
           # Count rows where ANY of the three narrative slots is NULL.
@@ -167,14 +167,20 @@ jobs:
         if: ${{ steps.precheck.outputs.should_run != 'false' }}
         run: |
           python -m pip install --upgrade pip
-          pip install anthropic supabase python-dotenv
+          # Pin anthropic below 1.0: the 1.0.0 major (released ~2026-08-06) removed
+          # `temperature` (and other sampling kwargs) from messages.create(), which
+          # broke every synthesis call with "unexpected keyword argument 'temperature'"
+          # — the unpinned install had been silently pulling latest each run. 0.125.0
+          # is the last 0.x and restores the working API. Migrating the worker to the
+          # 1.0 API (temperature -> output_config) is a separate, deliberate task.
+          pip install 'anthropic<1.0' supabase python-dotenv
 
       - name: Run synthesis worker
         if: ${{ steps.precheck.outputs.should_run != 'false' }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           # SUPABASE_URL intentionally NOT set — the script's hardcoded
-          # default (DEFAULT_SUPABASE_URL = https://bxcvzpbmxsdtalyfanee.supabase.co)
+          # default (DEFAULT_SUPABASE_URL = https://hdygktppfvuspnumpfuq.supabase.co)
           # kicks in via os.environ.get(..., DEFAULT). Setting it here to an
           # absent secret would evaluate to "" which the supabase client
           # rejects with "supabase_url is required".
