@@ -832,6 +832,77 @@ def run_httpx_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
     flush_progress(ctx)
 
 
+# ── gau — historical-URL harvest, INPUT-ONLY (Ship 1; Obsidian 168/173, 4.7) ──
+# gau fetches known URLs for a host from THIRD-PARTY ARCHIVES only — Wayback,
+# Common Crawl, AlienVault OTX, URLScan. It NEVER contacts the target, so this
+# phase sends ZERO packets to the asset (verified against gau's source: it has
+# no target-probing path; --timeout/--retries govern the archive HTTP client).
+# Ship 1 is INPUT-ONLY: it harvests + persists the URLs and emits NO FindingEvent.
+# The harvested surface feeds finding-driven target selection in a later ship.
+_GAU_ARCHIVE_TIMEOUT_S = 45      # per-request timeout to the ARCHIVE apis (not the target)
+_GAU_THREADS = 3                 # archive-fetch workers
+_GAU_WALL_TIMEOUT_S = 120        # hard wall on the whole invocation (4.7 R2: bounded per-asset runtime)
+_GAU_MAX_URLS = 5000             # cap the harvest so a deep Wayback history can't bloat the artifact
+_GAU_BLACKLIST = "png,jpg,jpeg,gif,svg,woff,woff2,ttf,eot,ico,css"  # static assets — noise for target-selection
+
+
+def _parse_gau_urls(stdout: str, cap: int = _GAU_MAX_URLS) -> list[str]:
+    """PURE (selftested, no gau needed). gau prints one URL per line to stdout.
+    Keep only http(s) lines, dedupe preserving first-seen order, cap the count.
+    Defensive against blank lines and any stray non-URL text (gau writes its
+    config/verbose notices to stderr, but we never trust that)."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for line in stdout.splitlines():
+        u = line.strip()
+        if not (u.startswith("http://") or u.startswith("https://")):
+            continue
+        if u in seen:
+            continue
+        seen.add(u)
+        out.append(u)
+        if len(out) >= cap:
+            break
+    return out
+
+
+def run_gau_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
+    """Harvest archived URLs for this host (INPUT-ONLY Ship 1). ADDITIVE +
+    NON-FATAL: a missing binary or an archive outage marks the tool degraded and
+    RETURNS — it never aborts the tier. Exercises the full additive-phase
+    machinery (tools_run + tool_status + artifact) but emits NO FindingEvent, so
+    it can never auto-close another tool's findings (no `source='gau'` rows
+    exist for the note-127 autocloser to reconcile)."""
+    tool_name = "gau"
+    ctx.tools_run.append(tool_name)
+
+    rc, stdout, stderr = run_cmd(
+        ["gau", ctx.hostname,
+         "--timeout", str(_GAU_ARCHIVE_TIMEOUT_S),
+         "--threads", str(_GAU_THREADS),
+         "--blacklist", _GAU_BLACKLIST],
+        timeout=_GAU_WALL_TIMEOUT_S,
+    )
+    _log_stderr_tail(stderr, label="gau")
+
+    urls = _parse_gau_urls(stdout)
+    if urls:
+        ctx.artifacts.append((tool_name, "text", "\n".join(urls)))
+
+    if rc != 0 or not urls:
+        reason = ("binary_unavailable" if rc == 127
+                  else "no_urls" if rc == 0 else f"rc_{rc}")
+        log(f"  gau DEGRADED (non-fatal, additive input-only tool): reason={reason} rc={rc}")
+        mark_tool_degraded(ctx, tool_name, reason)
+        flush_progress(ctx)
+        return
+
+    log(f"  gau: harvested {len(urls)} archived URL(s) — INPUT-ONLY, zero target "
+        f"traffic (archives: wayback,commoncrawl,otx,urlscan)")
+    mark_tool_ok(ctx, tool_name)
+    flush_progress(ctx)
+
+
 # ============================================================================
 # Security-stack identification — P0 passive collectors (Obsidian 146; 4.7 R1/R2)
 # ============================================================================
@@ -1567,7 +1638,8 @@ def _select_exploit_findings(ctx: HeavyScanContext) -> list:
     """Existing OPEN findings for this asset (finding-driven, existing-only -> FK-safe), each with
     its latest finding_history.matched_at, for the safe_exploit selector. Open set is the canonical
     ('detected','confirmed','open','regressed') (schema.sql / 20260528c). Class-agnostic read;
-    #2.1 filters to sensitive-path downstream."""
+    #2.1 / #2.1.b filter to sensitive-path / cors downstream (category + params carry the cors
+    endpoint the passive emitter recorded)."""
     if not ctx.dsn:
         return []
     try:
@@ -1614,7 +1686,9 @@ def _fire_exploit_get(ctx: HeavyScanContext, work_dir: Path, url: str, probe_id:
                       extra_headers: list | None = None) -> dict:
     """ONE detect-only GET, attribution-headed (4.7 B), body captured for classification. Returns the
     safe_exploit captured shape {status, headers, body, time, size}. 4.7 A — the body is REDACTED at
-    capture; the raw body is never persisted (only classify's redacted PoC reaches the DB)."""
+    capture; the raw body is never persisted (only classify's redacted PoC reaches the DB).
+    extra_headers (e.g. ['-H', 'Origin: ...']) lets the CORS class add its reflected-origin probe
+    header without changing the sensitive-path callers."""
     sink = work_dir / f"exploit_{probe_id}.body"
     args = (["curl", "-sSk", "-o", str(sink), "-D", "-",
              "-w", "\nCS_STATUS:%{http_code} CS_SIZE:%{size_download} CS_TIME:%{time_total}",
@@ -2195,13 +2269,6 @@ def close_out_heavy(conn, ctx: HeavyScanContext, inserted: int, updated: int, Js
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
-            # CLOSE_SCAN_*_SQL (shared from run_medium — Prodex-first targeted-scan
-            # schema) reference these. Heavy never runs the targeted planner, so both
-            # are NULL ("planner didn't run"). They must be PRESENT as params or
-            # psycopg errors on the missing placeholder — the bug that failed the
-            # first Prodex heavy (run 102, 2026-07-10).
-            "scan_profile": None,
-            "matrix_version_sha": None,
         }
         cur.execute(CLOSE_SCAN_RUN_SQL, params)
         cur.execute(CLOSE_SCAN_QUEUE_SQL, params)
@@ -2231,10 +2298,6 @@ def degraded_out_heavy(conn, ctx: HeavyScanContext, error: str,
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
-            # See close_out_heavy: DEGRADED_SCAN_*_SQL also stamp these targeted-scan
-            # columns; heavy has no profile → NULL. Must be present as params.
-            "scan_profile": None,
-            "matrix_version_sha": None,
         }
         cur.execute(DEGRADED_SCAN_RUN_SQL, params)
         cur.execute(DEGRADED_SCAN_QUEUE_SQL, params)
@@ -2396,7 +2459,7 @@ def run(descriptor_path: str, dsn: str) -> int:
         # tool_status keys each phase sets — testssl.sh / httpx — and the
         # net-depth pair credit (naabu / fingerprintx). Best-effort:
         # flush_planned_steps no-ops if dsn unset and swallows failures.
-        ctx.planned_steps = ["testssl.sh", "httpx", "naabu", "fingerprintx"]
+        ctx.planned_steps = ["testssl.sh", "httpx", "gau", "naabu", "fingerprintx"]
         flush_planned_steps(ctx)
 
         # Phase 1 — testssl.sh (P2). The whole point of v1 — clears the
@@ -2407,6 +2470,13 @@ def run(descriptor_path: str, dsn: str) -> int:
         # this call are the entire "add a tool" surface; the writer + close_out
         # are tool-agnostic. Runs after testssl has proven reachability.
         run_httpx_phase(ctx, work_dir)
+
+        # gau — historical-URL harvest (ADDITIVE, non-fatal, INPUT-ONLY Ship 1;
+        # Obsidian 168/173). ZERO target traffic: queries third-party archives
+        # (Wayback/CommonCrawl/OTX/URLScan), never the host. Persists a 'gau'
+        # artifact of harvested URLs and emits NO findings — the surface feeds
+        # target selection in a later ship. First heavy-tier depth addition.
+        run_gau_phase(ctx, work_dir)
 
         # Security-stack identification P0 — passive collectors (Obsidian 146).
         # ADDITIVE, persist-only: appends a `stack_id_passive` artifact and
