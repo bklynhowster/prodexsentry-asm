@@ -651,7 +651,8 @@ jobs:
         run: |
           SCAN_RUN_ID="${{ steps.poll.outputs.scan_run_id }}"
           # Name the step that died (2026-07-05) so the orphan sentinel isn't a
-          # black box. Passed to psql via -v + :'reason' (safe quoting).
+          # black box. Passed to psql via -v + :'reason' on STDIN (-f -), which
+          # is the only form that actually interpolates — see the block below.
           REASON="workflow ended without explicit close-out"
           if [[ "${{ steps.fetch_configs.outcome }}" == "failure" ]]; then
             REASON="failed during setup: fetch WireGuard configs (retries exhausted)"
@@ -659,25 +660,42 @@ jobs:
             REASON="failed during setup: VPN bring-up (retries exhausted)"
           fi
           echo "orphan-cleanup reason: $REASON"
-          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -v reason="$REASON" -c "
-            update public.scan_run
-               set status = 'failed',
-                   completed_at = now(),
-                   duration_seconds = extract(epoch from (now() - started_at))::int,
-                   error_message   = coalesce(error_message, :'reason')
-             where scan_run_id = '$SCAN_RUN_ID'
-               and status      = 'running';
-          " || true
 
-          psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 -v reason="$REASON" -c "
-            update public.scan_queue
-               set status = 'failed',
-                   completed_at = now(),
-                   duration_seconds = extract(epoch from (now() - started_at))::int,
-                   error_message   = coalesce(error_message, :'reason')
-             where scan_run_id = '$SCAN_RUN_ID'
-               and status      = 'running';
-          " || true
+          # ─── 2026-08-26: this step had NEVER worked ────────────────────────
+          # It used `psql -c "... :'reason' ..."`. psql performs variable
+          # interpolation for interactive input and for -f, but NOT for -c —
+          # -c is handed to the server verbatim. So the server received a
+          # literal :'reason' and threw, every single time:
+          #     ERROR:  syntax error at or near ":"
+          # Both statements were wrapped in `|| true`, so the step stayed green
+          # while the orphan sentinel did nothing — rows orphaned by a genuine
+          # mid-run death stayed status='running' forever.
+          # Fix: feed the SQL on stdin via `-f -` (interpolation DOES apply),
+          # and bind scan_run_id as a psql var too instead of splicing shell
+          # into the SQL string. Failures now emit a ::warning:: instead of
+          # being swallowed — cleanup still must not fail the scan, but it must
+          # never again fail SILENTLY.
+          orphan_update() {
+            local table="$1"
+            psql "$SUPABASE_DSN" -v ON_ERROR_STOP=1 \
+                 -v reason="$REASON" -v srid="$SCAN_RUN_ID" -f - <<SQL
+          update public.${table}
+             set status           = 'failed',
+                 completed_at     = now(),
+                 duration_seconds = extract(epoch from (now() - started_at))::int,
+                 error_message    = coalesce(error_message, :'reason')
+           where scan_run_id = :'srid'
+             and status      = 'running';
+          SQL
+          }
+
+          for t in scan_run scan_queue; do
+            if orphan_update "$t"; then
+              echo "orphan-cleanup: public.$t OK"
+            else
+              echo "::warning::orphan-cleanup FAILED on public.$t (scan_run_id=$SCAN_RUN_ID) — orphaned rows may remain status='running'"
+            fi
+          done
 
       # ─── Summarize ─────────────────────────────────────────────────
       - name: Summary
