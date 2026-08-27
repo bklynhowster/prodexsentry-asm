@@ -1038,11 +1038,22 @@ def check_dns_posture(ctx: ScanContext) -> None:
         return
 
     # Apex test: identity, NOT type. `type='apex_domain'` is unreliable —
-    # measured per instance: 15 rows carry that type but only 6 are real apexes.
-    is_apex = bool(apex) and ctx.asset_id == apex
-    # Data-quality gap (6 rows per instance have NULL apex_domain):
-    # FAIL SAFE to emitting rather than silently dropping DNS coverage.
-    unknown_scope = not apex
+    # measured on Command 2026-08-27: 15 rows carry that type, but only 6
+    # self-reference; the other 9 are mislabelled subdomains.
+    #
+    # 🔴 THE TWO INSTANCES USE DIFFERENT CONVENTIONS. Measured 2026-08-27:
+    #   Command : apex rows SELF-REFERENCE (apex_domain = asset_id), 0 NULL
+    #   Prodex  : the apex row is NULL     (apex_domain IS NULL),    0 self-ref
+    # BOTH arms are load-bearing; neither may be dropped. Testing only
+    # `apex is None` marks all 6 Command apexes non-apex AND promotes 6
+    # single_host rows to apex — backwards on the instance carrying the ~60
+    # re-attributed findings. Testing only self-reference silently demotes the
+    # Prodex apex, which would then emit solely via the sending-host arm.
+    #
+    # Bare IPs never reach here (guard above): on Command all 31 `ip` rows
+    # self-reference and both `ip_range` rows are NULL, so they would satisfy
+    # BOTH arms and be misread as apexes.
+    is_apex = (apex is None) or (ctx.asset_id == apex)
 
     # ── MX (new in A2). Serves sending-host inference AND DKIM provider hints.
     mx_rc, mx_out, _ = run_cmd(["dig", "+short", "MX", ctx.hostname], timeout=10)
@@ -1077,9 +1088,11 @@ def check_dns_posture(ctx: ScanContext) -> None:
     dkim = _dkim_probe(ctx.hostname, mx_records) if (is_apex or sending["is_sending_host"]) else []
     results["dkim_selectors_found"] = dkim
 
-    # Emit DNS findings when this name OWNS the fact: it's the apex, it sends
-    # mail in its own right, or we couldn't establish scope (fail-safe).
-    emit_scope = is_apex or unknown_scope or sending["is_sending_host"]
+    # Emit DNS findings when this name OWNS the fact: it's the apex, or it
+    # sends mail in its own right. NULL apex_domain now folds into is_apex, so
+    # the old separate `unknown_scope` arm is redundant — a NULL-scoped
+    # subdomain on Command still emits, preserving the fail-safe direction.
+    emit_scope = is_apex or sending["is_sending_host"]
 
     # ── (1)+(2) SPF
     if not spf_lines and emit_scope:

@@ -130,7 +130,7 @@ def main() -> int:
     tests = _all_tests()
     # FLOOR: this suite must never pass by collecting nothing.
     # See feedback_checks_that_pass_by_never_running.
-    assert len(tests) >= 13, f"expected >=13 tests, collected {len(tests)}"
+    assert len(tests) >= 21, f"expected >=13 tests, collected {len(tests)}"
     failed: list[tuple[str, str]] = []
     for t in tests:
         try:
@@ -146,6 +146,79 @@ def main() -> int:
     print(f"{len(tests) - len(failed)} / {len(tests)} passed")
     return 0 if not failed else 1
 
+
+
+# ── Apex identification (added 2026-08-27 after a live miss) ────────────────
+# The 13 tests above all exercise PURE functions. The apex test lives in the
+# WIRING of check_dns_posture, which none of them touched — so `is_apex` was
+# always False on both instances and nothing failed. It surfaced only when a
+# real scan of the prodexlabs.com APEX reported is_apex=false in its artifact.
+#
+# These fixtures are MEASURED from public.assets on 2026-08-27, and they
+# encode the fact that the two instances represent an apex DIFFERENTLY.
+
+def _is_apex(asset_id, apex_domain):
+    """Mirror of the expression in check_dns_posture (post bare-IP guard)."""
+    return (apex_domain is None) or (asset_id == apex_domain)
+
+
+def test_prodex_apex_is_apex_via_null_convention():
+    # Prodex: 1 apex_domain row, apex_domain IS NULL, 0 self-referencing.
+    assert _is_apex("prodexlabs.com", None) is True
+
+
+def test_prodex_subdomain_is_not_apex():
+    # Prodex: 63 single_host rows, all point elsewhere, 0 NULL.
+    assert _is_apex("gov.prodexlabs.com", "prodexlabs.com") is False
+
+
+def test_command_apex_is_apex_via_self_reference():
+    # Command: 15 apex_domain-typed rows, 0 NULL, 6 self-referencing.
+    # REGRESSION GUARD: `is_apex = (apex is None)` alone returns False here,
+    # demoting all 6 real Command apexes on the instance that carries the
+    # ~60 re-attributed findings.
+    assert _is_apex("commandcompanies.com", "commandcompanies.com") is True
+
+
+def test_command_mislabelled_apex_typed_row_is_not_apex():
+    # Command: 9 of the 15 apex_domain-typed rows point elsewhere — they are
+    # mislabelled subdomains. Identity, not type, is what decides.
+    assert _is_apex("mail.commandcompanies.com", "commandcompanies.com") is False
+
+
+def test_command_null_scoped_subdomain_fails_safe_to_apex():
+    # Command: 6 single_host rows have NULL apex_domain. Treating them as apex
+    # means they EMIT rather than being silently suppressed — the fail-safe
+    # direction, and the same behaviour the old `unknown_scope` arm produced.
+    assert _is_apex("orphan.commandcompanies.com", None) is True
+
+
+def test_null_only_rule_would_break_command():
+    # Pins the reasoning, so a future "simplification" to `apex is None`
+    # fails loudly here instead of silently on 6 production apexes.
+    null_only = lambda aid, apx: apx is None
+    assert null_only("commandcompanies.com", "commandcompanies.com") is False
+    assert _is_apex("commandcompanies.com", "commandcompanies.com") is True
+
+
+def test_self_reference_only_rule_would_break_prodex():
+    selfref_only = lambda aid, apx: bool(apx) and aid == apx
+    assert selfref_only("prodexlabs.com", None) is False
+    assert _is_apex("prodexlabs.com", None) is True
+
+
+def test_mirror_matches_the_real_expression_in_run_light():
+    """_is_apex above is a MIRROR. A mirror can drift from the code it mirrors,
+    and then these tests pass while production is wrong — which is exactly the
+    failure mode that let is_apex ship broken. Pin it to the source text."""
+    import pathlib as _pl
+    src = (_pl.Path(__file__).parent / "run_light.py").read_text()
+    expected = "is_apex = (apex is None) or (ctx.asset_id == apex)"
+    assert expected in src, (
+        "check_dns_posture's apex test changed but the mirror in this file "
+        "did not. Update _is_apex AND the fixtures, then re-measure "
+        "public.assets on BOTH instances before trusting the result.")
+    assert src.count(expected) == 1, "apex test appears more than once"
 
 if __name__ == "__main__":
     sys.exit(main())
