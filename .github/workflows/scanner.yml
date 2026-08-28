@@ -730,8 +730,14 @@ jobs:
       # work remains we re-fire the scanner via a PAT (secrets.DISPATCH_TOKEN).
       # Each run drains ONE asset (atomic SKIP LOCKED claim) then hands to the
       # next — the queue drains back-to-back with no external cron. No-op when
-      # DISPATCH_TOKEN is unset (Command keeps its cron-job.org poke model) or
-      # the queue is empty. Gated on has_work so a pre-poll failure can't loop.
+      # DISPATCH_TOKEN is unset or the queue is empty. Gated on has_work so a
+      # pre-poll failure can't loop. Ported to Command 2026-08-28 (parity):
+      # Command's poke model claims ONE asset per tick. Its cron is
+      # '7-57/10 * * * *' (every 10 min), so a 42-asset sweep needs ~7h AT BEST
+      # — and GitHub throttles scheduled crons hard, so the real figure is
+      # worse and unpredictable. Observed 2026-08-27: the queue sat idle with
+      # 40 queued and nothing running. Until the Command secret is set this
+      # step logs "self-chain disabled" and exits 0 — landing it is safe alone.
       - name: Self-chain if queue has more work
         if: ${{ always() && steps.poll.outputs.has_work == 'true' }}
         env:
