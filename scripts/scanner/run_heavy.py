@@ -850,11 +850,16 @@ def run_httpx_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
 # root. It looked healthy because `ok` only means rc==0 with a non-empty result.
 # Two defects, both ours, neither gau's:
 #
-#   1. NO --subs. gau queried ONLY the exact hostname. We scanned the apex
-#      `commandcompanies.com` while the actual site lives on
-#      `www.commandcompanies.com` — so every archived URL for the real site was
-#      excluded BY DEFAULT. We asked the archives about the wrong hostname and
-#      reported the answer as a clean result.
+#   1. NO --subs. gau queried ONLY the exact hostname, so records the archives
+#      filed under any OTHER hostname were excluded by default. Archives index
+#      by exact hostname string, not by "site".
+#      ⚠ CORRECTION 2026-08-28: I first claimed this explained the low yield on
+#      commandcompanies.com, asserting the real site lived on www. VERIFIED
+#      FALSE — the apex returns 200 and www 301-redirects TO IT, so the apex is
+#      canonical and was the right hostname all along. --subs is still correct
+#      (it catches genuinely separate hosts like mail/portal/insite) but it is
+#      NOT why this asset returned 4 URLs. Howie corrected me twice; one curl
+#      would have settled it. Check the redirect direction before theorising.
 #   2. The success log CLAIMED "archives: wayback,commoncrawl,otx,urlscan" — a
 #      string WE hardcoded, not gau reporting what it queried. We had zero
 #      evidence any provider beyond the first responded. --verbose fixes that;
@@ -868,6 +873,7 @@ _GAU_WALL_TIMEOUT_S = 180        # hard wall (raised from 120: --subs returns mo
                                  # wall-kill is rc!=0 -> degraded, so truncation stays visible)
 _GAU_MAX_URLS = 5000             # cap the harvest so a deep Wayback history can't bloat the artifact
 _GAU_BLACKLIST = "png,jpg,jpeg,gif,svg,woff,woff2,ttf,eot,ico,css"  # static assets — noise for target-selection
+_GAU_RETRIES = 3                 # Wayback/CommonCrawl are routinely flaky
 _GAU_STDERR_KEEP = 4000          # bounded evidence of what gau actually did
 
 
@@ -890,6 +896,39 @@ def _parse_gau_urls(stdout: str, cap: int = _GAU_MAX_URLS) -> list[str]:
             break
     return out
 
+
+
+
+_GAU_PROVIDERS = ("wayback", "commoncrawl", "otx", "urlscan")
+
+
+def gau_provider_failures(stderr: str) -> list[str]:
+    """PURE. Which archive providers gau reported trouble with.
+
+    🔴 gau EXITS 0 EVEN WHEN EVERY PROVIDER FAILS. Observed 2026-08-28 on
+    commandcompanies.com:
+        error instantiating commoncrawl: dial tcp4 ...: connection refused
+        failed to fetch wayback results page 0: API responded with non-200
+    ...and rc was still 0 with an empty result. So the exit code carries no
+    information about whether the harvest was even attempted successfully, and
+    a silent all-providers-down run is indistinguishable from a domain with no
+    archive history. This is why the yield floor exists, and why provider
+    failure is reported SEPARATELY from an empty result: "the archives were
+    down" and "this domain has no history" are different facts.
+    """
+    low = (stderr or "").lower()
+    out = []
+    for prov in _GAU_PROVIDERS:
+        for marker in ("error instantiating " + prov,
+                       "failed to fetch " + prov,
+                       "provider=" + prov):
+            if marker in low and ("error" in low or "failed" in low):
+                if prov not in out and (
+                        "error instantiating " + prov in low
+                        or "failed to fetch " + prov in low):
+                    out.append(prov)
+                break
+    return out
 
 
 def gau_harvest_shape(urls: list[str], hostname: str) -> dict:
@@ -968,6 +1007,7 @@ def run_gau_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
                                                      # apex scan misses the entire www site
          "--verbose",                                # make gau report its own provider work
          "--timeout", str(_GAU_ARCHIVE_TIMEOUT_S),
+         "--retries", str(_GAU_RETRIES),          # archives are flaky; rc=0 hides it
          "--threads", str(_GAU_THREADS),
          "--blacklist", _GAU_BLACKLIST],
         timeout=_GAU_WALL_TIMEOUT_S,
@@ -976,24 +1016,33 @@ def run_gau_phase(ctx: HeavyScanContext, work_dir: Path) -> None:
 
     urls = _parse_gau_urls(stdout)
     shape = gau_harvest_shape(urls, ctx.hostname)
+    failed_providers = gau_provider_failures(stderr)
 
-    if urls:
-        # Persist the harvest AND the evidence of how it was obtained. The
-        # stderr is gau's own account of its provider work — it replaces the
-        # provider list we used to assert in the success log.
-        ctx.artifacts.append((tool_name, "json", json.dumps({
-            "urls": urls,
-            "invocation": {"subs": True, "verbose": True,
-                           "blacklist": _GAU_BLACKLIST,
-                           "threads": _GAU_THREADS,
-                           "archive_timeout_s": _GAU_ARCHIVE_TIMEOUT_S,
-                           "wall_timeout_s": _GAU_WALL_TIMEOUT_S},
-            "shape": shape,
-            "gau_stderr": (stderr or "")[-_GAU_STDERR_KEEP:],
-        })))
+    # 🔴 PERSIST EVIDENCE UNCONDITIONALLY — especially on the failure path.
+    # This block was originally guarded by `if urls:`, so the very first real
+    # failure (all providers down, 2026-08-28) persisted NOTHING and had to be
+    # diagnosed from the Actions log. Evidence is least available exactly when
+    # it is most needed; write it before deciding anything.
+    ctx.artifacts.append((tool_name, "json", json.dumps({
+        "urls": urls,
+        "invocation": {"subs": True, "verbose": True, "retries": _GAU_RETRIES,
+                       "blacklist": _GAU_BLACKLIST,
+                       "threads": _GAU_THREADS,
+                       "archive_timeout_s": _GAU_ARCHIVE_TIMEOUT_S,
+                       "wall_timeout_s": _GAU_WALL_TIMEOUT_S},
+        "shape": shape,
+        "failed_providers": failed_providers,
+        "rc": rc,
+        "gau_stderr": (stderr or "")[-_GAU_STDERR_KEEP:],
+    })))
 
     if rc != 0 or not urls:
+        # Provider failure is a DIFFERENT fact from "no archive history".
+        # Conflating them would let an archives-outage look like a clean
+        # answer about the target.
         reason = ("binary_unavailable" if rc == 127
+                  else f"providers_failed_{'+'.join(failed_providers)}"
+                  if (rc == 0 and failed_providers)
                   else "no_urls" if rc == 0 else f"rc_{rc}")
         log(f"  gau DEGRADED (non-fatal, additive input-only tool): reason={reason} rc={rc}")
         mark_tool_degraded(ctx, tool_name, reason)
