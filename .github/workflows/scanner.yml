@@ -49,8 +49,23 @@ on:
   #    Standing 5-min cron to auto-drain the queued Light fleet sweep
   #    (no portal auto-dispatch wired yet). DISABLE after the sweep —
   #    empty ticks bill ~1 GH-min each. Re-comment these two lines.
-  # schedule:                        # RETIRED 2026-07-03 — replaced by the
-  #   - cron: '*/5 * * * *'          # self-chain drain (PAT re-dispatch).
+  # ─── RE-ENABLED 2026-09-02 (4.7 ruling ㊶) ────────────────────────────
+  # Retired 2026-07-03 in favour of the self-chain drain. That was wrong, and
+  # COMMANDsentry proved it: the self-chain only fires at the END of a run with
+  # queue depth > 0, so it CANNOT start a drain from idle. Command hit exactly
+  # this on 2026-07-21 — "went dark ~11:52 AM and the queue silently stopped
+  # draining for hours" — and re-enabled its native cron. Prodex kept the
+  # pre-fix design, leaving cold starts dependent on a cron-job.org heartbeat
+  # and the ~5-6-hourly ASM Discover chain. Observed 2026-09-02: a heavy row sat
+  # queued and claimable with nothing picking it up.
+  #
+  # 10 min (matching Command), not the old 5: empty ticks poll_queue, find no
+  # work and exit in seconds. FREE — this repo is PUBLIC, so Actions minutes are
+  # unlimited; that billing constraint is what justified retiring it in July.
+  # The self-chain, the portal heartbeat and the ASM Discover chain all remain —
+  # cron is additive cover for the idle case, not a replacement.
+  schedule:
+    - cron: '3-53/10 * * * *'
 
   # Chain after every successful ASM Discover run — guarantees a queue
   # drain pass at least every 6 hours (the ASM Discover cadence) even
@@ -236,7 +251,11 @@ jobs:
             select queue_id || '|' || status
               from public.scan_queue
              where asset_id = '$ASSET_ID'
-               and status in ('queued', 'running')
+               -- 4.7 ㊲ — age-bound 'running'; see enqueue-fleet.yml for why.
+               -- Without this a dead runner's row blocks this asset forever.
+               and (status = 'queued'
+                    or (status = 'running'
+                        and started_at > now() - (interval '1 hour' * ${STALE_RUN_HOURS:-8})))
              order by triggered_at desc
              limit 1;
           ")
