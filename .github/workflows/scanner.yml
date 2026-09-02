@@ -59,6 +59,19 @@ on:
   # and the ~5-6-hourly ASM Discover chain. Observed 2026-09-02: a heavy row sat
   # queued and claimable with nothing picking it up.
   #
+  # 🔴 MEASURED 2026-09-02, AFTER this was re-enabled — GitHub does NOT deliver
+  # this cadence. First scheduled fire came 3h19m after enablement
+  # (18:57:30Z on 45c9287), and Command's identically-configured 10-min cron
+  # shows gaps of 173/204/244/284/279/109/129/164/204 minutes across its last
+  # ten scheduled runs. Effective cadence on BOTH instances is 2-5 HOURS.
+  # The Jul 3 window below used '*/5' and still produced only 6 runs in 6h15m.
+  #
+  # This does not invalidate re-enabling it — as ADDITIVE idle cover it works,
+  # and it is free on a public repo. But nothing should assume a 10-minute
+  # drain, and shortening the interval will NOT help (Jul 3 proves */5 is
+  # throttled the same). A tighter idle guarantee has to come from the portal
+  # /api/scan-tick heartbeat, not from GitHub cron.
+  #
   # 10 min (matching Command), not the old 5: empty ticks poll_queue, find no
   # work and exit in seconds. FREE — this repo is PUBLIC, so Actions minutes are
   # unlimited; that billing constraint is what justified retiring it in July.
