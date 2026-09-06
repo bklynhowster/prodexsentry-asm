@@ -121,6 +121,47 @@ def test_naabu_failed_suppresses_close():
     cur = _run({80}, prior=prior, naabu_ok=False)   # 443 "gone" but naabu failed → no close
     assert not any(e["event_type"] == "port_closed" for e in _events(cur)), "fail-closed on naabu failure"
 
+# ── 226 / 4.7 Q4 — a failed naabu is a TRUE no-op, not a value-preserving write ──────────────────
+def test_naabu_failed_is_a_true_noop():
+    """Shipped 225 wrote the blob + service_count even when naabu FAILED. GREATEST(existing,0) made
+    the value harmless, but it still (a) stamped updated_by/updated_at as a scanner observation and
+    (b) created a 0-port BASELINE that the next real scan diffs into spurious port_opened. 4.7 Q4:
+    absence of coverage is not an observation — skip the whole write."""
+    cur = _run({80, 443}, prior=None, naabu_ok=False)
+    assert _surface_upserts(cur) == [], "naabu-fail must not touch asset_surface AT ALL"
+    assert _events(cur) == [], "naabu-fail must emit no surface events"
+
+
+def test_naabu_failed_does_not_block_scan_closeout():
+    cur = _run({80}, prior=None, naabu_ok=False)
+    assert any("scan_run" in sql.lower() for sql, _ in cur.executed), \
+        "close_out must still close the scan_run when the surface write is skipped"
+
+
+# ── SQL type-cast pin (caught LIVE 2026-09-05) ───────────────────────────────────────────────────
+def test_upsert_casts_blob_to_jsonb():
+    # psycopg's Json adapts a dict to type `json`, but jsonb_set() has no `json` overload — so
+    # WITHOUT an explicit ::jsonb cast the whole UPSERT fails to PLAN (UndefinedFunction), even on
+    # the plain-INSERT path (Postgres resolves the ON CONFLICT branch at plan time). The fake-cursor
+    # tests can't see this (no real Postgres), so pin the cast here.
+    sql = run_light.SCANNER_SURFACE_UPSERT
+    assert "%(blob)s::jsonb" in sql, "blob param must be cast ::jsonb (json has no jsonb_set overload)"
+    assert "jsonb_set(" in sql
+    # AmbiguousParameter guard: jsonb_build_object is VARIADIC "any", so an untyped param key
+    # can't have its type inferred — the tier param must be cast ::text (caught live 2026-09-05).
+    assert "%(tier)s::text" in sql, "tier param must be cast ::text inside jsonb_build_object"
+    # No bare %(blob)s / %(tier)s feeding a jsonb builder (every such param must carry a ::cast).
+    assert "jsonb_build_object(%(tier)s," not in sql and "jsonb_build_object(%(tier)s)" not in sql
+
+
+# ── wiring: close_out actually calls the surface write-back ───────────────────────────────────────
+def test_close_out_calls_surface_writeback():
+    src = inspect.getsource(run_light.close_out)
+    assert "write_scanner_surface" in src, "close_out must call write_scanner_surface"
+    assert "conn.transaction()" in src, "surface write must be savepoint-isolated (best-effort)"
+    assert hasattr(run_light, "build_scanner_surface_blob"), "shared blob builder must be imported"
+
+
 
 # ── SQL type-cast pin (caught LIVE 2026-09-05) ───────────────────────────────────────────────────
 def test_upsert_casts_blob_to_jsonb():
