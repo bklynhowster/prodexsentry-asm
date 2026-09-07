@@ -1,0 +1,174 @@
+name: Toolchain inventory
+
+# Capture the EXACT versions and flag sets of every scanning tool in the
+# running scanner image.
+#
+# WHY THIS EXISTS (2026-09-07). docker/Dockerfile installs all ten scanning
+# tools with `@latest`, the image is published as `:latest`, and nuclei
+# templates are refreshed with `-update-templates` at build time. Three
+# independent floating layers. Consequences:
+#
+#   * A finding can disappear because a nuclei template was renamed or
+#     dropped upstream, and the finding lifecycle records that as
+#     REMEDIATION. That is a false-remediation path no gate can catch,
+#     because the scan itself ran perfectly.
+#   * Every coverage measurement in specs 227-231 assumes stable tool
+#     behaviour. `wall_clock_cut_400s at 78%` can move with a nuclei
+#     release and nothing in our code changes.
+#   * Probe flags can change under us, which is what blocked the
+#     curl -> Go-stack migration (spec 231): no way to know which httpx
+#     flags the installed build actually supports.
+#
+# This workflow is the ground truth we pin FROM, and the thing to re-run
+# whenever a deliberate bump happens. Read-only; it changes nothing.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/bklynhowster/prodexsentry-scanner:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Tool versions
+        # Never let one tool's exit code kill the inventory — several PD
+        # tools print version to stderr and exit non-zero. We want the
+        # whole picture, including which ones misbehave.
+        run: |
+          set +e
+          echo "=============================================="
+          echo " TOOL VERSIONS  (pin the Dockerfile to these)"
+          echo "=============================================="
+          # ⚠ grep for the version line, do NOT `head` the raw output.
+          # dnsx / httpx / naabu / katana print a multi-line ASCII banner
+          # BEFORE the version, so `head -5` silently cut the only line that
+          # mattered on the first run of this workflow (2026-09-07). Filtering
+          # on the text we actually want is immune to banner height.
+          #
+          # ⚠ And there is no universal version flag. Run #2 (2026-09-07)
+          # proved it: ffuf rejects -version (wants -V), fingerprintx rejects
+          # both -version and --version (cobra: "unknown flag"). Two of the
+          # ten tools returned NOTHING, which is the failure that matters —
+          # an empty answer here reads as "no version" and would have shipped
+          # an incomplete pin. So: try every flag form, then fall back to a
+          # method that cannot depend on the tool's CLI at all.
+          #
+          # THE FALLBACK. Every Go binary embeds its own build info, and the
+          # main module record is literally `mod<TAB>module/path<TAB>vX.Y.Z`.
+          # We read it straight out of the executable — no Go toolchain
+          # required, which matters because the runtime stage deliberately has
+          # none (binaries are built in the builder stage). This is ground
+          # truth about the shipped artifact rather than whatever the tool
+          # chooses to print about itself.
+          #
+          # ⚠ `tr` first, then grep. Do NOT try to match the tabs with one
+          # clever regex: that regex cannot be tested anywhere outside this
+          # image, and a pattern that silently matches nothing looks exactly
+          # like "this tool has no version" — which is the failure that has
+          # already cost this workflow two runs. `tr -c '[:print:]' '\n'`
+          # turns every non-printable byte (tabs included) into a newline, so
+          # the record becomes three plain lines: mod / path / version. Then
+          # `grep -A2 '^mod$'` needs no cleverness at all.
+          # ⚠ Do NOT use -m1 here. Run #3 (2026-09-07) proved why: nuclei and
+          # katana both contain an earlier literal `mod` line somewhere in
+          # their data, so first-match returned `mod @` and `mod  H` — not
+          # empty, just garbage, which is worse because the empty-fallback
+          # never fired. Take EVERY `^mod$` window and keep only the lines
+          # that actually look like a module path or a version; the junk
+          # windows filter themselves out.
+          go_module_version() {
+            b=$(command -v "$1" 2>/dev/null)
+            if [ -z "$b" ]; then echo "(not on PATH)"; return; fi
+            info=$(tr -c '[:print:]' '\n' < "$b" \
+                   | grep -a -A2 '^mod$' \
+                   | grep -aE '^([a-z0-9.-]+\.[a-z]{2,}/|v[0-9]+\.)' \
+                   | head -4 | tr '\n' ' ')
+            if [ -n "$info" ]; then
+              echo "$info"
+            else
+              # Never return empty. An empty answer is indistinguishable from
+              # "no version exists" and would ship an incomplete pin.
+              echo "(no Go build-info record found — raw candidates:)"
+              tr -c '[:print:]' '\n' < "$b" \
+                | grep -aE "^(v[0-9]+\.[0-9]+|go1\.|github\.com/)" | head -6 \
+                | sed 's/^/      /'
+            fi
+          }
+
+          for t in subfinder dnsx httpx naabu nuclei katana fingerprintx ffuf gau; do
+            printf '\n----- %s -----\n' "$t"
+            # ⚠ flags only — never a bare `version` subcommand. gau and
+            # subfinder take positional/stdin targets, so `gau version`
+            # would go scan a "domain" called version. `< /dev/null` for the
+            # same reason: a flag that turns out to mean something other than
+            # version must not leave the tool blocking on stdin.
+            out=$("$t" -version 2>&1 </dev/null; "$t" --version 2>&1 </dev/null; "$t" -V 2>&1 </dev/null)
+            echo "$out" | grep -iE "current version|engine version|^v?[0-9]+\.[0-9]+" \
+              | grep -viE "^ *$" | head -4
+            # Always print the embedded module version too. It is the pin we
+            # actually copy into the Dockerfile, and it is the only line that
+            # exists for the tools whose CLI refuses to tell us.
+            printf '  [embedded] '; go_module_version "$t" || echo "(no build info found)"
+          done
+          # ⚠ wireguard-go needs the embedded record too, and it is the one
+          # tool where the two numbers are not even the same SCHEME. The
+          # binary prints its own release string ("v0.0.20250522"); the Go
+          # module has no tags at all, so it pins as a pseudo-version
+          # ("v0.0.0-20260522210424-<hash>"). You cannot derive one from the
+          # other, and this is the VPN egress keystone — not a thing to guess.
+          printf '\n----- wireguard-go -----\n'
+          wireguard-go --version 2>&1 | head -3
+          printf '  [embedded] '; go_module_version wireguard-go
+          printf '\n----- wg -----\n';           wg --version 2>&1 | head -3
+          printf '\n----- nikto -----\n';        nikto -Version 2>&1 | head -8
+          printf '\n----- wafw00f -----\n';      wafw00f --version 2>&1 | head -3
+          printf '\n----- testssl -----\n';      testssl.sh --version 2>&1 | head -5
+          exit 0
+
+      - name: Nuclei template version
+        # Templates float SEPARATELY from the nuclei binary: the Dockerfile
+        # runs `nuclei -update-templates` at build time. Pinning the binary
+        # alone does not pin what it scans FOR.
+        run: |
+          set +e
+          echo "=== nuclei -templates-version ==="
+          nuclei -templates-version 2>&1 | head -10
+          echo
+          echo "=== template dir + count ==="
+          for d in /root/nuclei-templates "$HOME/nuclei-templates" /nuclei-templates; do
+            [ -d "$d" ] && { echo "$d"; find "$d" -name '*.yaml' | wc -l; break; }
+          done
+          exit 0
+
+      - name: httpx flag set
+        # THE SPEC-231 BLOCKER. The curl -> Go-stack migration needs httpx to
+        # return RESPONSE HEADERS (check_headers needs the security-header
+        # set; check_methods needs `Allow` from OPTIONS). No existing httpx
+        # call in this repo retrieves headers, so there is no in-repo
+        # precedent for the flag. Capture the real one rather than guess —
+        # a guessed flag ships a probe that fails on the runner.
+        run: |
+          set +e
+          echo "=== httpx -h (FULL) ==="
+          httpx -h 2>&1
+          echo
+          echo "=== grep: header / method / response-body flags ==="
+          httpx -h 2>&1 | grep -iE "header|method|response|body|store|json" || true
+          exit 0
+
+      - name: Image provenance
+        run: |
+          set +e
+          echo "=== image digest / labels ==="
+          cat /etc/os-release 2>/dev/null | head -3
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          exit 0
