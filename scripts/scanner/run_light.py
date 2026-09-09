@@ -45,6 +45,7 @@ EXIT CODES:
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -383,21 +384,59 @@ def tls_check_is_degraded(exception: BaseException) -> tuple[bool, str]:
     return True, "unknown_exception"
 
 
+def httpx_header_key(header_name: str) -> str:
+    """Translate a wire-format header name to the key httpx emits in -json.
+
+    ⚠ THIS IS THE WHOLE MIGRATION HAZARD, so it gets its own function and
+    its own test. httpx does NOT return wire-format names in the `header`
+    object. Captured from the live v1.10.0 build against www.prodexlabs.com
+    (toolchain-inventory run #6, 2026-09-08):
+
+        "header": { "cache_control": ..., "content_type": ...,
+                    "x_powered_by": ..., "alt_svc": ..., "etag": ... }
+
+    Lowercase, and hyphens become UNDERSCORES. The curl path looked up
+    `header_name.lower()` -> "strict-transport-security", which matches
+    NOTHING in that dict. A naive swap would have reported all seven
+    security headers missing on every asset in the fleet — a clean
+    fleet-wide false positive that looks exactly like a real finding.
+
+    Caught only because the JSON shape was captured before the parser was
+    written. Do not "simplify" this to .lower().
+    """
+    return header_name.strip().lower().replace("-", "_")
+
+
 def headers_check_is_degraded(rc: int, stdout: str, stderr: str) -> tuple[bool, str]:
-    """curl -sI failure modes. rc != 0 with empty stdout = couldn't fetch
-    headers. rc == 0 but empty stdout = curl thinks it worked but got
-    nothing parseable (uncommon but seen)."""
+    """httpx -json failure modes (㊴ migration, 2026-09-08).
+
+    Was curl -sI. The migration exists because curl's UNMAPPED exit codes
+    were being recorded as reachability verdicts: measured over 90 days,
+    158 `curl_failed` runs on headers_check where the Go stack reached the
+    same host in the SAME run 94% of the time (spec 231). The mapped codes
+    (6/7/28/35) were honest — the catch-all was not.
+
+    httpx gives a structured `failed` boolean instead of an exit code we
+    have to interpret, so there is no catch-all left to misread.
+    """
     if rc != 0 and len(stdout.strip()) == 0:
-        # curl's own exit code mapping for the network-level failures
-        if rc in (6, 7):  # 6=resolve failed, 7=connect failed
-            return True, "network_unreachable"
-        if rc == 28:  # operation timed out
-            return True, "network_timeout"
-        if rc == 35:  # SSL handshake fail
-            return True, "tls_handshake_failed"
-        return True, "curl_failed"
-    if rc == 0 and len(stdout.strip()) == 0:
+        # httpx exits non-zero with no output only when it could not run or
+        # could not reach anything at all. No per-errno mapping to guess at.
+        return True, "httpx_no_output"
+    if not stdout.strip():
         return True, "empty_response_body"
+    try:
+        rec = json.loads(stdout.strip().splitlines()[0])
+    except (json.JSONDecodeError, IndexError):
+        return True, "no_parseable_json"
+    # httpx's own verdict, not our inference from a process exit code.
+    if rec.get("failed") is True:
+        return True, "host_unreachable"
+    if not isinstance(rec.get("header"), dict):
+        # -irh was accepted but produced no header map. Do NOT treat this as
+        # "no headers present" — that would emit 7 false findings. It is a
+        # tool fault, and it must degrade.
+        return True, "no_header_map"
     return False, ""
 
 
@@ -437,17 +476,51 @@ def dns_posture_is_degraded(spf_rc: int, dmarc_rc: int) -> tuple[bool, str]:
     return False, ""
 
 
-def httpx_methods_is_degraded(rc: int, stdout: str) -> tuple[bool, str]:
-    """methods_check uses curl OPTIONS. Same failure-mode mapping as
-    headers_check — rc != 0 with empty stdout means we couldn't ask the
-    server about its methods at all."""
-    if rc != 0 and len(stdout.strip()) == 0:
-        if rc in (6, 7):
-            return True, "network_unreachable"
-        if rc == 28:
-            return True, "network_timeout"
-        return True, "curl_failed"
-    return False, ""
+def methods_check_is_degraded(rc: int, stdout: str) -> tuple[bool, str]:
+    """methods_check is the ONE light probe ㊴ cannot migrate.
+
+    httpx has no way to SEND an OPTIONS request — its `-method` flag is
+    display-only — so this probe stays on curl permanently. What ㊴ fixes
+    here is the INTERPRETATION, not the mechanism.
+
+    🔴 THE DEFECT. The old catch-all returned `curl_failed` for every exit
+    code it did not recognise, and degradation.py maps `curl_failed` ->
+    CUT_TRANSPORT, i.e. "we never reached the target". That is a factual
+    claim about the ASSET, invented from an exit code nobody had mapped.
+
+    It was measured wrong. Over 90 days, 158 `curl_failed` runs on
+    headers_check had the Go stack reach the SAME host in the SAME run 94%
+    of the time. And `curl_failed` is 316 of the ~1066 occurrences that make
+    TRANSPORT the dominant cut class on this fleet — so roughly a third of
+    that headline rests on a guess that was usually false.
+
+    So: map only what curl(1) actually documents, and for anything else say
+    we do not know. An unmapped exit falls through _CUT_CLASS_PREFIXES to
+    CUT_UNCLASSIFIED by design — `classify_cut_reason` returns that rather
+    than a default class precisely so an unrecognised reason is an admitted
+    gap instead of a wrong population. `unclassified` in a group-by is the
+    signal to come add a real mapping once evidence exists for one.
+
+    ⚠ Do NOT add a `curl_exit` prefix to _CUT_CLASS_PREFIXES to "tidy up"
+    the unclassified rows. That re-asserts the exact verdict this removes.
+    ⚠ `curl_failed` STAYS mapped in degradation.py. 316 historical rows
+    carry it and must keep classifying the way they did when they were
+    written; this changes what we emit from now on, not the past.
+    """
+    # Unchanged trigger: a non-zero rc that also produced NO output. A
+    # non-zero rc WITH output means curl got something back and the probe
+    # can still be read.
+    if not (rc != 0 and len(stdout.strip()) == 0):
+        return False, ""
+    if rc in (6, 7):
+        # curl(1): 6 = couldn't resolve host, 7 = failed to connect.
+        # Both are unambiguous transport. Kept lumped under the existing
+        # reason so historical classification is unchanged.
+        return True, "network_unreachable"
+    if rc == 28:
+        return True, "network_timeout"
+    # Everything else: name the code, claim nothing about the target.
+    return True, f"curl_exit_{rc}_unmapped"
 
 
 def wpvuln_lookup_is_degraded(reason: str | None) -> tuple[bool, str]:
@@ -461,6 +534,54 @@ def wpvuln_lookup_is_degraded(reason: str | None) -> tuple[bool, str]:
     if reason in ("client_import_failed", "homepage_fetch_failed"):
         return True, reason
     return False, ""
+
+
+def wpvuln_homepage_is_degraded(rc: int, html: str) -> tuple[bool, str]:
+    """㊴ probe 3, INTERPRETATION fix. Same defect as methods_check.
+
+    The old call site collapsed `rc != 0 or not html` into the single reason
+    `homepage_fetch_failed`, which degradation.py maps to CUT_TRANSPORT --
+    "we never reached the target". That is a claim about the ASSET derived
+    from an unmapped curl exit code.
+
+    It is not a small line item: `homepage_fetch_failed` is 265 of the ~1066
+    occurrences that make TRANSPORT the dominant cut class on this fleet,
+    second only to `curl_failed`'s 316. Both are light-tier, and both were
+    over-claiming.
+
+    ⚠ probe 3 STAYS ON CURL, permanently, and that is a measured decision --
+    not laziness. Inventory run #9 (2026-09-09) against a real www->apex 301:
+
+        no -fr :  status 301, wp-content occurrences in body = 0
+        -fr    :  status 200, wp-content occurrences in body = 46
+
+    So `-fr` is mandatory or every redirecting asset reads as "not WordPress"
+    and mark_tool_ok fires -- a healthy-looking total loss of WP CVE coverage.
+    But under `-fr`, httpx's `url` field STILL echoes the input, so there is
+    no field saying where we landed, and the ratified guard (never follow a
+    redirect off eTLD+1) cannot be enforced from its output. `-include-chain`
+    is not a way out: it reintroduces the same unescaped-control-character
+    parse error that makes `-irr` unusable. curl's `-w %{url_effective}` does
+    report the final URL, so curl remains the only tool here that CAN enforce
+    the boundary. Enforcing it is a separate, ratified piece of work.
+
+    Distinguishes three outcomes that were previously one:
+      * documented transport codes  -> a real transport verdict
+      * reached but empty body      -> NOT transport; the host answered
+      * anything else               -> unmapped, classifies as UNCLASSIFIED
+    """
+    if rc == 0 and html:
+        return False, ""
+    if rc == 0 and not html:
+        # We reached the host and it returned nothing. That is a fact about
+        # the RESPONSE, not about reachability. Calling it transport would be
+        # the same over-claim in a different costume.
+        return True, "empty_homepage_body"
+    if rc in (6, 7):
+        return True, "network_unreachable"
+    if rc == 28:
+        return True, "network_timeout"
+    return True, f"curl_exit_{rc}_unmapped"
 
 
 def common_paths_is_degraded(probe_count: int, total_paths: int) -> tuple[bool, str]:
@@ -565,30 +686,44 @@ def check_tls(ctx: ScanContext) -> None:
 
 
 def check_headers(ctx: ScanContext) -> None:
-    """Fetch '/' and check for the standard security header set."""
+    """Fetch '/' and check for the standard security header set.
+
+    ㊴ (2026-09-08): migrated curl -sI -> httpx -json -irh. Precedent is
+    healthcheck #32 (2026-06-16), which moved curl -> httpx for exactly this
+    reason: targets that fingerprint TLS or header shapes reject curl while
+    accepting the Go stack. The light tier's own probes were never migrated
+    until now.
+
+    ⚠ -L is not passed to httpx here on purpose. curl's -L followed
+    redirects silently, so a host redirecting off its own eTLD+1 would have
+    had ITS headers graded against OUR asset. httpx reports the redirect via
+    status_code and we grade what the asset itself served.
+    """
     ctx.tools_run.append("headers_check")
     rc, stdout, stderr = run_cmd(
-        ["curl", "-sI", "-L", "--max-time", "15",
-         "-H", "User-Agent: Mozilla/5.0 (compatible; COMMANDsentry/1.0)",
-         f"https://{ctx.hostname}/"],
-        timeout=20,
+        ["httpx", "-u", f"https://{ctx.hostname}/",
+         "-silent", "-no-color", "-json", "-irh", "-sc",
+         "-timeout", "15",
+         "-H", "User-Agent: Mozilla/5.0 (compatible; COMMANDsentry/1.0)"],
+        timeout=25,
     )
     degraded, reason = headers_check_is_degraded(rc, stdout, stderr)
     if degraded:
-        log(f"headers_check: curl rc={rc}: {stderr.strip()[:200]}")
+        log(f"headers_check: httpx rc={rc}: {stderr.strip()[:200]}")
         mark_tool_degraded(ctx, "headers_check", reason)
         return
 
-    ctx.artifacts.append(("headers_check", "txt", stdout))
+    ctx.artifacts.append(("headers_check", "json", stdout))
 
-    headers_lc = {}
-    for line in stdout.splitlines():
-        if ":" in line:
-            k, v = line.split(":", 1)
-            headers_lc[k.strip().lower()] = v.strip()
+    # httpx already normalises the header names (lowercase, hyphens ->
+    # underscores). Keys are used verbatim; the SECURITY_HEADERS side is
+    # translated to match via httpx_header_key(). See that function — this
+    # is the one place the migration could silently invent findings.
+    rec = json.loads(stdout.strip().splitlines()[0])
+    headers_lc = rec.get("header") or {}
 
     for header_name, severity, why in SECURITY_HEADERS:
-        if header_name.lower() not in headers_lc:
+        if httpx_header_key(header_name) not in headers_lc:
             slug = header_name.lower().replace("-", "_")
             ctx.findings.append(LightFinding(
                 check_name=f"missing-header-{header_name.lower()}",
@@ -615,7 +750,10 @@ def check_headers(ctx: ScanContext) -> None:
 # non-HIGH paths. Kept INDEPENDENT of run_medium.detect_ffuf_catchall by design
 # (ruling 2): same SEMANTIC (random-path 2xx with a content-matching baseline),
 # different tool (curl vs httpx) and surface (fixed list vs ffuf wordlist).
-_STATUS_MARKER = "__CS_HTTP_STATUS__"
+# _STATUS_MARKER is GONE with 39 probe 2. It existed only to smuggle the
+# status code out of curl on a `-w` line appended to the body; httpx returns
+# `status_code` as a first-class NUMBER, so there is nothing to smuggle and
+# nothing to strip back off the body. Do not reintroduce it.
 _MAX_BODY = 262144  # 256 KB cap for hashing / marker scan (hole 3)
 
 
@@ -737,25 +875,68 @@ def _probe_path_body(ctx: ScanContext, path: str) -> tuple[int, str, str | None]
     Returns (0, '', None) on transport failure. The status/content_type ride out
     on one curl -w line, tab-separated (Content-Type never contains a tab)."""
     rc, stdout, _ = run_cmd(
-        ["curl", "-sS", "--max-time", "10",
+        ["httpx", "-u", f"https://{ctx.hostname}{path}",
+         "-silent", "-no-color", "-json",
+         "-irrb",            # base64 request/response -- see the WHY below
+         "-sc", "-ct",       # status_code + content_type as first-class fields
+         "-timeout", "10",
          "-H", "Accept-Encoding: identity",
-         "-H", "User-Agent: Mozilla/5.0 (compatible; COMMANDsentry/1.0)",
-         "-w", f"\n{_STATUS_MARKER}%{{http_code}}\t%{{content_type}}",
-         f"https://{ctx.hostname}{path}"],
+         "-H", "User-Agent: Mozilla/5.0 (compatible; COMMANDsentry/1.0)"],
         timeout=15,
     )
-    if rc != 0 or _STATUS_MARKER not in stdout:
+    if rc != 0 or not stdout.strip():
         return 0, "", None
-    body, _, tail = stdout.rpartition(_STATUS_MARKER)
-    if body.endswith("\n"):
-        body = body[:-1]
-    code_str, _, ctype_str = tail.strip().partition("\t")
     try:
-        code = int(code_str.strip()[:3])
-    except ValueError:
-        code = 0
-    ctype = _normalize_ctype(ctype_str) if ctype_str.strip() else None
+        rec = json.loads(stdout.strip().splitlines()[0])
+    except (ValueError, IndexError):
+        return 0, "", None
+    # httpx's own reachability verdict, not an exit code we have to interpret.
+    if rec.get("failed") is True:
+        return 0, "", None
+
+    code = rec.get("status_code")
+    if not isinstance(code, int):
+        # Captured as a NUMBER on v1.10.0. If a bump ever makes it a string,
+        # `code not in (200, 204, 206)` would silently never match and NO path
+        # would ever be considered exposed -- a total, silent loss of this
+        # check. Refuse rather than degrade quietly.
+        return 0, "", None
+
+    body = _decode_httpx_body(rec.get("body"))
+    ct_raw = rec.get("content_type") or (rec.get("header") or {}).get("content_type")
+    ctype = _normalize_ctype(ct_raw) if ct_raw and str(ct_raw).strip() else None
     return code, body[:_MAX_BODY], ctype
+
+
+def _decode_httpx_body(raw: object) -> str:
+    """Decode httpx's `-irrb` body field (base64) to text.
+
+    ⚠ WHY BASE64 AND NOT `-irr`. Captured 2026-09-09, inventory run #7:
+    `-irr` emits the raw response with LITERAL control bytes (CR/LF) inside a
+    JSON string, unescaped, and jq rejects it outright --
+    "control characters from U+0000 through U+001F must be escaped".
+    Python's json.loads rejects it too (strict=True). `-irrb` base64-encodes
+    it, so the record is ordinary parseable JSON. Do NOT "simplify" this back
+    to -irr.
+
+    ⚠ WHY `body` AND NOT `raw_header`/`request`. Run #8 captured them as three
+    SEPARATE top-level keys. `body` is the response body ALONE -- no Date, no
+    Set-Cookie. That matters because _body_sha() hashes this for the catch-all
+    baseline: a hash over anything containing a volatile header would differ on
+    every request, the two control probes would never match each other, and
+    catch-all detection would silently switch itself off.
+
+    Returns "" on anything unexpected. An empty body is the SAFE failure here
+    only because the caller already treats (0, "", None) as a failed probe --
+    never let "" reach _body_sha as if it were a real body, or every host
+    hashes identically and looks like a catch-all.
+    """
+    if not isinstance(raw, str) or not raw:
+        return ""
+    try:
+        return base64.b64decode(raw, validate=False).decode("utf-8", "replace")
+    except Exception:
+        return ""
 
 
 _CATCHALL_2XX = (200, 204, 206)
@@ -1384,10 +1565,9 @@ def check_wpvulnerability(ctx: ScanContext) -> None:
          "-A", BROWSER_UA, f"https://{ctx.hostname}/"],
         timeout=20,
     )
-    if rc != 0 or not html:
-        log(f"  wpvulnerability: homepage fetch rc={rc}, skipping")
-        # Degraded: couldn't even reach the target homepage.
-        degraded, reason = wpvuln_lookup_is_degraded("homepage_fetch_failed")
+    degraded, reason = wpvuln_homepage_is_degraded(rc, html)
+    if degraded:
+        log(f"  wpvulnerability: homepage fetch rc={rc} reason={reason}, skipping")
         mark_tool_degraded(ctx, "wpvulnerability", reason)
         return
 
@@ -1534,9 +1714,9 @@ def check_methods(ctx: ScanContext) -> None:
          f"https://{ctx.hostname}/"],
         timeout=15,
     )
-    degraded, reason = httpx_methods_is_degraded(rc, stdout)
+    degraded, reason = methods_check_is_degraded(rc, stdout)
     if degraded:
-        log(f"methods_check: curl rc={rc}: {stderr.strip()[:200]}")
+        log(f"methods_check: curl rc={rc} reason={reason}: {stderr.strip()[:200]}")
         mark_tool_degraded(ctx, "methods_check", reason)
         return
 
