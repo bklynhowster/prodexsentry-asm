@@ -1157,58 +1157,205 @@ def legacy_adapter(fn, tier, *args, _phase_name=None, **kwargs):
 # if it is misbehaviour, fix the misbehaviour. Raising the ceiling to hide slow
 # behaviour is the failure mode 4.7 named explicitly.
 #
-# ── 🔶 SUSPENDED 2026-09-09 — the finding under this guard is NOT settled ────
+# ── ⛔ THIS CONSTANT IS NOT PRODEX'S BOTTLENECK — measured 2026-09-09 ────────
 #
 # Everything from here to CUMULATIVE_WALL_CLOCK_S is DERIVED-FROM, not
-# DO-NOT-REVISIT. Read it as provenance. Do not treat any number in it as a
-# constant, and do not let it stop you re-measuring — it very nearly did
-# exactly that on 2026-09-09.
+# DO-NOT-REVISIT. It was derived on COMMAND and it does not describe this
+# instance. Read the sample before using any number in it.
 #
-# THE SAMPLE IT WAS DERIVED FROM (never stated until now, which is the defect):
-#   * date       : pre-2026-09-06 runs ONLY
-#   * population : Command, WAF/CDN-fronted targets (Pressable, Cloudflare)
+# THE SAMPLE THE COMMAND FINDING RESTS ON:
+#   * date       : 08-31 .. 09-06
+#   * population : Command, WAF/CDN-fronted (Pressable, Cloudflare)
 #   * tiers      : MIXED heavy + medium
-#   * n          : single digits
+#   * n          : 6 timeable crit/high chunk records
+#   * result     : rate FLAT at 3.0-4.0 req/s; the WAF-reduced plan (7255)
+#                  needs ~2073s and the FULL plan (9039) needs ~2583s, both
+#                  against this 1800s ceiling. CONFIRMED for Command. See that
+#                  instance's copy.
+#                  ⚠ 7255/9039 are PLAN CLASSES, not dates — no cutover.
 #
-# WHY SUSPENDED. Every input is now known stale or confounded:
-#   * `7255 counter-units` is the PRE-cutover total. The crit/high chunk's
-#     `total` steps 7255 -> 9039 around 09-06 on BOTH instances. Cause not yet
-#     identified (candidates: ㉙ plan-selection split, nuclei-templates corpus
-#     growth, the toolchain pin itself, or a RECORDING change).
-#   * `3.8 units/sec` is derived from pre-cutover `percent`.
-#   * `~1909s` falls out of both, so it inherits both.
-#   * ⚠ If `total` changed MEANING rather than size — e.g. nuclei clustering
-#     templates by request signature differently across a version bump — then
-#     `percent` is unit-inconsistent across the boundary and NONE of these
-#     numbers are comparable to post-09-06 ones. Unresolved.
+# ⚠ PRODEX IS A DIFFERENT REGIME. Measured here 2026-09-09, `requests / rps`
+# recovering chunk elapsed from the per-chunk record:
 #
-# ⚠ PRODEX NOTE: this instance reaches 83-95% on the crit/high chunk post-
-# cutover, versus the 17-23% this comment was derived from on Command. That gap
-# is NOT yet attributable — tier is confounded with the boundary in the sample
-# (pre bucket mixes heavy+medium, post bucket is medium-only), and heavy burns
-# cumulative budget on ports/TLS before nuclei runs, which shortens nuclei's
-# EFFECTIVE fuse independently of this constant. Do not read Prodex's numbers
-# as refuting the acceptance, or as endorsing a longer fuse, until that
-# confound is resolved.
+#   ⚠ "boundary" below means the HEAVY-PLAN REGIME boundary (09-01, when the
+#     pre-cumulative scanner-less plan was retired) — a REAL date-keyed change.
+#     It is NOT the retracted `total` "09-06 boundary", which never existed.
+#     Two different things; do not merge them.
+#   * date       : 09-02 .. 09-09 (post-regime-boundary), plus one 09-01 row
+#                  from before it
+#   * population : prodexlabs.com, www.prodexlabs.com, demo., tour.
+#   * tiers      : heavy AND medium — the tier confound in the earlier draft of
+#                  this note is RESOLVED, both tiers measure the same rate
+#   * n          : 13 crit/high records carrying data, 12 post-regime-boundary
+#   * rate       : 19-22 req/s — FLAT, ~6x Command's, no decay
+#   * elapsed    : recovered 377-403s (mean 388) against the 400s per-chunk fuse
+#   * run length : heavy finishes in 1230-1497s
 #
-# STATUS: neither "stands" nor "refuted" — SUSPENDED pending measurement in
-# validated units. That distinction is load-bearing: it is what stops the next
-# reader treating either the old or the new number as settled.
+# ⛔ CONSEQUENCE: Prodex heavy runs NEVER REACH this 1800s cumulative ceiling.
+# They finish ~300-570s under it. The crit/high chunk on this instance is cut
+# by NUCLEI_CHUNK_WALL_S (400s, run_medium.py — a hardcoded module constant,
+# NOT env-overridable and NOT in scanner.yml), with cumulative budget unspent.
+# Raising or lowering CUMULATIVE_WALL_CLOCK_S here changes nothing about
+# crit/high coverage. If you are in this file to fix Prodex coverage, you are
+# in the wrong file.
 #
-# ⛔ DO NOT re-derive this on post-cutover `percent` either. `percent` is the
-# measurement under suspicion and cannot validate itself (an allowlist cannot
-# self-reference). Resolve units FIRST by counting actual template executions
-# from run artifacts on one pre- and one post-cutover run, same asset+tier.
+# The arithmetic, stated as arithmetic and NOT as a proposal:
+#     9039 requests / 21 req/s = ~430s needed
+#     per-chunk fuse           =  400s
+#     shortfall                =  ~30s (7%)
+#     predicted percent 400*21/9039 = 93%, observed 83-95%
+# Command's equivalent shortfall is ~2200s. Same constant, two problems three
+# orders of magnitude apart. They should not keep sharing one number, but that
+# is a decision to take deliberately — not by editing a constant because a
+# figure looks nearly achievable.
+#
+# ✅ THE `total` QUESTION IS RESOLVED (2026-09-10) — and it was never a step.
+# 7255 and 9039 are TWO PLANS, selected per-run by WAF state:
+#
+#     run_medium.py:3032-3035
+#         if ctx.waf_detected:  cmd += ["-exclude-tags", "intrusive,dos,fuzz"]
+#         else:                 cmd += ["-exclude-tags", "dos"]
+#
+# Both branches drop `dos`; the WAF branch also drops `intrusive` and `fuzz`.
+# Verified three ways: the code above; `total` is stable per asset and strictly
+# two-valued across 14 assets with no asset ever showing both; and on Command
+# the two values INTERLEAVE within 09-06 hour by hour, which kills any
+# corpus-growth reading. `waf_detected` vs `total` separates 7 of 7 where
+# recorded, including email.commandcompanies.com (false/9039) against
+# commandcompanies.com (7255) — same parent domain, opposite bucket.
+#
+# ⚠ WHAT THIS MEANS FOR THE PRODEX NUMBERS ABOVE. prodexlabs.com,
+# www.prodexlabs.com and demo.prodexlabs.com are all 9039 — the FULL plan, no
+# WAF. tour.prodexlabs.com is 7255. So the 19-22 req/s measurement and the
+# ~430s figure describe the FULL plan, which is the honest denominator.
+# ⛔ Command's equivalent numbers are all from WAF-fronted assets on the
+# REDUCED 7255 plan. Prodex is 7% short on the full plan; Command is short on a
+# plan that was already cut by exclusion before the fuse ever fired. Those are
+# not the same shortfall and must not be closed by the same change.
+#
+# ⚠ `percent` is comparable WITHIN a plan class AND WITHIN a corpus version —
+# not across either. See the corpus note below; the earlier phrasing here said
+# only "plan class" and was incomplete.
+#
+# ⛔ STILL DO NOT size a fuse off `percent` — it is requests ÷ total,
+# algebraically the same quantity as `requests`, and cannot validate itself.
+#
+# ⛔ 7255 AND 9039 ARE NOT CLASS IDENTIFIERS. `total` is planned requests over
+# the LOADED TEMPLATE SET, so it is PLAN CLASS x CORPUS VERSION, and only one
+# corpus version has been measured. Templates are deliberately NOT pinned
+# (`nuclei -update-templates` at image build, blank version string); only the
+# binary is (v3.11.1). The same asset in the same WAF class WILL report a
+# different `total` after the next rebuild. Key on the WAF class, never the
+# number. 1784 is likewise this-corpus, and belongs in any future write-up as a
+# RATIO at a stamped corpus, not a fixed count.
+#
+# ⚠ BOUND ON CORPUS DRIFT, measured 2026-09-10. There WAS a rebuild inside the
+# record window — Dockerfile 9191df6 at 09-07 16:54, reaching prod immediately
+# because scanner.yml sat on `:latest` until 09-07. The PRIOR build was 89e2f53
+# at 08-26 07:18, a 12.3-day gap, so the re-fetch spanned a real upstream
+# window. Two assets on THIS instance span it at an unchanged total:
+# prodexlabs.com (7 runs, 09-03 .. 09-09) and www.prodexlabs.com (4 runs,
+# 09-05 .. 09-09), all 9039.
+#
+# THE FETCH DEMONSTRABLY LANDED — "the update silently failed" is refuted for
+# this rebuild: the pin commit edits layers ABOVE the update-templates line so
+# Docker's cache was busted and it genuinely re-ran; nothing COPYs templates
+# into the image, so /root/nuclei-templates can only exist because the fetch
+# succeeded; and inventory measured 13,619 templates present on 09-07.
+#
+# ⚠ But `RUN nuclei -update-templates -silent 2>/dev/null || true` IS a
+# fail-silent path (docker/Dockerfile:258). It did not fire here; it can fire
+# later, and nothing would record that it had — `nuclei -templates-version`
+# prints an empty string, so the corpus cannot be read from inside the image.
+# ⛔ #31 must stamp the corpus PRESENT AT SCAN TIME, not the corpus the build
+# intended to fetch. Those can differ with nothing recording it.
+#
+# Evidence the corpus was STABLE in the crit/high band across 08-26 -> 09-07.
+# NOT evidence that `total` is corpus-insensitive.
+#
+# ⚠ THE WAF VERDICT HAS A SECOND, PER-RUN INPUT — so "one total per asset" is
+# measured, not structurally guaranteed. run_heavy.py:2148 (`waf_differential`)
+# sets `ctx.waf_detected = True` from a BEHAVIOURAL block verdict, which can
+# differ run to run on one asset and would flip its plan class.
+# MEASURED 09-10 on `stack_id_waf_differential` artifacts: 124 of 126 have
+# `details.live_flag = false` (dry-run, cannot set the flag), 07-21 .. 09-06.
+# The 2 live ones (3 payload classes blocked) are both 08-28 — BEFORE the heavy
+# regime boundary, so they carry no crit/high record and touched no `total` in
+# the sample. ⛔ `ACTIVE_PROBE_LIVE` defaults to 'false' and is settable only by
+# workflow_dispatch input; if it is ever dispatched true, an asset CAN change
+# plan class between runs with no other change. Re-check before relying on
+# per-asset stability.
+#
+# ⚠ tour.prodexlabs.com IS THIS INSTANCE'S ONLY WAF-DETECTED ASSET, and every
+# anomaly on it is the WAF plan class rather than an outlier: total 7255 (vs
+# 9039), rps 7 (vs 19-22), percent 15 (vs 83-95). That makes Prodex a PAIRED
+# two-arm comparison — both plan classes on one instance, one egress, one VPN
+# config. n=1 on the WAF arm, so do not lean on it; a post-boundary re-scan of
+# tour turns it into a clean within-instance test of the WAF effect on rate.
+#
+# ⚠ PRECISION. `rps` is an integer, so the recovery band is 100/rps: ±4.5-5.3%
+# at Prodex's rates (vs ±17% at Command's). Tighter, but per-row some bands
+# EXCLUDE 400s. The estimator agrees with the fuse in aggregate over 12 runs,
+# not row by row. Do not quote a single row as a measurement.
+#
+# ⚠ DENOMINATOR. 13 records out of 100 Prodex runs in 45d (51 heavy, 41 light,
+# 8 medium). Of the 51 heavies, 43 carry NO crit/high chunk record:
+#
+#   40  status=complete, 26 assets, avg 157s, `planned_steps` =
+#       ["testssl.sh","httpx","gau","naabu","fingerprintx"]. nuclei was never
+#       scheduled. ⚠ THIS IS ARCHAEOLOGY, NOT A LIVE DEFECT — see the regime
+#       boundary below. It is the PRE-CUMULATIVE heavy plan (session log 190),
+#       which ran until the `_CUMULATIVE_HEAVY_ENABLED` flag was deleted
+#       (logs 196 on 08-29, 213 on 09-02). The planned_steps match log 190's
+#       old plan item for item.
+#    1  degraded — testssl.sh:wall_timeout at 1809s (the long outlier).
+#    1  failed — unhandled ProgrammingError, "query parameter missing:
+#       matrix_version_sha", 139s.
+#    1  nuclei ran but wrote no per_chunk — shrunk plan, 9 planned -> 4 actual.
+#
+# ⛔ THE 45-DAY WINDOW STRADDLES A REGIME CHANGE. Any fleet-coverage percentage
+# computed across it measures the CHANGE, not the current state:
+#
+#   PRODEX  heavy, no scanner : 07-29 20:09 .. 09-01 18:41   (42 runs)
+#           heavy, has scanner: 09-01 18:18 .. 09-09 16:32   ( 9 runs)
+#   COMMAND heavy, no scanner : 07-28 23:26 .. 08-28 22:09   ( 9 runs)
+#           heavy, has scanner: 08-29 19:48 .. 09-06 12:20   (19 runs)
+#
+# Command's boundary is clean with no overlap. Prodex overlaps by 23 minutes on
+# 09-01 (four short subdomain runs at 18:35-18:41 after the 18:18 cutover) —
+# consistent with a deploy landing mid-queue, and possibly the legitimate
+# no-web-surface case. Since 09-01 18:41 Prodex has ZERO scanner-less heavies.
+#
+# ⛔ NEVER quote "78% of Prodex heavies ran no scanner" or the Command 35% as
+# present-tense numbers. Both are pre-boundary history. Same defect as reading
+# the 09-06 `total` step as a live boundary.
+#
+# ⚠ Two earlier drafts of this comment got this wrong in two different ways:
+# first "they died before reaching nuclei" (inferred from short duration —
+# FALSE, they completed), then "a far larger coverage hole than this fuse,
+# cause not identified" (FALSE — it is a superseded plan, and it is closed).
+#
+# Three medium rows predating 09-03 are `{"ok": true}` with no counters — a
+# THIRD record shape, the evidence-free mark_tool_ok path. Not evidence of
+# completion, and any shape-agnostic accessor must handle it.
+#
+# ⚠ POST-BOUNDARY the population is 9 heavy + 8 medium = 17 runs and 13 carry
+# records — near-census for the CURRENT regime. That is what makes the fuse
+# measurement above well-supported rather than self-selected.
+#
+# ⚠ TWO RECORD SHAPES. heavy writes tool_status->'nuclei'->'per_chunk'[];
+# medium writes a TOP-LEVEL 'nuclei[critical,high]' key with `ok:false` and NO
+# `outcome` field. Filtering on `outcome` silently drops every medium run. That
+# selection error was made three times in one week.
 #
 # ⚠ A do-not-revisit warning is only ever as good as the finding underneath it.
-# This one guarded a number nobody had verified and discouraged the exact
-# re-measurement that was required. Any future guard here carries its
-# population, date, tier and n — or it does not go in.
+# Any future guard here carries its population, date, tier and n — or it does
+# not go in.
 #
-# Full context: Obsidian 234 (RETRACTED IN PLACE — read the retraction header,
-# not the body) and the 4.7 exchange of 2026-09-09.
+# Full context: Obsidian 205 (Command measurement, VINDICATED) and 234
+# (RETRACTED IN PLACE — read the retraction header, not the body).
 #
-# ── 4.7 rulings ㉖/㉗/㉘, 2026-09-01 — PROVENANCE OF THE SUSPENDED FINDING ────
+# ── 4.7 rulings ㉖/㉗/㉘, 2026-09-01 — CONFIRMED FOR COMMAND, N/A HERE ────────
 #
 # This ceiling was tested against a real aspiration and HELD. nuclei's
 # `critical,high` chunk is 7255 counter-units at a measured 3.8 units/sec, so it
