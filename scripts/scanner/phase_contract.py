@@ -1281,10 +1281,14 @@ def legacy_adapter(fn, tier, *args, _phase_name=None, **kwargs):
 # `details.live_flag = false` (dry-run, cannot set the flag), 07-21 .. 09-06.
 # The 2 live ones (3 payload classes blocked) are both 08-28 — BEFORE the heavy
 # regime boundary, so they carry no crit/high record and touched no `total` in
-# the sample. ⛔ `ACTIVE_PROBE_LIVE` defaults to 'false' and is settable only by
-# workflow_dispatch input; if it is ever dispatched true, an asset CAN change
-# plan class between runs with no other change. Re-check before relying on
-# per-asset stability.
+# the sample.
+# ⚠ DOWNGRADED 2026-09-10 from "could break the WAF<->total mapping" to "code
+# path EXISTS but is UNOBSERVED": no asset has more than one distinct `total`
+# in ALL history on either instance (Command 18 assets, Prodex 4). Scoped to
+# where the behavioural path can actually fire — non-WAF assets with heavy runs
+# — that is prodexlabs.com (7 runs) and www.prodexlabs.com (4), all 9039.
+# Eleven runs, no flip. `ACTIVE_PROBE_LIVE` defaults to 'false' and is settable
+# only by workflow_dispatch input; re-check only if it is ever dispatched true.
 #
 # ⚠ tour.prodexlabs.com IS THIS INSTANCE'S ONLY WAF-DETECTED ASSET, and every
 # anomaly on it is the WAF plan class rather than an outlier: total 7255 (vs
@@ -1338,6 +1342,28 @@ def legacy_adapter(fn, tier, *args, _phase_name=None, **kwargs):
 # Three medium rows predating 09-03 are `{"ok": true}` with no counters — a
 # THIRD record shape, the evidence-free mark_tool_ok path. Not evidence of
 # completion, and any shape-agnostic accessor must handle it.
+#
+# ⛔⛔ A THIRD PLAN CLASS EXISTS, AND SELECTING ON `total` DROPS IT SILENTLY.
+# The FortiGate SAFE-ONLY branch plans `nuclei[medium:tech]` and nothing else,
+# so no crit/high chunk exists, `total` is structurally NULL, and the asset
+# CANNOT appear in any population keyed on `total`. Confirmed from data
+# 2026-09-10 (not from 194's description): Command's commandcommcentral.com
+# (3 heavy, 09-03) and ftp.sciimage.com (1 heavy, 09-06); one such run here on
+# 09-01. ⚠ Those are the assets with the WORST coverage in the fleet — zero
+# critical/high templates ever run — and they are invisible to every
+# `total`-keyed query. FOURTH selection trap of the week, same shape as the
+# other three.
+#
+# ⚠ THE REAL DENOMINATOR (Prodex, ALL history, both record shapes):
+#     HAS crit/high chunk, `total` present : 13 runs /  4 assets, 09-01..09-09
+#     HAS crit/high chunk, `total` NULL    : 39 runs / 26 assets, 07-04..08-26
+#     NO  crit/high chunk at all           :  1 run  /  1 asset,  09-01
+#   The 13 records are 13 of 53 runs and cover 4 of 31 assets that have ever
+#   carried a crit/high chunk. Recording reaches back to 07-04, NOT 08-30 — the
+#   older generation carries the chunk with no counters.
+# ⚠ "Near-census" below is a claim about RUNS in the current regime, NOT about
+#   assets: only 4 assets have been medium/heavy scanned since the boundary, so
+#   every post-boundary number here describes those 4 assets.
 #
 # ⚠ POST-BOUNDARY the population is 9 heavy + 8 medium = 17 runs and 13 carry
 # records — near-census for the CURRENT regime. That is what makes the fuse
