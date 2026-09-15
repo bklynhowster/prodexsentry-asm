@@ -116,6 +116,7 @@ from finding_history_writer import write_finding_history_for_scan_run
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "db"))
 from asset_liveness import bump_alive_clock  # noqa: E402
 
+
 # ─── 4.7 I1 — nikto header classifier SSOT ──────────────────────────────
 # Lives in the normalize package so BOTH parser paths (cs_parsers/nikto.py and
 # this one) share one boundary. Fail-open: if the import ever breaks, nikto
@@ -498,12 +499,6 @@ CRAWL_FIRST_MODE = os.environ.get("CRAWL_FIRST_MODE", "").lower() in ("true", "1
 CRAWL_DEPTH = int(os.environ.get("CRAWL_DEPTH", "3"))
 # katana wall (seconds). Crawl runs once at scan start, so budget enough.
 CRAWL_WALL_S = int(os.environ.get("CRAWL_WALL_S", "300"))
-# Spec 221 ruling ①: crawl-empty is DEGRADED, never a silent fall-back to
-# path-enum. The crawl must yield at least this many URLs or the run degrades.
-# Start conservative (floor=1 → only a truly-empty crawl degrades); tighten from
-# OBSERVED healthy-crawl yields once the viability canary calibrates it — better
-# to under-DEGRADE a thin-but-real crawl than over-DEGRADE a small legit site.
-CRAWL_MIN_URLS = int(os.environ.get("CRAWL_MIN_URLS", "1"))
 # Match the regions for which we've shipped WireGuard configs in the
 # vpn-tools GH release. Add more by generating + uploading more confs.
 
@@ -638,6 +633,13 @@ def classify_ffuf_severity(word: str, url: str, status: int) -> str:
     in the call site of the helper; promotion logic isn't smeared across
     multiple decision points.
     """
+    # ┌─ DO NOT blanket-downgrade .env/secret → INFO here. That IS the 59ad6a13
+    # │  mistake. A .env+200 only REACHES this function on a DISCRIMINATING host:
+    # │  Fix B (detect_ffuf_catchall + calibration retry, ~L1527) suppresses ffuf
+    # │  ENTIRELY on a 200-catch-all host UPSTREAM, and should_suppress_ffuf_*
+    # │  drops baseline-matching rows before emit. So a 200 landing here is a real
+    # └─ hit → HIGH is correct. (Medium has no body, so no content-verify like
+    #    Light's check_common_paths marker check — that's a logged follow-up.)
     if not word:
         return "INFO"
     # Redirects: stay INFO regardless of path class. The catch-all-redirect
@@ -679,11 +681,45 @@ class MediumFinding:
     cwe: list[int] = field(default_factory=list)
     references: list[str] = field(default_factory=list)
     raw_excerpt: str | None = None
-    # 4.7 I2 — parser-native intra-source dedup key. check_name stays UNIQUE per
-    # finding (drives finding_id); this shared key is what the dedup view collapses
-    # on. Overloads normalized_key (same-fact semantics); COALESCE guard in the
-    # UPSERT so a cross-source curated key is never overwritten.
+    # Targeted-scan P1a: per-finding source override. None → the write path
+    # uses the scan's default f"commandsentry_{intensity}". Exposure findings
+    # set 'commandsentry_exposure' so they are isolated from medium's
+    # delta_close (source-scoped) AND the note-127 cron (producer-map absent) —
+    # no false-close path. See TARGETED_SCAN_ARCHITECTURE_SPEC.md §6.
+    source: str | None = None
+    # 4.7 I2/I5 — shared class-collapse key (e.g. class:tech-header-disclosure).
+    # None for everything except the nikto fingerprint/version buckets; the dedup
+    # view collapses rows sharing it while finding_id stays per-header.
     normalized_key: str | None = None
+
+
+def exposure_to_finding(ef, asset_id: str) -> "MediumFinding":
+    """Map a dispatch.ExposureFinding → a MediumFinding row (targeted-scan P1a).
+
+    Module-level + pure so the trust-critical bits are unit-testable WITHOUT
+    running a full scan: source='commandsentry_exposure' (the delta_close + cron
+    isolation that guarantees no false-close), category='info_disclosure', and
+    the exposure/network tags. `ef` is left untyped to avoid a module-load-time
+    import of the decision layer (run() imports dispatch lazily).
+    """
+    return MediumFinding(
+        check_name=ef.check_name,
+        title=ef.title,
+        severity=ef.severity,
+        category="info_disclosure",
+        # 4.7 ruling 1: surface the P1a lifecycle so a portal viewer isn't
+        # confused when a closed port still shows an open exposure row.
+        description=(
+            f"{ef.note} Lifecycle: port-closed remediation is MANUAL in P1a "
+            f"(mark_remediated) — the P3 network engine will drive auto-close."
+        ),
+        tags=["exposure", "network", ef.role],
+        cwe=[668],  # CWE-668 Exposure of Resource to Wrong Sphere
+        references=[],
+        raw_excerpt=(f"port={ef.port} role={ef.role} "
+                     f"severity={ef.severity} asset_id={asset_id}"),
+        source="commandsentry_exposure",
+    )
 
 
 @dataclass
@@ -843,6 +879,15 @@ class ScanContext:
     # default: False (run everything) when the asset_surface read fails
     # or no row exists.
     auth_gated: bool = False
+    # Targeted-scan P1a (TARGETED_SCAN_ARCHITECTURE_SPEC.md §5/§6). Populated
+    # after the discovery read in run(): the per-host ScanPlan (dispatch.py)
+    # and its sorted role-union profile (stamped on scan_run.scan_profile at
+    # close_out, alongside matrix_version_sha). Both stay None on ANY
+    # discovery-read failure → pre-P1 semantics, existing scan unchanged.
+    # Typed `object` (not ScanPlan) to avoid a module-load-time import of the
+    # decision layer into this dataclass; run() imports dispatch lazily.
+    scan_plan: object | None = None
+    scan_profile: list[str] | None = None
 
     @property
     def web_host(self) -> str:
@@ -2800,8 +2845,11 @@ def max_possible_chunk_count(ctx: ScanContext) -> int:
     Doing so made the safe-only plan its own upper bound, so planned == actual,
     ⑭′.4 never fired, all 5 chunks reported ok, and the asset SELF-CERTIFIED as
     fully covered while never having been offered a critical/high template.
-    172 of 391 Command assets (44%) read as covered on that basis. A different
-    plan is not a complete plan just because it finished.
+    Measured on the Command instance: 172 of 391 assets (44%) read as covered
+    on that basis. A different plan is not a complete plan just because it
+    finished. Shipped to both instances for parity — Prodex has no FortiGate
+    apexes today, so no Prodex asset currently takes this route, and that is
+    exactly why it must land before one does.
 
     THRESHOLD_PROBE keeps its own bound — it is an operator-invoked diagnostic
     with a deliberately narrow plan, not a routing decision made on the asset's
@@ -2934,13 +2982,8 @@ def run_katana_crawl(ctx: ScanContext, base_url: str) -> str | None:
     (no template-driven path enumeration that would hit /wp-login,
     /admin, /.env and trip FortiGate bot-trap signatures).
 
-    Returns the path to a file containing one URL per line (>= CRAWL_MIN_URLS).
-
-    Spec 221 ruling ①: there is NO path-enum fall-back. A failed / blocked /
-    empty crawl raises DegradedRunError — it never returns None to let the caller
-    run `-u target` (which would re-introduce the /.env, /wp-login path probes
-    crawl-first exists to avoid, tripping the ban). Evidence-mandatory: real URL
-    surface or DEGRADED.
+    Returns the path to a file containing one URL per line, or None on
+    failure (caller falls back to template-driven scanning).
     """
     ctx.tools_run.append("katana")
     ua = pick_ua()
@@ -2973,42 +3016,26 @@ def run_katana_crawl(ctx: ScanContext, base_url: str) -> str | None:
     if b1_reason:
         mark_tool_degraded(ctx, "katana", b1_reason, stderr=stderr)
         raise DegradedRunError(b1_reason, "katana")
-    # Ruling ① — crawl-empty / crawl-failed is DEGRADED, NEVER a silent fall-back
-    # to path-enum. The old code returned None on any of these, and the caller
-    # then ran nuclei `-u target`, re-introducing the exact signature paths
-    # crawl-first exists to avoid (tripping the FortiGate ban). Each failure mode
-    # stamps tool_status (degraded) and raises; mark_tool_ok moves to the success
-    # path so the stamp is never both ok AND degraded.
+    mark_tool_ok(ctx, "katana")
+
     if rc != 0:
-        reason = "crawl_failed"
-        log(f"  katana rc={rc} — crawl FAILED; DEGRADING (no path-enum fall-back)")
+        log(f"  katana rc={rc} — crawl failed, falling back to template-driven mode")
         log(f"  stderr: {stderr[:300]}")
-        mark_tool_degraded(ctx, "katana", reason, stderr=stderr)
-        raise DegradedRunError(reason, "katana")
+        return None
+    # Count URLs discovered + log a preview
     try:
         with open(out_file) as f:
             urls = [u.strip() for u in f if u.strip()]
+        log(f"  katana discovered {len(urls)} URL(s)")
+        if len(urls) == 0:
+            log("  empty crawl — falling back to template-driven mode")
+            return None
+        # Persist as artifact for forensics
+        ctx.artifacts.append(("katana", "text", "\n".join(urls)))
+        return out_file
     except Exception as e:
-        reason = "crawl_output_unreadable"
-        log(f"  could not read katana output: {e} — DEGRADING")
-        mark_tool_degraded(ctx, "katana", reason)
-        raise DegradedRunError(reason, "katana")
-
-    log(f"  katana discovered {len(urls)} URL(s) (floor CRAWL_MIN_URLS={CRAWL_MIN_URLS})")
-    if len(urls) < CRAWL_MIN_URLS:
-        # crawl-empty on a FortiGate asset = the FortiGate blocked the crawl
-        # (Trap B). Surface it as DEGRADED; that's the diagnostic signal, not a
-        # false ok hiding zero coverage.
-        reason = "crawl_empty_no_surface"
-        log(f"  crawl below floor ({len(urls)} < {CRAWL_MIN_URLS}) — DEGRADING "
-            f"(never falls back to path-enum on a ban-on-signature WAF)")
-        mark_tool_degraded(ctx, "katana", reason)
-        raise DegradedRunError(reason, "katana")
-
-    # Real URL surface discovered — record evidence + stamp ok on the success path.
-    ctx.artifacts.append(("katana", "text", "\n".join(urls)))
-    mark_tool_ok(ctx, "katana")
-    return out_file
+        log(f"  could not read katana output: {e}")
+        return None
 
 
 def run_nuclei_chunk(ctx: ScanContext, target_url: str,
@@ -3403,11 +3430,11 @@ def run_nuclei_chunked(ctx: ScanContext) -> None:
     url_list_file = None
     if CRAWL_FIRST_MODE:
         log("→ CRAWL_FIRST_MODE on — running katana preflight to build URL list")
-        # Ruling ①: run_katana_crawl returns a real URL surface (>= CRAWL_MIN_URLS)
-        # or raises DegradedRunError. It never returns None to trigger a path-enum
-        # fall-back, so there is no longer a "fell back to -u target" branch.
         url_list_file = run_katana_crawl(ctx, base_url)
-        log(f"  nuclei chunks will run against -list {url_list_file}")
+        if url_list_file:
+            log(f"  nuclei chunks will run against -list {url_list_file}")
+        else:
+            log("  katana failed or empty — chunks will fall back to -u target_url")
 
     # P1 + P2.5: target-class + stack-aware chunk plan. See build_chunk_plan()
     # for routing logic. PROBE+SAFE_ONLY still gets its diagnostic-specific
@@ -3437,16 +3464,17 @@ def run_nuclei_chunked(ctx: ScanContext) -> None:
         # anything that happened during the scan — it was never offered the
         # standard plan at all, by a routing decision made before the scan
         # started. Attributing that to `stack_not_applicable` would name the
-        # wrong cause on 44% of the fleet and send an operator looking at tech
-        # detection for a decision taken in build_chunk_plan().
+        # wrong cause and send an operator looking at tech detection for a
+        # decision taken in build_chunk_plan().
         if is_fortigate_target(ctx):
             ctx.chunk_plan_meta["plan_delta_reason"] = "routed_safe_only"
             ctx.chunk_plan_meta["plan_routing"] = "safe_only"
-            # ⚠ Presumption vs evidence. wafw00f has never once returned a
-            # named FortiWeb verdict fleet-wide (all-time: 7 <none>, 2 generic,
-            # 0 named), so in practice this route is decided by the hardcoded
-            # FORTIGATE_HOSTNAMES / FORTIGATE_APEXES lists, not by observation.
-            # Record which, so the record never implies evidence we do not have.
+            # ⚠ Presumption vs evidence. On the Command instance wafw00f has
+            # never once returned a named FortiWeb verdict (all-time: 7 <none>,
+            # 2 generic, 0 named), so in practice this route is decided by the
+            # hardcoded FORTIGATE_HOSTNAMES / FORTIGATE_APEXES lists, not by
+            # observation. Record which, so the record never implies evidence
+            # we do not have.
             ctx.chunk_plan_meta["plan_routing_basis"] = (
                 "wafw00f_confirmed"
                 if (ctx.waf_kind and "forti" in ctx.waf_kind)
@@ -3602,8 +3630,8 @@ def run_nuclei_chunked(ctx: ScanContext) -> None:
         # tunnel timeout / momentary 5xx) doesn't discard a scan whose target
         # was reachable throughout — the docs/preview false-degrade
         # (2026-07-04). Returns on the first healthy probe, so zero added
-        # latency on good hosts. A dead backend (persistent 504) fails every
-        # attempt with a non-zero ban code and still degrades.
+        # latency on good hosts. A dead backend (azure-demo's persistent 504)
+        # fails every attempt with a non-zero ban code and still degrades.
         post_chunk_healthy, post_chunk_code = healthcheck_with_retry(
             lambda: healthcheck(ctx),
             attempts=POST_ROTATE_SETTLE_ATTEMPTS,
@@ -3910,6 +3938,7 @@ def slug_for_identity(text: str, fallback: str) -> str:
 
 
 # issues, not header checks already done in light.
+# issues, not header checks already done in light.
 NIKTO_HEADER_DEDUP_PATTERN = "Suggested security header missing"
 
 # #28 footer guard — parse nikto's "N items reported" summary line.
@@ -3943,6 +3972,15 @@ def _nikto_severity_for_id(nikto_id: str) -> str:
     treat everything else as LOW with a conservative default.
     """
     return "INFO" if nikto_id.startswith("999") else "LOW"
+
+
+# The 2026-07-05 tech-fingerprint-header ROLL-UP (is_nikto_fingerprint_header +
+# NIKTO_FINGERPRINT_HEADER_RE + a synthetic "nikto-tech-fingerprint-headers" INFO)
+# was RETIRED per 4.7 I5 (2026-07-08). It collapsed by line shape, which swallowed
+# version disclosures (H3) and lost per-header member_finding_ids (I2). Fingerprint/
+# version collapse now runs on the shared normalized_key set by the SSOT classifier
+# (classify_nikto_header / extract_header_disclosure, imported at top) inside
+# parse_nikto_findings — identical to Command. See FINDING_COUNT_INFLATION_PRODEX_FORK.md.
 
 
 def parse_nikto_findings(
@@ -3985,11 +4023,11 @@ def parse_nikto_findings(
         severity = _nikto_severity_for_id(nikto_id)
         we_promoted += 1
 
-        # 4.7 I1/I2 — response-header disclosure buckets. fingerprint → collapse
-        # INFO via the shared normalized_key; version → own LOW; else default
-        # (Bucket 3, untouched). check_name stays UNIQUE (drives finding_id) so
-        # the dedup view collapses N distinct findings on the shared key with
-        # member_finding_ids intact.
+        # 4.7 I1/I2/I5 — response-header disclosure buckets (replaces the retired
+        # 2026-07-05 roll-up). fingerprint → collapse INFO via the shared
+        # normalized_key; version → own LOW; else default (Bucket 3, untouched).
+        # check_name stays UNIQUE (drives finding_id) so the dedup view collapses
+        # N distinct findings on the shared key with member_finding_ids intact.
         norm_key = None
         title = f"nikto: {body[:120]}"
         _hd = extract_header_disclosure(description)
@@ -4344,6 +4382,8 @@ def run_ffuf_chunk(ctx: ScanContext, words: list[str],
         # but don't emit a per-path finding; the collapsed summary at
         # end-of-chunked-loop emits ONE INFO covering all of them.
         # EXACT-equality semantic is locked in should_suppress_ffuf_redirect.
+        # Normalize a path-preserving host-rewrite the same way the baseline
+        # was, so the EXACT-equality suppression still fires (2026-07-04).
         redirect_to_norm = (
             _normalize_hostrewrite_redirect(redirect_to, word)
             if status in (301, 302, 307) else redirect_to
@@ -4553,8 +4593,8 @@ def run_ffuf_chunked(ctx: ScanContext) -> None:
         # tunnel timeout / momentary 5xx) doesn't discard a scan whose target
         # was reachable throughout — the docs/preview false-degrade
         # (2026-07-04). Returns on the first healthy probe, so zero added
-        # latency on good hosts. A dead backend (persistent 504) fails every
-        # attempt with a non-zero ban code and still degrades.
+        # latency on good hosts. A dead backend (azure-demo's persistent 504)
+        # fails every attempt with a non-zero ban code and still degrades.
         post_chunk_healthy, post_chunk_code = healthcheck_with_retry(
             lambda: healthcheck(ctx),
             attempts=POST_ROTATE_SETTLE_ATTEMPTS,
@@ -4654,6 +4694,12 @@ ON CONFLICT (finding_id) DO UPDATE SET
     title             = EXCLUDED.title,
     category          = EXCLUDED.category,
     description       = EXCLUDED.description,
+    -- 4.7 I2/I5 — new key wins over NULL, existing non-null preserved.
+    normalized_key    = COALESCE(EXCLUDED.normalized_key, findings.normalized_key),
+    -- #2.05 (Obsidian 160) — per-class target context. New non-empty wins; an empty '{}'
+    -- re-emit preserves any existing params, mirroring the normalized_key rule directly above.
+    params            = CASE WHEN EXCLUDED.params = '{}'::jsonb
+                             THEN findings.params ELSE EXCLUDED.params END,
     current_status = CASE
       WHEN findings.current_status IN (
              'remediated', 'validated_remediated',
@@ -4692,15 +4738,6 @@ ON CONFLICT (finding_id) DO UPDATE SET
     first_detected_at = LEAST(findings.first_detected_at, EXCLUDED.first_detected_at),
     last_observed_at  = EXCLUDED.last_observed_at,
     tags              = EXCLUDED.tags,
-    -- 4.7 I2 — parser-native class-collapse key. New value wins over NULL; a
-    -- Bucket-3 nikto finding (EXCLUDED NULL) preserves the existing key so a
-    -- cross-source curated key is never clobbered.
-    normalized_key    = COALESCE(EXCLUDED.normalized_key, findings.normalized_key),
-    -- #2.05 (Obsidian 160) — per-class target context. New non-empty wins; an empty '{}'
-    -- re-emit (a non-safe-exploit re-detect of the same finding_id) preserves any existing
-    -- params, mirroring the normalized_key "never clobber curated" rule directly above.
-    params            = CASE WHEN EXCLUDED.params = '{}'::jsonb
-                             THEN findings.params ELSE EXCLUDED.params END,
     -- Trust-layer Part 3 — derive-on-write (replaces upgrade-only CASE).
     -- validation_status follows the CURRENT scanner_version's active-set
     -- membership. Promote AND demote. Re-validation on a different
@@ -4757,7 +4794,13 @@ SET status            = 'complete',
     -- of the GH Actions log.
     egress_ip         = %(egress_ip)s,
     vpn_config_used   = %(vpn_config_used)s,
-    rotation_log      = %(rotation_log)s
+    rotation_log      = %(rotation_log)s,
+    -- Targeted-scan P1a — per-host role-union profile + matrix git SHA
+    -- (reproducibility: scan = f(SHA, target, matrix)). NULL for pre-P1 runs
+    -- and any run where the discovery read failed (fail-safe) — a NULL here
+    -- reads as "planner didn't run", never as "empty profile".
+    scan_profile       = %(scan_profile)s,
+    matrix_version_sha = %(matrix_version_sha)s
 WHERE scan_run_id     = %(scan_run_id)s;
 """
 
@@ -4805,7 +4848,14 @@ SET status            = 'degraded',
     error_message     = %(error)s,
     egress_ip         = %(egress_ip)s,
     vpn_config_used   = %(vpn_config_used)s,
-    rotation_log      = %(rotation_log)s
+    rotation_log      = %(rotation_log)s,
+    -- Targeted-scan P1a (4.7 ruling 4) — stamp profile + matrix SHA on degraded
+    -- runs too, so "was targeting applied?" is a column read, not a log grep.
+    -- Guarded NULL (planner-didn't-run) stays distinguishable from a real
+    -- profile: a degraded run that DID plan shows its profile; one that never
+    -- reached the planner shows NULL.
+    scan_profile       = %(scan_profile)s,
+    matrix_version_sha = %(matrix_version_sha)s
 WHERE scan_run_id     = %(scan_run_id)s;
 """
 
@@ -4866,7 +4916,11 @@ def write_findings_and_artifacts(conn, ctx: ScanContext, Json) -> tuple[int, int
         f"validation_status={validation_status}")
     with conn.cursor() as cur:
         for f in ctx.findings:
-            finding_id = f"{ctx.asset_id}:medium:{f.check_name}"
+            # Targeted-scan P1a: exposure findings get an ':exposure:' id segment
+            # (not ':medium:') so the P3 network engine re-emits the SAME
+            # finding_id (source-stable) rather than creating a duplicate row.
+            seg = "exposure" if f.source == "commandsentry_exposure" else "medium"
+            finding_id = f"{ctx.asset_id}:{seg}:{f.check_name}"
             params = {
                 "finding_id": finding_id,
                 "asset_id": ctx.asset_id,
@@ -4876,9 +4930,12 @@ def write_findings_and_artifacts(conn, ctx: ScanContext, Json) -> tuple[int, int
                 "description": f.description,
                 "cwe": f.cwe,
                 "references": f.references,
-                "source": source_for_tier(MEDIUM),
+                # Targeted-scan P1a: honor a per-finding source override
+                # (exposure findings → 'commandsentry_exposure'); default to the
+                # scan's intensity source for every normal tool finding.
+                "source": f.source or source_for_tier(MEDIUM),
                 "tags": f.tags,
-                "normalized_key": f.normalized_key,   # 4.7 I2 — class-collapse key
+                "normalized_key": f.normalized_key,   # 4.7 I2/I5 class-collapse key
                 # #2.05 (Obsidian 160) — per-class target context. Medium findings carry no
                 # params; default '{}' matches the findings.params column default.
                 "params": Json(getattr(f, "params", None) or {}),
@@ -4989,7 +5046,7 @@ def close_out(conn, ctx: ScanContext, inserted: int, updated: int, Json) -> None
     # 2026-09-07 — fold the chunk-plan diagnostics into the nuclei entries
     # BEFORE tool_status is serialised. Medium's chunks are credited inside the
     # chunk loop, not via run_phase, so phase_contract's merge never saw them
-    # and planned_chunks landed on 0 of 54 medium runs in 90 days.
+    # and planned_chunks landed on 0 of 54 medium runs in 90 days (Command).
     apply_chunk_plan_meta(ctx)
     apply_cut_class(ctx)
 
@@ -5014,6 +5071,14 @@ def close_out(conn, ctx: ScanContext, inserted: int, updated: int, Json) -> None
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
+            # Targeted-scan P1a — profile + matrix SHA. Stamped only when the
+            # planner ran (ctx.scan_profile set); NULL otherwise (fail-safe).
+            # Extra keys are harmless for CLOSE_SCAN_QUEUE_SQL (psycopg binds
+            # only the named params that appear in each statement).
+            "scan_profile": ctx.scan_profile,
+            "matrix_version_sha": (
+                get_scanner_version() if ctx.scan_profile is not None else None
+            ),
         }
         cur.execute(CLOSE_SCAN_RUN_SQL, params)
         cur.execute(CLOSE_SCAN_QUEUE_SQL, params)
@@ -5235,8 +5300,6 @@ def reconcile_tool_status_invariant(ctx: ScanContext) -> None:
 def degraded_out(conn, ctx: ScanContext, error: str,
                  inserted: int, updated: int, Json) -> None:
     """Stamp scan_run.status='degraded', scan_queue.status='degraded',
-    (chunk-plan diagnostics are folded in first — a degraded run is
-    precisely the one whose plan composition is worth explaining)
     AND flip findings.scan_quality='degraded' for any findings already
     written by this scan_run.
 
@@ -5291,6 +5354,11 @@ def degraded_out(conn, ctx: ScanContext, error: str,
             "egress_ip": ctx.egress_ip_initial,
             "vpn_config_used": ctx.vpn_config_used,
             "rotation_log": Json(build_rotation_log(ctx)),
+            # Targeted-scan P1a (4.7 ruling 4) — same stamp + guard as close_out.
+            "scan_profile": ctx.scan_profile,
+            "matrix_version_sha": (
+                get_scanner_version() if ctx.scan_profile is not None else None
+            ),
         }
         cur.execute(DEGRADED_SCAN_RUN_SQL, params)
         cur.execute(DEGRADED_SCAN_QUEUE_SQL, params)
@@ -5464,6 +5532,83 @@ def run(descriptor_path: str, dsn: str) -> int:
         log(f"asset is auth_gated — will SKIP nikto + ffuf + nuclei attack/cve/"
             f"exposure/wordpress/iis/php/drupal/joomla chunks. Keep wafw00f + "
             f"httpx + nuclei[medium:tech]. Recommend authenticated DAST.")
+
+    # ─── Targeted-scan P1a — discovery read → plan → exposure findings ───
+    # TARGETED_SCAN_ARCHITECTURE_SPEC.md §5/§6, 4.7 ruling 4a/4b. Reads the
+    # cached ports + fingerprint discovery ALREADY captured in
+    # asset_surface.surface_data, builds the per-host plan (dispatch.build_scan_
+    # plan), and emits exposure-is-the-finding rows — internet-exposed
+    # RDP/SMB/DB/... is a finding BY PRESENCE, independent of any CVE.
+    #
+    # PURELY ADDITIVE + FAIL-SAFE. On ANY uncertainty (read error, missing asset
+    # row, unsupported/absent schema_version, no matching subdomain, matrix
+    # import/parse fault) we skip planning entirely: ctx.scan_profile stays None
+    # (pre-P1 semantics) and the existing http scan runs completely unchanged.
+    # We NEVER narrow the existing scan on a discovery-read failure. The whole
+    # block mirrors the auth_gated fail-safe above (transient autocommit conn,
+    # broad except → default-safe).
+    #
+    # TRUST-LAYER: exposure findings are appended to ctx.findings ONLY — no
+    # tools_run / tool_status touch (the set-equality invariant is untouched).
+    # They carry source='commandsentry_exposure' (migration 20260706b) so they
+    # are isolated from medium's delta_close (source-scoped) AND the note-127
+    # cron (producer-map absent) → no false-close path. Port-closed UX is the
+    # STALE/PRESUMED-REMEDIATED display machine; real lifecycle lands with the
+    # P3 network engine (the true producer of this source).
+    #
+    # P1 SCOPE: auth_results=None → every exposure emits at BASE severity (an
+    # open DB is CRITICAL until the P3 auth-probe can downgrade a handshake-gated
+    # one to HIGH). The http phases below are NOT yet gated by http_roles — that
+    # (and the §5 fresh baseline tools) is P1b. P1a only ADDS the plan + exposure
+    # rows + the scan_run stamp.
+    try:
+        from surface_read import extract_signals
+        from matrix_loader import get_matrix
+        from dispatch import build_scan_plan
+        disc_conn = psycopg.connect(dsn, row_factory=dict_row, autocommit=True)
+        try:
+            with disc_conn.cursor() as cur:
+                cur.execute(
+                    "SELECT a.name AS name, a.kind::text AS kind, s.surface_data "
+                    "FROM public.assets a "
+                    "LEFT JOIN public.asset_surface s USING (asset_id) "
+                    "WHERE a.asset_id = %s",
+                    (ctx.asset_id,),
+                )
+                drow = cur.fetchone()
+        finally:
+            disc_conn.close()
+        if drow is None:
+            log("targeted-scan: no asset row for discovery read — skipping "
+                "exposure planning (existing scan unaffected)")
+        else:
+            _name = drow["name"] if isinstance(drow, dict) else drow[0]
+            _kind = drow["kind"] if isinstance(drow, dict) else drow[1]
+            _sd = drow["surface_data"] if isinstance(drow, dict) else drow[2]
+            sig = extract_signals(_sd, _name or ctx.hostname)
+            if sig is None:
+                log("targeted-scan: no usable discovery signals (unsupported "
+                    "schema / no matching sub) — skipping exposure planning "
+                    "(existing scan unaffected)")
+            else:
+                open_ports, fp_tokens, has_http = sig
+                plan = build_scan_plan(
+                    get_matrix(),
+                    open_ports=open_ports,
+                    fingerprint_tokens=fp_tokens,
+                    has_http=has_http,
+                    kind=_kind,
+                    auth_results=None,   # P1: no auth probe yet → base severity
+                )
+                ctx.scan_plan = plan
+                ctx.scan_profile = plan.scan_profile
+                for ef in plan.exposure_findings:
+                    ctx.findings.append(exposure_to_finding(ef, ctx.asset_id))
+                log(f"targeted-scan plan: {plan.summary()}  "
+                    f"exposure_findings_emitted={len(plan.exposure_findings)}")
+    except Exception as e:
+        log(f"targeted-scan planning failed (skipping — existing scan "
+            f"unaffected, fail-safe): {e!r}")
 
     # ─── Validate-mode flag read — actual assert deferred until inside `try` below ─
     # If skip_vpn=true was set on the workflow_dispatch input, the runner

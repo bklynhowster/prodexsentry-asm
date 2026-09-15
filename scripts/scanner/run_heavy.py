@@ -365,6 +365,11 @@ class HeavyScanContext:
     ffuf_catchall_size: int | None = None
     ffuf_catchall_status_count: int = 0
     auth_gated: bool = False
+    # PRODEX-ONLY (Command's run_medium.ScanContext has neither — verified
+    # 2026-08-29). Legitimate instance divergence, not a parity violation; the
+    # superset test in test_phase_registry.py is what surfaced it, per-instance.
+    scan_plan: object | None = None
+    scan_profile: list[str] | None = None
 
     # Canonical host for HTTP-layer phases (4.7 rulings 77-82). Medium's
     # phases run against THIS context under cumulative heavy, so the field and
@@ -3272,6 +3277,7 @@ def run(descriptor_path: str, dsn: str) -> int:
             selected, ctx, work_dir, log=log)
         if cumulative_abort is not None:
             log(f"cumulative heavy halted: {cumulative_abort.reason}")
+
 
         # Phase 1 — testssl.sh (P2). The whole point of v1 — clears the
         # stranded backlog so the note-127 auto-closer can reconcile.

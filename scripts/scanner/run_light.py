@@ -149,7 +149,7 @@ DANGEROUS_METHODS = {
     "PATCH":  ("MODERATE", "PATCH method allowed — may enable unauthorized modification"),
 }
 
-DEFAULT_SUPABASE_URL = "https://hdygktppfvuspnumpfuq.supabase.co"
+DEFAULT_SUPABASE_URL = "https://bxcvzpbmxsdtalyfanee.supabase.co"
 
 
 # ─── ADR-001 — Validated-SHA key (convergent edition) ───────────────────
@@ -1045,22 +1045,20 @@ def _emit_exposed_path(ctx: ScanContext, path: str, severity: str, why: str,
                        code: int, content_type: str | None = None) -> None:
     slug = path.lstrip("/").replace("/", "-").replace(".", "")
     ct = content_type or "none"
-    # PLAIN-ENGLISH TITLE (2026-07-25, Howie reviewing littleleaffarms). An INFO
-    # row titled "Exposed path: /.env (HTTP 200)" sitting next to "host serves 2xx
-    # to arbitrary paths — 7 probes suppressed" reads as a flat contradiction to an
-    # analyst: is /.env exposed or isn't it? The LOGIC is right and 4.7-ratified —
-    # a HIGH path is content-verified even on a catch-all host and DOWNGRADED to
-    # INFO rather than suppressed, so a real secret is never silently eaten. Only
-    # the wording was wrong. INFO now says what actually happened (checked, no
-    # secret found); EMIT-severity rows keep the assertive "Exposed path".
-    title = (
-        f"Checked {path} — no secret found (catch-all host returned HTTP {code})"
-        if severity == "INFO"
-        else f"Exposed path: {path} (HTTP {code})"
-    )
     ctx.findings.append(LightFinding(
         check_name=f"exposed-path-{slug}",
-        title=title,
+        title=(
+            # PLAIN-ENGLISH TITLE (2026-07-25, Howie reviewing littleleaffarms). An
+            # INFO row titled "Exposed path: /.env (HTTP 200)" next to "host serves
+            # 2xx to arbitrary paths — N probes suppressed" reads as a flat
+            # contradiction: is /.env exposed or isn't it? The LOGIC is right and
+            # 4.7-ratified — a HIGH path is content-verified even on a catch-all
+            # host and DOWNGRADED to INFO rather than suppressed, so a real secret
+            # is never silently eaten. Only the wording was wrong.
+            f"Checked {path} — no secret found (catch-all host returned HTTP {code})"
+            if severity == "INFO"
+            else f"Exposed path: {path} (HTTP {code})"
+        ),
         severity=severity,
         category="info_disclosure",  # enum remap: 'paths' isn't a valid finding_category_t
         description=f"The path {path} on {ctx.hostname} returned HTTP {code} "
@@ -2994,9 +2992,9 @@ def write_findings_and_artifacts(conn, ctx: ScanContext, Json) -> tuple[int, int
 # inventory (asset_surface) like discovered assets. ISOLATED under surface_data->'_scanner'->'light'
 # so asm-discover's top-level surface + its own port-event diff are NEVER touched (4.7 Q6 per-
 # producer baseline). Events diff against THIS tier's OWN prior blob (empty on first write →
-# asset_first_seen, NO false port_closed — the fleet-wide guard for the 28 already-discovered
-# assets that also get light scans). Per-field authority on derived cols: NO-DOWNGRADE
-# service_count (a thin light scan must never shrink a fuller discover's count).
+# asset_first_seen, NO false port_closed — the fleet-wide guard for the already-discovered assets
+# that also get light scans). Per-field authority on derived cols: NO-DOWNGRADE service_count
+# (a thin light scan must never shrink a fuller discover's count).
 SCANNER_SURFACE_UPSERT = """
 INSERT INTO public.asset_surface
   (asset_id, surface_data, service_count, discovered_via, first_discovered, last_seen, updated_by)
