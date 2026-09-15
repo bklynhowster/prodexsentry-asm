@@ -220,6 +220,14 @@ from cs_parsers.common import FindingEvent, stable_finding_id  # noqa: E402
 _DB_PATH = _REPO_ROOT / "scripts" / "db"
 if str(_DB_PATH) not in sys.path:
     sys.path.insert(0, str(_DB_PATH))
+# ⛔ UNCONDITIONAL, at module scope — NOT inside the `if` above. Putting it there
+# binds the name only when _DB_PATH was absent from sys.path; when an earlier import
+# already added it (as `from run_light import derive_hostname` does), the branch is
+# skipped, the name is never bound, and close_out_heavy raises NameError at runtime
+# with every test still green. That is precisely the "defaults that differ by arrival
+# path" trap the comment above warns about, and the first draft of this change fell
+# into it.
+from asset_liveness import bump_alive_clock  # noqa: E402  — U7 alive clock
 from surface_diff import (  # noqa: E402
     build_scanner_surface_blob,
     compute_events,
@@ -357,11 +365,6 @@ class HeavyScanContext:
     ffuf_catchall_size: int | None = None
     ffuf_catchall_status_count: int = 0
     auth_gated: bool = False
-    # PRODEX-ONLY (Command's run_medium.ScanContext has neither — verified
-    # 2026-08-29). Legitimate instance divergence, not a parity violation; the
-    # superset test in test_phase_registry.py is what surfaced it, per-instance.
-    scan_plan: object | None = None
-    scan_profile: list[str] | None = None
 
     # Canonical host for HTTP-layer phases (4.7 rulings 77-82). Medium's
     # phases run against THIS context under cumulative heavy, so the field and
@@ -2986,6 +2989,16 @@ def close_out_heavy(conn, ctx: HeavyScanContext, inserted: int, updated: int, Js
         cur.execute(CLOSE_SCAN_RUN_SQL, params)
         cur.execute(CLOSE_SCAN_QUEUE_SQL, params)
 
+        # U7 (relay 155/158) — THE ALIVE CLOCK. Heavy DOES run naabu, so it uses the same
+        # svc_count signal as light and the promote rule. No discovery_status filter: the
+        # clock records "this observation got an answer", not a status transition.
+        bump_alive_clock(
+            cur, ctx.asset_id,
+            svc_count=len({p["port"] for p in (ctx.open_ports or [])
+                           if isinstance(p, dict) and isinstance(p.get("port"), int)}),
+            logfn=log,
+        )
+
         # 226 — heavy-tier ASM surface write-back (225 Option B). SAVEPOINT-isolated +
         # best-effort: a surface-write error must NEVER roll back the scan close-out above.
         # conn.transaction() nested in the caller's txn = a savepoint; on error it rolls
@@ -3259,7 +3272,6 @@ def run(descriptor_path: str, dsn: str) -> int:
             selected, ctx, work_dir, log=log)
         if cumulative_abort is not None:
             log(f"cumulative heavy halted: {cumulative_abort.reason}")
-
 
         # Phase 1 — testssl.sh (P2). The whole point of v1 — clears the
         # stranded backlog so the note-127 auto-closer can reconcile.
