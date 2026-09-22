@@ -1620,9 +1620,21 @@ def test_nikto_parser_collapses_fingerprints_on_shared_key_not_rollup():
     assert all(f.severity == "INFO" for f in fp)
 
     # BREACH (999966) stays Bucket 3 — its own row, no class key.
+    #
+    # ⚠ (relay 436 T2) THE PROXY MOVED. This asserted `normalized_key is None`,
+    # because a null key was how "not collapsed into a class" used to look. T2
+    # stopped producing nulls — every finding now gets a deterministic
+    # per-finding key — so the null is no longer the signal and asserting it
+    # would just re-pin the defect. Assert the PROPERTY instead: BREACH must not
+    # carry a CLASS key (that is what would collapse it), and must still have a
+    # usable key of its own.
     breach = [f for f in findings
               if "BREACH" in f.title or "Content-Encoding" in f.description]
-    assert breach and all(f.normalized_key is None for f in breach)
+    assert breach
+    for f in breach:
+        assert f.normalized_key, "BREACH lost its key entirely"
+        assert not f.normalized_key.startswith("class:"), (
+            f"BREACH was collapsed into a class family: {f.normalized_key}")
 
     # 7 shape-matched lines; 6 fingerprint + 1 BREACH = 7 emitted objects.
     assert nikto_emitted == 7
@@ -1652,7 +1664,11 @@ def test_nikto_parser_security_header_line_not_swallowed():
     ])
     findings, _, _ = parse_nikto_findings(fixture, "host.example.com")
     assert findings, "expected the security-header finding to be emitted"
-    assert all(f.normalized_key is None for f in findings)
+    # (relay 436 T2) same proxy move as above: not-a-class-key is the property,
+    # and a null key is no longer how it is expressed.
+    for f in findings:
+        assert f.normalized_key, "a security-header finding lost its key"
+        assert not f.normalized_key.startswith("class:"), f.normalized_key
 
 
 # ═══════════════════════════════════════════════════════════════════════
