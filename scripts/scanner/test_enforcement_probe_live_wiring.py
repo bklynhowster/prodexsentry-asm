@@ -15,9 +15,14 @@ step and it is still permanently dry-run, silently. So these tests do not ask
 comment or the wrong step would satisfy). They parse the YAML, find the step
 that actually invokes run_light.py, and assert the env key is in THAT step.
 
-⛔ AND CRON MUST STAY DRY-RUN. The `|| 'false'` fallback is what makes a
-scheduled run safe: github.event.inputs is empty on cron, so the env arrives as
-'false'. That value is fed to the REAL probe_is_authorised below and must deny.
+⭐ CRON IS NOW ARMED (2026-09-27, Howie's explicit fleet-wide authorization).
+This file previously pinned `|| 'false'`, which made the scheduled path
+permanently dry-run. Correct while no asset was opted in; it became the thing
+preventing the feature from working once the fleet was authorized. The chain is
+now `input || vars.ENFORCEMENT_PROBE_LIVE || 'true'`, so a scheduled run arms the
+FLEET half and the per-asset flag is the only remaining gate. These tests assert
+that shape, and still assert — against the real probe_is_authorised — that an
+asset WITHOUT the flag is denied no matter what the fleet half says.
 """
 from __future__ import annotations
 
@@ -100,26 +105,40 @@ def test_the_env_appears_exactly_once_in_the_whole_workflow():
     assert n == 1, f"{ENV_KEY} wired on {n} steps, expected exactly 1"
 
 
-def test_the_env_derives_from_the_input_with_the_cron_safe_fallback():
+def test_the_env_derives_from_input_then_repo_var_then_armed():
     step = _step_running("run_light.py")
     expr = step["env"][ENV_KEY]
     assert f"github.event.inputs.{INPUT_NAME}" in expr, (
-        "the env must come from the dispatch input, not a hardcoded value")
-    assert "|| 'false'" in expr, (
-        "without the fallback, cron sends empty and the value is unset rather "
-        "than explicitly false")
+        "a manual dispatch must still win over the fleet default")
+    assert f"vars.{ENV_KEY}" in expr, (
+        f"no repo-variable override; without vars.{ENV_KEY} the only way to "
+        "disarm the fleet is a code change")
+    assert "|| 'true'" in expr, (
+        "the fleet half must END armed")
 
 
 # ── end to end against the REAL consumer: cron denies, dispatch allows ───────
 
-def test_the_cron_value_denies_even_for_an_opted_in_asset():
-    """⛔ What cron actually delivers. github.event.inputs is empty on a
-    schedule, so `|| 'false'` yields the string 'false'. Fed to the real gate
-    with the per-asset flag ON, it must still deny."""
-    opted_in = {EP.AUTH_FLAG: True}
-    for cron_value in ("false", ""):
+def test_the_cron_value_now_arms_an_opted_in_asset():
+    """⭐ What cron delivers NOW: `|| 'true'` yields 'true'. With the per-asset
+    flag ON it must ALLOW. Asserting it here means a silent revert to 'false'
+    fails this file rather than quietly muting the fleet again."""
+    assert EP.probe_is_authorised(
+        {EP.AUTH_FLAG: True}, env={EP.LIVE_ENV: "true"}) is True
+
+
+def test_the_per_asset_flag_still_denies_under_an_armed_fleet():
+    """⛔ THE ASSERTION THAT MATTERS MOST. Arming the fleet half must not widen
+    the target set by one host."""
+    for asset in ({}, {EP.AUTH_FLAG: False}, {EP.AUTH_FLAG: None}):
         assert EP.probe_is_authorised(
-            opted_in, env={EP.LIVE_ENV: cron_value}) is False, cron_value
+            asset, env={EP.LIVE_ENV: "true"}) is False, asset
+
+
+def test_the_repo_var_kill_switch_denies_even_an_opted_in_asset():
+    """The disarm path: repo var -> 'false'."""
+    assert EP.probe_is_authorised(
+        {EP.AUTH_FLAG: True}, env={EP.LIVE_ENV: "false"}) is False
 
 
 def test_the_dispatch_value_arms_it_only_with_the_per_asset_flag():
