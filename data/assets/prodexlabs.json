@@ -10,10 +10,10 @@
     "discovered_via": "manual"
   },
   "scan": {
-    "id": "scan_2026-09-29T18:05:16Z_112f3b15",
-    "started_at": "2026-09-29T18:05:16Z",
-    "completed_at": "2026-09-29T18:20:55Z",
-    "duration_seconds": 939,
+    "id": "scan_2026-09-30T00:10:59Z_340a1802",
+    "started_at": "2026-09-30T00:10:59Z",
+    "completed_at": "2026-09-30T00:33:22Z",
+    "duration_seconds": 1343,
     "engine_version": "3.0.0",
     "scanner_origin": "github-actions-ubuntu-azure",
     "tools_run": [
@@ -29,11 +29,11 @@
   },
   "registration": {},
   "summary": {
-    "subdomain_count": 28,
-    "live_subdomain_count": 28,
-    "host_count": 23,
+    "subdomain_count": 29,
+    "live_subdomain_count": 29,
+    "host_count": 21,
     "service_count": 64,
-    "newest_cert_expiry_days": 39,
+    "newest_cert_expiry_days": 45,
     "top_hosting_org": "Google LLC",
     "platforms": []
   },
@@ -43,8 +43,8 @@
       "alive": true,
       "is_root": true,
       "discovered_via": "dnsx",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -110,9 +110,9 @@
           "ns-cloud-d4.googledomains.com"
         ],
         "txt": [
-          "MS=ms22662979",
+          "v=spf1 include:_spf.google.com ~all",
           "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d",
-          "v=spf1 include:_spf.google.com ~all"
+          "MS=ms22662979"
         ],
         "spf": "v=spf1 include:_spf.google.com ~all",
         "dnssec": false
@@ -179,8 +179,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:22Z",
+      "last_seen": "2026-09-30T00:33:22Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -237,7 +237,7 @@
             "not_before": "2026-09-10T19:24:09Z",
             "not_after": "2026-12-03T19:24:08Z",
             "self_signed": false,
-            "days_to_expiry": 65
+            "days_to_expiry": 64
           }
         }
       ],
@@ -280,8 +280,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:22Z",
+      "last_seen": "2026-09-30T00:33:22Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -301,17 +301,7 @@
       },
       "hosts": [
         {
-          "ip": "150.171.109.72",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Virginia",
-          "city": "Leesburg",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "150.171.110.193",
+          "ip": "150.171.109.183",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -321,17 +311,7 @@
           "is_private": false
         },
         {
-          "ip": "2603:1061:14:41::1",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Washington",
-          "city": "Redmond",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "2603:1061:14:49::1",
+          "ip": "2603:1061:14:b6::1",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -343,7 +323,7 @@
       ],
       "services": [
         {
-          "ip": "150.171.110.193",
+          "ip": "150.171.109.183",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -351,7 +331,7 @@
           "tls": false
         },
         {
-          "ip": "150.171.110.193",
+          "ip": "150.171.109.183",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -366,16 +346,16 @@
             "not_before": "2026-06-19T00:00:00Z",
             "not_after": "2026-12-19T23:59:59Z",
             "self_signed": false,
-            "days_to_expiry": 81
+            "days_to_expiry": 80
           }
         }
       ],
       "dns": {
         "a": [
-          "150.171.109.72"
+          "150.171.109.183"
         ],
         "aaaa": [
-          "2603:1061:14:49::1"
+          "2603:1061:14:b6::1"
         ],
         "cname": "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net",
         "mx": [],
@@ -411,8 +391,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:23Z",
+      "last_seen": "2026-09-30T00:33:23Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -432,19 +412,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -452,28 +432,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=bitec.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "bitec.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-27T04:50:32Z",
-            "not_after": "2026-12-26T05:43:25Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 87
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -525,8 +505,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:23Z",
+      "last_seen": "2026-09-30T00:33:23Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -583,7 +563,7 @@
             "not_before": "2026-08-16T23:37:42Z",
             "not_after": "2026-11-15T00:30:55Z",
             "self_signed": false,
-            "days_to_expiry": 46
+            "days_to_expiry": 45
           }
         }
       ],
@@ -661,8 +641,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:23Z",
+      "last_seen": "2026-09-30T00:33:23Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -682,19 +662,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -702,28 +682,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=dass.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "dass.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-22T13:54:16Z",
-            "not_after": "2026-12-21T14:48:30Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 82
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -775,8 +755,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:23Z",
+      "last_seen": "2026-09-30T00:33:23Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -796,19 +776,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -816,28 +796,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=demo.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "demo.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-25T05:12:23Z",
-            "not_after": "2026-12-24T06:06:17Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 85
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -889,8 +869,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:23Z",
+      "last_seen": "2026-09-30T00:33:23Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -910,7 +890,7 @@
       },
       "hosts": [
         {
-          "ip": "66.33.60.129",
+          "ip": "66.33.60.194",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -920,7 +900,7 @@
           "is_private": false
         },
         {
-          "ip": "66.33.60.67",
+          "ip": "66.33.60.35",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -930,7 +910,7 @@
           "is_private": false
         },
         {
-          "ip": "76.76.21.22",
+          "ip": "76.76.21.123",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -940,7 +920,7 @@
           "is_private": false
         },
         {
-          "ip": "76.76.21.98",
+          "ip": "76.76.21.93",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -952,7 +932,7 @@
       ],
       "services": [
         {
-          "ip": "66.33.60.129",
+          "ip": "66.33.60.194",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -960,7 +940,7 @@
           "tls": false
         },
         {
-          "ip": "66.33.60.129",
+          "ip": "66.33.60.194",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -979,7 +959,7 @@
           }
         },
         {
-          "ip": "76.76.21.22",
+          "ip": "76.76.21.93",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -987,7 +967,7 @@
           "tls": false
         },
         {
-          "ip": "76.76.21.22",
+          "ip": "76.76.21.93",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -1008,8 +988,8 @@
       ],
       "dns": {
         "a": [
-          "76.76.21.98",
-          "66.33.60.67"
+          "76.76.21.123",
+          "66.33.60.35"
         ],
         "aaaa": [],
         "cname": "cname.mintlify-dns.com",
@@ -1051,8 +1031,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1107,7 +1087,7 @@
             "not_before": "2026-09-23T19:41:00Z",
             "not_after": "2026-12-22T19:40:59Z",
             "self_signed": false,
-            "days_to_expiry": 84
+            "days_to_expiry": 83
           }
         }
       ],
@@ -1145,8 +1125,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1166,19 +1146,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1186,28 +1166,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=highcom.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "highcom.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-08-19T04:23:47Z",
-            "not_after": "2026-11-17T05:16:20Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 48
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -1259,8 +1239,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1280,19 +1260,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1300,28 +1280,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=l3h-ivs.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "l3h-ivs.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-27T05:18:56Z",
-            "not_after": "2026-12-26T06:13:30Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 87
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -1373,8 +1353,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1394,19 +1374,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1414,28 +1394,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=l3h-nh.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "l3h-nh.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-08-22T15:46:46Z",
-            "not_after": "2026-11-20T16:40:20Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 51
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -1487,8 +1467,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1508,19 +1488,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1528,28 +1508,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=l3h-ss.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "l3h-ss.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-20T09:16:02Z",
-            "not_after": "2026-12-19T10:08:55Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 80
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -1601,8 +1581,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:55Z",
-      "last_seen": "2026-09-29T18:20:55Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1677,7 +1657,7 @@
             "not_before": "2026-09-14T21:21:19Z",
             "not_after": "2026-12-13T21:21:18Z",
             "self_signed": false,
-            "days_to_expiry": 75
+            "days_to_expiry": 74
           }
         },
         {
@@ -1704,7 +1684,7 @@
             "not_before": "2026-09-14T21:21:19Z",
             "not_after": "2026-12-13T21:21:18Z",
             "self_signed": false,
-            "days_to_expiry": 75
+            "days_to_expiry": 74
           }
         },
         {
@@ -1731,7 +1711,7 @@
             "not_before": "2026-09-14T21:21:19Z",
             "not_after": "2026-12-13T21:21:18Z",
             "self_signed": false,
-            "days_to_expiry": 75
+            "days_to_expiry": 74
           }
         }
       ],
@@ -1773,8 +1753,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1794,19 +1774,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1814,28 +1794,142 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=littleleaffarms.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "littleleaffarms.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-26T05:07:17Z",
-            "not_after": "2026-12-25T06:01:11Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 86
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
+        ],
+        "aaaa": [],
+        "cname": null,
+        "mx": [],
+        "ns": [],
+        "txt": [],
+        "spf": null,
+        "dnssec": false
+      },
+      "fingerprint": {
+        "server": "nginx",
+        "platform_label": null,
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
+      },
+      "waf": {
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
+      }
+    },
+    {
+      "name": "oidc-test.prodexlabs.com",
+      "alive": true,
+      "is_root": false,
+      "discovered_via": "subfinder",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
+      "tags": [],
+      "reachability": {
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
+      },
+      "probe_status": {
+        "naabu": {
+          "ok": true
+        },
+        "httpx_tech": {
+          "ok": true
+        },
+        "fingerprintx": {
+          "ok": true
+        }
+      },
+      "hosts": [
+        {
+          "ip": "136.81.198.25",
+          "asn": "AS396982",
+          "asn_org": "Google LLC",
+          "country": "US",
+          "region": "Missouri",
+          "city": "Kansas City",
+          "reverse_dns": "25.198.81.136.bc.googleusercontent.com",
+          "is_private": false
+        }
+      ],
+      "services": [
+        {
+          "ip": "136.81.198.25",
+          "port": 80,
+          "protocol": "tcp",
+          "service": "http",
+          "banner": null,
+          "tls": false
+        },
+        {
+          "ip": "136.81.198.25",
+          "port": 443,
+          "protocol": "tcp",
+          "service": "https",
+          "banner": null,
+          "tls": true,
+          "cert": {
+            "subject": "CN=oidc-test.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "oidc-test.prodexlabs.com"
+            ],
+            "not_before": "2026-09-23T23:12:01Z",
+            "not_after": "2026-12-23T00:07:57Z",
+            "self_signed": false,
+            "days_to_expiry": 83
+          }
+        }
+      ],
+      "dns": {
+        "a": [
+          "136.81.198.25"
         ],
         "aaaa": [],
         "cname": null,
@@ -1887,8 +1981,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1908,19 +2002,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -1928,28 +2022,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=panthalassa.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "panthalassa.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-08-23T04:28:04Z",
-            "not_after": "2026-11-21T05:22:38Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 52
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -2001,8 +2095,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2106,8 +2200,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2127,19 +2221,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -2147,28 +2241,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=prod.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "prod.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-25T13:08:37Z",
-            "not_after": "2026-12-24T14:00:09Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 85
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -2220,8 +2314,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:24Z",
+      "last_seen": "2026-09-30T00:33:24Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2276,7 +2370,7 @@
             "not_before": "2026-09-23T23:03:17Z",
             "not_after": "2026-12-22T23:59:12Z",
             "self_signed": false,
-            "days_to_expiry": 84
+            "days_to_expiry": 83
           }
         }
       ],
@@ -2334,8 +2428,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2355,19 +2449,19 @@
       },
       "hosts": [
         {
-          "ip": "34.149.145.200",
+          "ip": "136.81.194.166",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "200.145.149.34.bc.googleusercontent.com",
+          "reverse_dns": "166.194.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "34.149.145.200",
+          "ip": "136.81.194.166",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -2375,7 +2469,7 @@
           "tls": false
         },
         {
-          "ip": "34.149.145.200",
+          "ip": "136.81.194.166",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -2387,16 +2481,16 @@
             "san": [
               "prosalud.prodexlabs.com"
             ],
-            "not_before": "2026-09-27T21:48:09Z",
-            "not_after": "2026-12-26T22:41:43Z",
+            "not_before": "2026-09-23T23:36:18Z",
+            "not_after": "2026-12-23T00:32:13Z",
             "self_signed": false,
-            "days_to_expiry": 88
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "34.149.145.200"
+          "136.81.194.166"
         ],
         "aaaa": [],
         "cname": null,
@@ -2448,13 +2542,13 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
-        "live": false,
-        "http_status": null,
-        "title": null
+        "live": true,
+        "http_status": 200,
+        "title": "PRODEX"
       },
       "probe_status": {
         "naabu": {
@@ -2464,7 +2558,7 @@
           "ok": true
         },
         "fingerprintx": {
-          "degraded": "fpx_rc_0"
+          "ok": true
         }
       },
       "hosts": [
@@ -2494,23 +2588,18 @@
           "protocol": "tcp",
           "service": "https",
           "banner": null,
-          "tls": true
-        },
-        {
-          "ip": "136.81.198.25",
-          "port": 8080,
-          "protocol": "tcp",
-          "service": "http-alt",
-          "banner": null,
-          "tls": false
-        },
-        {
-          "ip": "136.81.198.25",
-          "port": 8443,
-          "protocol": "tcp",
-          "service": "https-alt",
-          "banner": null,
-          "tls": true
+          "tls": true,
+          "cert": {
+            "subject": "CN=sandbox.prodexlabs.com",
+            "issuer": "CN=WR3, O=Google Trust Services, C=US",
+            "san": [
+              "sandbox.prodexlabs.com"
+            ],
+            "not_before": "2026-09-23T23:12:01Z",
+            "not_after": "2026-12-23T00:07:56Z",
+            "self_signed": false,
+            "days_to_expiry": 83
+          }
         }
       ],
       "dns": {
@@ -2526,14 +2615,40 @@
         "dnssec": false
       },
       "fingerprint": {
-        "server": null,
+        "server": "nginx",
         "platform_label": null,
-        "tech": []
+        "tech": [
+          {
+            "name": "Google Cloud",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "Google Cloud CDN",
+            "version": null,
+            "category": null
+          },
+          {
+            "name": "HSTS",
+            "version": null,
+            "category": "security"
+          },
+          {
+            "name": "HTTP/3",
+            "version": null,
+            "category": "transport"
+          },
+          {
+            "name": "Nginx",
+            "version": null,
+            "category": "webserver"
+          }
+        ]
       },
       "waf": {
-        "detected": false,
-        "vendor": null,
-        "confidence": "unknown"
+        "detected": true,
+        "vendor": "Google Cloud App Armor",
+        "confidence": "high"
       }
     },
     {
@@ -2541,8 +2656,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2655,8 +2770,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2676,19 +2791,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -2696,28 +2811,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=time.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "time.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-08-09T20:03:15Z",
-            "not_after": "2026-11-07T20:56:28Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 39
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -2769,8 +2884,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2825,7 +2940,7 @@
             "not_before": "2026-08-31T23:02:37Z",
             "not_after": "2026-11-29T23:56:11Z",
             "self_signed": false,
-            "days_to_expiry": 61
+            "days_to_expiry": 60
           }
         }
       ],
@@ -2888,8 +3003,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2909,19 +3024,19 @@
       },
       "hosts": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "53.202.227.35.bc.googleusercontent.com",
+          "reverse_dns": "196.173.81.136.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -2929,28 +3044,28 @@
           "tls": false
         },
         {
-          "ip": "35.227.202.53",
+          "ip": "136.81.173.196",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
           "banner": null,
           "tls": true,
           "cert": {
-            "subject": "CN=trial.prodexlabs.com",
+            "subject": "CN=*.prodexlabs.com",
             "issuer": "CN=WR3, O=Google Trust Services, C=US",
             "san": [
-              "trial.prodexlabs.com"
+              "*.prodexlabs.com"
             ],
-            "not_before": "2026-09-23T21:16:16Z",
-            "not_after": "2026-12-22T22:09:48Z",
+            "not_before": "2026-09-23T21:25:12Z",
+            "not_after": "2026-12-22T22:21:07Z",
             "self_signed": false,
-            "days_to_expiry": 84
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "35.227.202.53"
+          "136.81.173.196"
         ],
         "aaaa": [],
         "cname": null,
@@ -3002,8 +3117,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3058,7 +3173,7 @@
             "not_before": "2026-09-23T22:52:10Z",
             "not_after": "2026-12-22T23:48:06Z",
             "self_signed": false,
-            "days_to_expiry": 84
+            "days_to_expiry": 83
           }
         }
       ],
@@ -3116,8 +3231,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3137,19 +3252,19 @@
       },
       "hosts": [
         {
-          "ip": "8.233.90.115",
+          "ip": "8.232.58.165",
           "asn": "AS396982",
           "asn_org": "Google LLC",
           "country": "US",
           "region": "Missouri",
           "city": "Kansas City",
-          "reverse_dns": "115.90.233.8.bc.googleusercontent.com",
+          "reverse_dns": "165.58.232.8.bc.googleusercontent.com",
           "is_private": false
         }
       ],
       "services": [
         {
-          "ip": "8.233.90.115",
+          "ip": "8.232.58.165",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -3157,7 +3272,7 @@
           "tls": false
         },
         {
-          "ip": "8.233.90.115",
+          "ip": "8.232.58.165",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -3169,16 +3284,16 @@
             "san": [
               "valorep.prodexlabs.com"
             ],
-            "not_before": "2026-08-18T01:41:27Z",
-            "not_after": "2026-11-16T02:34:00Z",
+            "not_before": "2026-09-23T23:23:08Z",
+            "not_after": "2026-12-23T00:19:03Z",
             "self_signed": false,
-            "days_to_expiry": 47
+            "days_to_expiry": 83
           }
         }
       ],
       "dns": {
         "a": [
-          "8.233.90.115"
+          "8.232.58.165"
         ],
         "aaaa": [],
         "cname": null,
@@ -3230,8 +3345,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-09-29T18:20:56Z",
-      "last_seen": "2026-09-29T18:20:56Z",
+      "first_discovered": "2026-09-30T00:33:25Z",
+      "last_seen": "2026-09-30T00:33:25Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3288,7 +3403,7 @@
             "not_before": "2026-08-16T23:37:42Z",
             "not_after": "2026-11-15T00:30:55Z",
             "self_signed": false,
-            "days_to_expiry": 46
+            "days_to_expiry": 45
           }
         }
       ],
@@ -3364,8 +3479,317 @@
   ],
   "phantom_subdomains": [],
   "deltas": {
-    "since_scan": "scan_2026-09-29T12:06:33Z_8ba14aed",
+    "since_scan": "scan_2026-09-29T18:05:16Z_112f3b15",
     "added": {
+      "subdomains": [
+        "oidc-test.prodexlabs.com"
+      ],
+      "services": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.183",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.183",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "bitec.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "bitec.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "dass.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "dass.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "demo.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "demo.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.194",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.194",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.93",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.93",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "highcom.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "highcom.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ivs.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ivs.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-nh.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-nh.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ss.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ss.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "littleleaffarms.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "littleleaffarms.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "oidc-test.prodexlabs.com",
+          "ip": "136.81.198.25",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "oidc-test.prodexlabs.com",
+          "ip": "136.81.198.25",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "panthalassa.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "panthalassa.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prod.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prod.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prosalud.prodexlabs.com",
+          "ip": "136.81.194.166",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prosalud.prodexlabs.com",
+          "ip": "136.81.194.166",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "time.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "time.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "trial.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "trial.prodexlabs.com",
+          "ip": "136.81.173.196",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "valorep.prodexlabs.com",
+          "ip": "8.232.58.165",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "valorep.prodexlabs.com",
+          "ip": "8.232.58.165",
+          "port": 443,
+          "protocol": "tcp"
+        }
+      ],
+      "hosts": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.183"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "2603:1061:14:b6::1"
+        },
+        {
+          "subdomain": "bitec.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "dass.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "demo.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.194"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.35"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.123"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.93"
+        },
+        {
+          "subdomain": "highcom.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "l3h-ivs.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "l3h-nh.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "l3h-ss.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "littleleaffarms.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "oidc-test.prodexlabs.com",
+          "ip": "136.81.198.25"
+        },
+        {
+          "subdomain": "panthalassa.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "prod.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "prosalud.prodexlabs.com",
+          "ip": "136.81.194.166"
+        },
+        {
+          "subdomain": "time.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "trial.prodexlabs.com",
+          "ip": "136.81.173.196"
+        },
+        {
+          "subdomain": "valorep.prodexlabs.com",
+          "ip": "8.232.58.165"
+        }
+      ]
+    },
+    "removed": {
       "subdomains": [],
       "services": [
         {
@@ -3381,6 +3805,42 @@
           "protocol": "tcp"
         },
         {
+          "subdomain": "bitec.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "bitec.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "dass.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "dass.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "demo.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "demo.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
           "subdomain": "docs.prodexlabs.com",
           "ip": "66.33.60.129",
           "port": 80,
@@ -3401,6 +3861,102 @@
         {
           "subdomain": "docs.prodexlabs.com",
           "ip": "76.76.21.22",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "highcom.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "highcom.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ivs.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ivs.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-nh.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-nh.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ss.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "l3h-ss.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "littleleaffarms.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "littleleaffarms.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "panthalassa.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "panthalassa.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prod.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prod.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prosalud.prodexlabs.com",
+          "ip": "34.149.145.200",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "prosalud.prodexlabs.com",
+          "ip": "34.149.145.200",
           "port": 443,
           "protocol": "tcp"
         },
@@ -3414,6 +3970,42 @@
           "subdomain": "sandbox.prodexlabs.com",
           "ip": "136.81.198.25",
           "port": 8443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "time.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "time.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "trial.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "trial.prodexlabs.com",
+          "ip": "35.227.202.53",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "valorep.prodexlabs.com",
+          "ip": "8.233.90.115",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "valorep.prodexlabs.com",
+          "ip": "8.233.90.115",
+          "port": 443,
           "protocol": "tcp"
         }
       ],
@@ -3435,6 +4027,18 @@
           "ip": "2603:1061:14:49::1"
         },
         {
+          "subdomain": "bitec.prodexlabs.com",
+          "ip": "35.227.202.53"
+        },
+        {
+          "subdomain": "dass.prodexlabs.com",
+          "ip": "35.227.202.53"
+        },
+        {
+          "subdomain": "demo.prodexlabs.com",
+          "ip": "35.227.202.53"
+        },
+        {
           "subdomain": "docs.prodexlabs.com",
           "ip": "66.33.60.129"
         },
@@ -3449,95 +4053,50 @@
         {
           "subdomain": "docs.prodexlabs.com",
           "ip": "76.76.21.98"
-        }
-      ]
-    },
-    "removed": {
-      "subdomains": [
-        "oidc-test.prodexlabs.com"
-      ],
-      "services": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.149",
-          "port": 80,
-          "protocol": "tcp"
         },
         {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.149",
-          "port": 443,
-          "protocol": "tcp"
+          "subdomain": "highcom.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.130",
-          "port": 80,
-          "protocol": "tcp"
+          "subdomain": "l3h-ivs.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.130",
-          "port": 443,
-          "protocol": "tcp"
+          "subdomain": "l3h-nh.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.61",
-          "port": 80,
-          "protocol": "tcp"
+          "subdomain": "l3h-ss.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.61",
-          "port": 443,
-          "protocol": "tcp"
+          "subdomain": "littleleaffarms.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "oidc-test.prodexlabs.com",
-          "ip": "136.81.198.25",
-          "port": 80,
-          "protocol": "tcp"
+          "subdomain": "panthalassa.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "oidc-test.prodexlabs.com",
-          "ip": "136.81.198.25",
-          "port": 443,
-          "protocol": "tcp"
-        }
-      ],
-      "hosts": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.149"
+          "subdomain": "prod.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.152"
+          "subdomain": "prosalud.prodexlabs.com",
+          "ip": "34.149.145.200"
         },
         {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:94::1"
+          "subdomain": "time.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.130"
+          "subdomain": "trial.prodexlabs.com",
+          "ip": "35.227.202.53"
         },
         {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.35"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.123"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.61"
-        },
-        {
-          "subdomain": "oidc-test.prodexlabs.com",
-          "ip": "136.81.198.25"
+          "subdomain": "valorep.prodexlabs.com",
+          "ip": "8.233.90.115"
         }
       ]
     },
@@ -3547,238 +4106,14 @@
       "reachability": [
         {
           "subdomain": "sandbox.prodexlabs.com",
-          "from": true,
-          "to": false,
+          "from": false,
+          "to": true,
           "is_root": false
         }
       ]
     }
   },
   "history": [
-    {
-      "scan_id": "scan_2026-08-31T22:10:50Z_50482374",
-      "started_at": "2026-08-31T22:10:50Z",
-      "completed_at": "2026-08-31T22:27:05Z",
-      "subdomain_count": 29,
-      "live_subdomain_count": 29,
-      "host_count": 21,
-      "service_count": 61,
-      "subdomain_names": [
-        "atlantis-gcp.prodexlabs.com",
-        "azure-demo.prodexlabs.com",
-        "bitec.prodexlabs.com",
-        "cooked.prodexlabs.com",
-        "demo.prodexlabs.com",
-        "docs.prodexlabs.com",
-        "gov.prodexlabs.com",
-        "highcom.prodexlabs.com",
-        "l3h-ivs.prodexlabs.com",
-        "l3h-nh.prodexlabs.com",
-        "l3h-ss.prodexlabs.com",
-        "link.prodexlabs.com",
-        "littleleaffarms.prodexlabs.com",
-        "oidc-test.prodexlabs.com",
-        "panthalassa.prodexlabs.com",
-        "preview.prodexlabs.com",
-        "prod.prodexlabs.com",
-        "prodexlabs.com",
-        "prosalud-staging.prodexlabs.com",
-        "prosalud.prodexlabs.com",
-        "sandbox.prodexlabs.com",
-        "staging-gpt55.prodexlabs.com",
-        "staging.prodexlabs.com",
-        "time.prodexlabs.com",
-        "tour.prodexlabs.com",
-        "trial.prodexlabs.com",
-        "uat.prodexlabs.com",
-        "valorep.prodexlabs.com",
-        "www.prodexlabs.com"
-      ],
-      "ports_by_sub": {
-        "prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        },
-        "atlantis-gcp.prodexlabs.com": {
-          "34.67.20.186": [
-            80,
-            443
-          ]
-        },
-        "azure-demo.prodexlabs.com": {
-          "150.171.109.183": [
-            80,
-            443
-          ]
-        },
-        "bitec.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "cooked.prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        },
-        "demo.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "docs.prodexlabs.com": {
-          "66.33.60.129": [
-            80,
-            443
-          ],
-          "76.76.21.22": [
-            80,
-            443
-          ]
-        },
-        "gov.prodexlabs.com": {
-          "52.244.87.51": [
-            80,
-            443
-          ]
-        },
-        "highcom.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "l3h-ivs.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "l3h-nh.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "l3h-ss.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "link.prodexlabs.com": {
-          "170.187.131.209": [
-            80
-          ],
-          "185.3.93.228": [
-            80,
-            443
-          ]
-        },
-        "littleleaffarms.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "oidc-test.prodexlabs.com": {
-          "136.110.176.164": [
-            80,
-            443
-          ]
-        },
-        "panthalassa.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "preview.prodexlabs.com": {
-          "34.54.236.210": [
-            80,
-            443
-          ]
-        },
-        "prod.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "prosalud-staging.prodexlabs.com": {
-          "34.13.119.70": [
-            80,
-            443
-          ]
-        },
-        "prosalud.prodexlabs.com": {
-          "34.149.145.200": [
-            80,
-            443
-          ]
-        },
-        "sandbox.prodexlabs.com": {
-          "136.110.176.164": [
-            80,
-            443
-          ]
-        },
-        "staging-gpt55.prodexlabs.com": {
-          "34.117.3.186": [
-            80,
-            443
-          ]
-        },
-        "staging.prodexlabs.com": {
-          "34.117.3.186": [
-            80,
-            443
-          ]
-        },
-        "time.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "tour.prodexlabs.com": {
-          "34.36.153.196": [
-            80,
-            443
-          ]
-        },
-        "trial.prodexlabs.com": {
-          "35.227.202.53": [
-            80,
-            443
-          ]
-        },
-        "uat.prodexlabs.com": {
-          "136.68.149.70": [
-            80,
-            443
-          ]
-        },
-        "valorep.prodexlabs.com": {
-          "8.233.90.115": [
-            80,
-            443
-          ]
-        },
-        "www.prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        }
-      },
-      "tech_versions": {}
-    },
     {
       "scan_id": "scan_2026-09-01T02:35:39Z_0b40f15e",
       "started_at": "2026-09-01T02:35:39Z",
@@ -30946,6 +31281,235 @@
         },
         "valorep.prodexlabs.com": {
           "8.233.90.115": [
+            80,
+            443
+          ]
+        },
+        "www.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        }
+      },
+      "tech_versions": {}
+    },
+    {
+      "scan_id": "scan_2026-09-30T00:10:59Z_340a1802",
+      "started_at": "2026-09-30T00:10:59Z",
+      "completed_at": "2026-09-30T00:33:22Z",
+      "subdomain_count": 29,
+      "live_subdomain_count": 29,
+      "host_count": 21,
+      "service_count": 64,
+      "subdomain_names": [
+        "atlantis-gcp.prodexlabs.com",
+        "azure-demo.prodexlabs.com",
+        "bitec.prodexlabs.com",
+        "cooked.prodexlabs.com",
+        "dass.prodexlabs.com",
+        "demo.prodexlabs.com",
+        "docs.prodexlabs.com",
+        "gov.prodexlabs.com",
+        "highcom.prodexlabs.com",
+        "l3h-ivs.prodexlabs.com",
+        "l3h-nh.prodexlabs.com",
+        "l3h-ss.prodexlabs.com",
+        "link.prodexlabs.com",
+        "littleleaffarms.prodexlabs.com",
+        "oidc-test.prodexlabs.com",
+        "panthalassa.prodexlabs.com",
+        "preview.prodexlabs.com",
+        "prod.prodexlabs.com",
+        "prodexlabs.com",
+        "prosalud-staging.prodexlabs.com",
+        "prosalud.prodexlabs.com",
+        "sandbox.prodexlabs.com",
+        "staging.prodexlabs.com",
+        "time.prodexlabs.com",
+        "tour.prodexlabs.com",
+        "trial.prodexlabs.com",
+        "uat.prodexlabs.com",
+        "valorep.prodexlabs.com",
+        "www.prodexlabs.com"
+      ],
+      "ports_by_sub": {
+        "prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "atlantis-gcp.prodexlabs.com": {
+          "34.67.20.186": [
+            80,
+            443
+          ]
+        },
+        "azure-demo.prodexlabs.com": {
+          "150.171.109.183": [
+            80,
+            443
+          ]
+        },
+        "bitec.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "cooked.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "dass.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "demo.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "docs.prodexlabs.com": {
+          "66.33.60.194": [
+            80,
+            443
+          ],
+          "76.76.21.93": [
+            80,
+            443
+          ]
+        },
+        "gov.prodexlabs.com": {
+          "52.244.87.51": [
+            80,
+            443
+          ]
+        },
+        "highcom.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "l3h-ivs.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "l3h-nh.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "l3h-ss.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "link.prodexlabs.com": {
+          "170.187.131.209": [
+            80,
+            443
+          ],
+          "185.3.93.228": [
+            80,
+            443
+          ],
+          "97.107.135.178": [
+            80,
+            443
+          ]
+        },
+        "littleleaffarms.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "oidc-test.prodexlabs.com": {
+          "136.81.198.25": [
+            80,
+            443
+          ]
+        },
+        "panthalassa.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "preview.prodexlabs.com": {
+          "34.54.236.210": [
+            80,
+            443
+          ]
+        },
+        "prod.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "prosalud-staging.prodexlabs.com": {
+          "136.81.196.61": [
+            80,
+            443
+          ]
+        },
+        "prosalud.prodexlabs.com": {
+          "136.81.194.166": [
+            80,
+            443
+          ]
+        },
+        "sandbox.prodexlabs.com": {
+          "136.81.198.25": [
+            80,
+            443
+          ]
+        },
+        "staging.prodexlabs.com": {
+          "136.81.178.35": [
+            80,
+            443
+          ]
+        },
+        "time.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "tour.prodexlabs.com": {
+          "34.36.153.196": [
+            80,
+            443
+          ]
+        },
+        "trial.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "uat.prodexlabs.com": {
+          "136.69.87.98": [
+            80,
+            443
+          ]
+        },
+        "valorep.prodexlabs.com": {
+          "8.232.58.165": [
             80,
             443
           ]
