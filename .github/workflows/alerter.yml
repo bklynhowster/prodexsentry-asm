@@ -1,0 +1,84 @@
+name: Daily posture digest
+
+# 318 (2026-10-14) — Prodex gets the same daily digest Command has had.
+# Howie, after reading the Command one: "I love the digest. It's just great.
+# Do we have something similar for prodex?" — it did not: the code was here,
+# byte-identical to Command's, but this job file never was.
+#
+# Runs once a day at 12:00 UTC = 07:00 ET (08:00 ET during EDT). Cron is UTC.
+# Also runnable manually from the Actions tab via workflow_dispatch;
+# dry_run=true is safe (renders, no email, no DB write).
+#
+# Mail transport (4.7 M1): Prodex sends over SMTP/iCloud — the same settings
+# the mail canary (11:00 UTC) and discovery already use on this repo.
+#
+# ⚠ IDENTITY COMES FROM REPO VARIABLES, NOT FROM THIS FILE. Command's copy of
+# this job carries `|| 'literal'` fallbacks because those literals ARE
+# Command's identity; its own comment says to delete them when mirrored.
+# They are deleted here. run_alerter.py has no defaults either (4.7 M5), so
+# an unset variable makes the job stop with a clear message rather than send
+# Prodex's posture as, or to, the wrong tenant. The variables this job reads:
+#   ALERTER_FROM, ALERTER_FROM_NAME   (already set — the canary uses them)
+#   ALERTER_TO                        howie, sean, keanu @prodexlabs.com
+#   ALERTER_PORTAL_URL                https://prodexsentry.netlify.app
+#   ALERTER_DASHBOARD_URL             the Prodex Supabase project
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Render but don't send / write"
+        required: false
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # 316: PyYAML — the block-page library (312) reads artifact_signatures.yaml.
+          # Its absence crashed the Command digest of 2026-10-14 on the first measured block.
+          pip install 'psycopg[binary]==3.3.4' 'pyyaml>=6,<7'
+
+      - name: Run alerter
+        env:
+          SUPABASE_DSN:        ${{ secrets.SUPABASE_DSN }}
+          # Transport. Prodex: smtp/iCloud (MAIL_PROVIDER=smtp). The SendGrid key
+          # is passed through for parity with Command's job; unused here.
+          SENDGRID_API_KEY:    ${{ secrets.SENDGRID_API_KEY }}
+          MAIL_PROVIDER:       ${{ vars.MAIL_PROVIDER }}
+          SMTP_HOST:           ${{ vars.SMTP_HOST }}
+          SMTP_PORT:           ${{ vars.SMTP_PORT }}
+          SMTP_USER:           ${{ vars.SMTP_USER }}
+          SMTP_PASS:           ${{ secrets.SMTP_PASS }}
+          INSTANCE_NAME:       ${{ github.event.repository.name }}
+          # Identity — repo variables only, no fallbacks (see the header).
+          ALERTER_FROM:          ${{ vars.ALERTER_FROM }}
+          ALERTER_FROM_NAME:     ${{ vars.ALERTER_FROM_NAME }}
+          ALERTER_TO:            ${{ vars.ALERTER_TO }}
+          ALERTER_DASHBOARD_URL: ${{ vars.ALERTER_DASHBOARD_URL }}
+          # Note 307 — links in the email go to the portal, not the raw database.
+          ALERTER_PORTAL_URL:    ${{ vars.ALERTER_PORTAL_URL }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python scripts/alerter/run_alerter.py --dry-run
+          else
+            python scripts/alerter/run_alerter.py
+          fi
