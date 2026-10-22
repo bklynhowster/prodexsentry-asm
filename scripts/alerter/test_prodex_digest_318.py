@@ -62,3 +62,19 @@ def test_318_the_transport_matches_the_canary():
     c = canary.read_text(encoding="utf-8")
     for var in ("MAIL_PROVIDER", "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS"):
         assert (f"{var}:" in c) == (f"{var}:" in t), f"{var}: the digest and the canary must read the same transport"
+
+
+def test_3l_the_brand_file_is_prodexs_and_carries_no_command_identity():
+    """KB 12 job 3l (2026-10-22): the digest's brand (name, colors, logo) is a data file per repo,
+    so the code stays identical. Prodex's must be Prodex's: Howie, 08:55, "do the same thing for
+    prodex using a prodex logo."."""
+    import json
+    brand_dir = ROOT / "scripts" / "alerter" / "brand"
+    b = json.loads((brand_dir / "brand.json").read_text(encoding="utf-8"))
+    if "prodex" not in ROOT.name.lower():
+        pytest.skip("Command's brand is Command's")
+    assert b["short_name"] == "Prodex" and b["logo_alt"] == "Prodex Labs"
+    raw = (brand_dir / "brand.json").read_text(encoding="utf-8")
+    for bad in ("Command Companies", "CCwhite", "#0A4595"):
+        assert bad not in raw, f"Command identity in Prodex's brand: {bad}"
+    assert (brand_dir / b["logo_file"]).read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
