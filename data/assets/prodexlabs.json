@@ -10,10 +10,10 @@
     "discovered_via": "manual"
   },
   "scan": {
-    "id": "scan_2026-11-06T00:06:49Z_87e437fe",
-    "started_at": "2026-11-06T00:06:49Z",
-    "completed_at": "2026-11-06T00:20:23Z",
-    "duration_seconds": 814,
+    "id": "scan_2026-11-06T06:04:37Z_c11eb5d7",
+    "started_at": "2026-11-06T06:04:37Z",
+    "completed_at": "2026-11-06T06:17:55Z",
+    "duration_seconds": 798,
     "engine_version": "3.0.0",
     "scanner_origin": "github-actions-ubuntu-azure",
     "tools_run": [
@@ -30,7 +30,7 @@
   "summary": {
     "subdomain_count": 30,
     "live_subdomain_count": 30,
-    "host_count": 23,
+    "host_count": 24,
     "service_count": 68,
     "newest_cert_expiry_days": 37,
     "top_hosting_org": "Google LLC",
@@ -42,8 +42,8 @@
       "alive": true,
       "is_root": true,
       "discovered_via": "dnsx",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -97,7 +97,7 @@
             "not_before": "2026-10-08T00:53:17Z",
             "not_after": "2027-01-06T01:47:31Z",
             "self_signed": false,
-            "days_to_expiry": 61
+            "days_to_expiry": 60
           }
         }
       ],
@@ -116,8 +116,8 @@
         ],
         "txt": [
           "MS=ms22662979",
-          "v=spf1 include:_spf.google.com ~all",
-          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d"
+          "linkedin-site-verification=7208f2b4-e4a4-4584-9423-6e135977865d",
+          "v=spf1 include:_spf.google.com ~all"
         ],
         "spf": "v=spf1 include:_spf.google.com ~all",
         "dnssec": false
@@ -189,8 +189,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:23Z",
-      "last_seen": "2026-11-06T00:20:23Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -287,8 +287,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:23Z",
-      "last_seen": "2026-11-06T00:20:23Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -305,7 +305,27 @@
       },
       "hosts": [
         {
-          "ip": "150.171.109.148",
+          "ip": "150.171.109.76",
+          "asn": "AS8075",
+          "asn_org": "Microsoft Corporation",
+          "country": "US",
+          "region": "New York",
+          "city": "New York City",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "150.171.109.77",
+          "asn": "AS8075",
+          "asn_org": "Microsoft Corporation",
+          "country": "US",
+          "region": "New York",
+          "city": "New York City",
+          "reverse_dns": null,
+          "is_private": false
+        },
+        {
+          "ip": "2603:1061:14:48::1",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -315,17 +335,7 @@
           "is_private": false
         },
         {
-          "ip": "150.171.109.151",
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation",
-          "country": "US",
-          "region": "Arizona",
-          "city": "Phoenix",
-          "reverse_dns": null,
-          "is_private": false
-        },
-        {
-          "ip": "2603:1061:14:96::1",
+          "ip": "2603:1061:14:75::1",
           "asn": "AS8075",
           "asn_org": "Microsoft Corporation",
           "country": "US",
@@ -337,7 +347,7 @@
       ],
       "services": [
         {
-          "ip": "150.171.109.151",
+          "ip": "150.171.109.76",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -345,7 +355,7 @@
           "tls": false
         },
         {
-          "ip": "150.171.109.151",
+          "ip": "150.171.109.76",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -366,10 +376,10 @@
       ],
       "dns": {
         "a": [
-          "150.171.109.148"
+          "150.171.109.77"
         ],
         "aaaa": [
-          "2603:1061:14:96::1"
+          "2603:1061:14:75::1"
         ],
         "cname": "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net",
         "mx": [],
@@ -405,8 +415,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -516,8 +526,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -571,7 +581,7 @@
             "not_before": "2026-10-08T00:53:17Z",
             "not_after": "2027-01-06T01:47:31Z",
             "self_signed": false,
-            "days_to_expiry": 61
+            "days_to_expiry": 60
           }
         }
       ],
@@ -654,8 +664,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -765,8 +775,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -876,8 +886,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -894,7 +904,7 @@
       },
       "hosts": [
         {
-          "ip": "66.33.60.129",
+          "ip": "66.33.60.194",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -904,7 +914,7 @@
           "is_private": false
         },
         {
-          "ip": "66.33.60.66",
+          "ip": "66.33.60.34",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -914,7 +924,7 @@
           "is_private": false
         },
         {
-          "ip": "76.76.21.142",
+          "ip": "76.76.21.164",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -924,7 +934,7 @@
           "is_private": false
         },
         {
-          "ip": "76.76.21.22",
+          "ip": "76.76.21.93",
           "asn": "AS16509",
           "asn_org": "Amazon.com, Inc.",
           "country": "US",
@@ -936,7 +946,7 @@
       ],
       "services": [
         {
-          "ip": "66.33.60.129",
+          "ip": "66.33.60.194",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -944,7 +954,7 @@
           "tls": false
         },
         {
-          "ip": "66.33.60.129",
+          "ip": "66.33.60.194",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -959,11 +969,11 @@
             "not_before": "2026-10-28T01:53:47Z",
             "not_after": "2027-01-26T01:53:46Z",
             "self_signed": false,
-            "days_to_expiry": 81
+            "days_to_expiry": 80
           }
         },
         {
-          "ip": "76.76.21.22",
+          "ip": "76.76.21.93",
           "port": 80,
           "protocol": "tcp",
           "service": "http",
@@ -971,7 +981,7 @@
           "tls": false
         },
         {
-          "ip": "76.76.21.22",
+          "ip": "76.76.21.93",
           "port": 443,
           "protocol": "tcp",
           "service": "https",
@@ -986,14 +996,14 @@
             "not_before": "2026-10-28T01:53:47Z",
             "not_after": "2027-01-26T01:53:46Z",
             "self_signed": false,
-            "days_to_expiry": 81
+            "days_to_expiry": 80
           }
         }
       ],
       "dns": {
         "a": [
-          "76.76.21.142",
-          "66.33.60.66"
+          "66.33.60.34",
+          "76.76.21.164"
         ],
         "aaaa": [],
         "cname": "cname.mintlify-dns.com",
@@ -1021,11 +1031,6 @@
             "name": "Vercel",
             "version": null,
             "category": null
-          },
-          {
-            "name": "dc.js",
-            "version": null,
-            "category": null
           }
         ]
       },
@@ -1040,8 +1045,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1136,8 +1141,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1247,8 +1252,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1358,8 +1363,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1469,8 +1474,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1580,8 +1585,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:24Z",
-      "last_seen": "2026-11-06T00:20:24Z",
+      "first_discovered": "2026-11-06T06:17:55Z",
+      "last_seen": "2026-11-06T06:17:55Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1713,9 +1718,9 @@
       ],
       "dns": {
         "a": [
-          "97.107.135.178",
+          "170.187.131.209",
           "185.3.93.228",
-          "170.187.131.209"
+          "97.107.135.178"
         ],
         "aaaa": [],
         "cname": "track.smtp2go.net",
@@ -1749,8 +1754,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1860,8 +1865,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -1971,8 +1976,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2082,8 +2087,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2178,8 +2183,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2280,8 +2285,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2391,8 +2396,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2502,8 +2507,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2555,7 +2560,7 @@
             "not_before": "2026-09-23T23:36:18Z",
             "not_after": "2026-12-23T00:32:13Z",
             "self_signed": false,
-            "days_to_expiry": 47
+            "days_to_expiry": 46
           }
         }
       ],
@@ -2613,8 +2618,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2724,8 +2729,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": false,
@@ -2814,8 +2819,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -2867,7 +2872,7 @@
             "not_before": "2026-09-24T00:27:34Z",
             "not_after": "2026-12-23T01:23:29Z",
             "self_signed": false,
-            "days_to_expiry": 47
+            "days_to_expiry": 46
           }
         }
       ],
@@ -2925,8 +2930,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3036,8 +3041,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3089,7 +3094,7 @@
             "not_before": "2026-10-26T00:19:53Z",
             "not_after": "2027-01-24T01:14:27Z",
             "self_signed": false,
-            "days_to_expiry": 79
+            "days_to_expiry": 78
           }
         }
       ],
@@ -3152,8 +3157,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3263,8 +3268,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3374,8 +3379,8 @@
       "alive": true,
       "is_root": false,
       "discovered_via": "subfinder",
-      "first_discovered": "2026-11-06T00:20:25Z",
-      "last_seen": "2026-11-06T00:20:25Z",
+      "first_discovered": "2026-11-06T06:17:56Z",
+      "last_seen": "2026-11-06T06:17:56Z",
       "tags": [],
       "reachability": {
         "live": true,
@@ -3429,7 +3434,7 @@
             "not_before": "2026-10-08T00:53:17Z",
             "not_after": "2027-01-06T01:47:31Z",
             "self_signed": false,
-            "days_to_expiry": 61
+            "days_to_expiry": 60
           }
         }
       ],
@@ -3510,8 +3515,83 @@
   ],
   "phantom_subdomains": [],
   "deltas": {
-    "since_scan": "scan_2026-11-05T20:26:54Z_cd9a99a9",
+    "since_scan": "scan_2026-11-06T00:06:49Z_87e437fe",
     "added": {
+      "subdomains": [],
+      "services": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.76",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.76",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.194",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.194",
+          "port": 443,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.93",
+          "port": 80,
+          "protocol": "tcp"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.93",
+          "port": 443,
+          "protocol": "tcp"
+        }
+      ],
+      "hosts": [
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.76"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "150.171.109.77"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "2603:1061:14:48::1"
+        },
+        {
+          "subdomain": "azure-demo.prodexlabs.com",
+          "ip": "2603:1061:14:75::1"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.194"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.34"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.164"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
+          "ip": "76.76.21.93"
+        }
+      ]
+    },
+    "removed": {
       "subdomains": [],
       "services": [
         {
@@ -3566,78 +3646,19 @@
         },
         {
           "subdomain": "docs.prodexlabs.com",
+          "ip": "66.33.60.129"
+        },
+        {
+          "subdomain": "docs.prodexlabs.com",
           "ip": "66.33.60.66"
         },
         {
           "subdomain": "docs.prodexlabs.com",
           "ip": "76.76.21.142"
-        }
-      ]
-    },
-    "removed": {
-      "subdomains": [],
-      "services": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.72",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.72",
-          "port": 443,
-          "protocol": "tcp"
         },
         {
           "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.193",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.193",
-          "port": 443,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.241",
-          "port": 80,
-          "protocol": "tcp"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.241",
-          "port": 443,
-          "protocol": "tcp"
-        }
-      ],
-      "hosts": [
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.72"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "150.171.109.77"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:41::1"
-        },
-        {
-          "subdomain": "azure-demo.prodexlabs.com",
-          "ip": "2603:1061:14:49::1"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "66.33.60.193"
-        },
-        {
-          "subdomain": "docs.prodexlabs.com",
-          "ip": "76.76.21.241"
+          "ip": "76.76.21.22"
         }
       ]
     },
@@ -3648,229 +3669,6 @@
     }
   },
   "history": [
-    {
-      "scan_id": "scan_2026-10-08T18:05:20Z_cfb749b6",
-      "started_at": "2026-10-08T18:05:20Z",
-      "completed_at": "2026-10-08T18:27:38Z",
-      "subdomain_count": 29,
-      "live_subdomain_count": 29,
-      "host_count": 23,
-      "service_count": 60,
-      "subdomain_names": [
-        "atlantis-gcp.prodexlabs.com",
-        "azure-demo.prodexlabs.com",
-        "bitec.prodexlabs.com",
-        "cooked.prodexlabs.com",
-        "dass.prodexlabs.com",
-        "demo.prodexlabs.com",
-        "docs.prodexlabs.com",
-        "gov.prodexlabs.com",
-        "highcom.prodexlabs.com",
-        "l3h-ivs.prodexlabs.com",
-        "l3h-nh.prodexlabs.com",
-        "l3h-ss.prodexlabs.com",
-        "link.prodexlabs.com",
-        "littleleaffarms.prodexlabs.com",
-        "oidc-test.prodexlabs.com",
-        "panthalassa.prodexlabs.com",
-        "preview.prodexlabs.com",
-        "prod.prodexlabs.com",
-        "prodexlabs.com",
-        "prosalud-staging.prodexlabs.com",
-        "prosalud.prodexlabs.com",
-        "sandbox.prodexlabs.com",
-        "staging.prodexlabs.com",
-        "time.prodexlabs.com",
-        "tour.prodexlabs.com",
-        "trial.prodexlabs.com",
-        "uat.prodexlabs.com",
-        "valorep.prodexlabs.com",
-        "www.prodexlabs.com"
-      ],
-      "ports_by_sub": {
-        "prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        },
-        "atlantis-gcp.prodexlabs.com": {
-          "34.67.20.186": [
-            80,
-            443
-          ]
-        },
-        "azure-demo.prodexlabs.com": {
-          "150.171.109.150": [
-            80,
-            443
-          ]
-        },
-        "bitec.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "cooked.prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        },
-        "dass.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "demo.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "docs.prodexlabs.com": {
-          "66.33.60.130": [
-            80,
-            443
-          ],
-          "76.76.21.61": [
-            80,
-            443
-          ]
-        },
-        "gov.prodexlabs.com": {
-          "52.244.87.51": [
-            80,
-            443
-          ]
-        },
-        "highcom.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "l3h-ivs.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "l3h-nh.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "l3h-ss.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "link.prodexlabs.com": {
-          "185.3.93.228": [
-            80,
-            443
-          ]
-        },
-        "littleleaffarms.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "oidc-test.prodexlabs.com": {
-          "136.81.198.25": [
-            80,
-            443
-          ]
-        },
-        "panthalassa.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "preview.prodexlabs.com": {
-          "34.54.236.210": [
-            80,
-            443
-          ]
-        },
-        "prod.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "prosalud-staging.prodexlabs.com": {
-          "136.81.196.61": [
-            80,
-            443
-          ]
-        },
-        "prosalud.prodexlabs.com": {
-          "136.81.194.166": [
-            80,
-            443
-          ]
-        },
-        "sandbox.prodexlabs.com": {
-          "136.81.198.25": [
-            80,
-            443
-          ]
-        },
-        "staging.prodexlabs.com": {
-          "136.81.178.35": [
-            80,
-            443
-          ]
-        },
-        "time.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "tour.prodexlabs.com": {
-          "34.36.153.196": [
-            80,
-            443
-          ]
-        },
-        "trial.prodexlabs.com": {
-          "136.81.173.196": [
-            80,
-            443
-          ]
-        },
-        "uat.prodexlabs.com": {
-          "136.69.87.98": [
-            80,
-            443
-          ]
-        },
-        "valorep.prodexlabs.com": {
-          "8.232.58.165": [
-            80,
-            443
-          ]
-        },
-        "www.prodexlabs.com": {
-          "8.232.147.166": [
-            80,
-            443
-          ]
-        }
-      },
-      "tech_versions": {
-        "Nginx": "1.31.6"
-      }
-    },
     {
       "scan_id": "scan_2026-10-09T00:11:52Z_fb811844",
       "started_at": "2026-10-09T00:11:52Z",
@@ -31181,13 +30979,253 @@
       "tech_versions": {
         "Nginx": "1.31.6"
       }
+    },
+    {
+      "scan_id": "scan_2026-11-06T06:04:37Z_c11eb5d7",
+      "started_at": "2026-11-06T06:04:37Z",
+      "completed_at": "2026-11-06T06:17:55Z",
+      "subdomain_count": 30,
+      "live_subdomain_count": 30,
+      "host_count": 24,
+      "service_count": 68,
+      "subdomain_names": [
+        "atlantis-gcp.prodexlabs.com",
+        "azure-demo.prodexlabs.com",
+        "bitec.prodexlabs.com",
+        "cooked.prodexlabs.com",
+        "dass.prodexlabs.com",
+        "demo.prodexlabs.com",
+        "docs.prodexlabs.com",
+        "gov.prodexlabs.com",
+        "highcom.prodexlabs.com",
+        "l3h-ivs.prodexlabs.com",
+        "l3h-nh.prodexlabs.com",
+        "l3h-ss.prodexlabs.com",
+        "link.prodexlabs.com",
+        "littleleaffarms.prodexlabs.com",
+        "oidc-test.prodexlabs.com",
+        "panthalassa.prodexlabs.com",
+        "ph-test.prodexlabs.com",
+        "preview.prodexlabs.com",
+        "prod.prodexlabs.com",
+        "prodexlabs.com",
+        "prosalud-staging.prodexlabs.com",
+        "prosalud.prodexlabs.com",
+        "sandbox.prodexlabs.com",
+        "staging-gpt55.prodexlabs.com",
+        "staging.prodexlabs.com",
+        "time.prodexlabs.com",
+        "tour.prodexlabs.com",
+        "trial.prodexlabs.com",
+        "uat.prodexlabs.com",
+        "www.prodexlabs.com"
+      ],
+      "ports_by_sub": {
+        "prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "atlantis-gcp.prodexlabs.com": {
+          "34.67.20.186": [
+            80,
+            443
+          ]
+        },
+        "azure-demo.prodexlabs.com": {
+          "150.171.109.76": [
+            80,
+            443
+          ]
+        },
+        "bitec.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "cooked.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        },
+        "dass.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "demo.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "docs.prodexlabs.com": {
+          "66.33.60.194": [
+            80,
+            443
+          ],
+          "76.76.21.93": [
+            80,
+            443
+          ]
+        },
+        "gov.prodexlabs.com": {
+          "52.244.87.51": [
+            80,
+            443
+          ]
+        },
+        "highcom.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "l3h-ivs.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "l3h-nh.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "l3h-ss.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "link.prodexlabs.com": {
+          "170.187.131.209": [
+            80,
+            443
+          ],
+          "185.3.93.228": [
+            80,
+            443
+          ],
+          "97.107.135.178": [
+            80,
+            443
+          ]
+        },
+        "littleleaffarms.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "oidc-test.prodexlabs.com": {
+          "136.81.198.25": [
+            80,
+            443
+          ]
+        },
+        "panthalassa.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "ph-test.prodexlabs.com": {
+          "20.158.99.117": [
+            80,
+            443
+          ]
+        },
+        "preview.prodexlabs.com": {
+          "34.54.236.210": [
+            80,
+            443
+          ]
+        },
+        "prod.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "prosalud-staging.prodexlabs.com": {
+          "136.81.196.61": [
+            80,
+            443
+          ]
+        },
+        "prosalud.prodexlabs.com": {
+          "136.81.194.166": [
+            80,
+            443
+          ]
+        },
+        "sandbox.prodexlabs.com": {
+          "136.81.198.25": [
+            80,
+            443
+          ]
+        },
+        "staging-gpt55.prodexlabs.com": {
+          "34.117.3.186": [
+            80,
+            443,
+            8080,
+            8443
+          ]
+        },
+        "staging.prodexlabs.com": {
+          "136.81.178.35": [
+            80,
+            443
+          ]
+        },
+        "time.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "tour.prodexlabs.com": {
+          "34.36.153.196": [
+            80,
+            443
+          ]
+        },
+        "trial.prodexlabs.com": {
+          "136.81.173.196": [
+            80,
+            443
+          ]
+        },
+        "uat.prodexlabs.com": {
+          "136.69.87.98": [
+            80,
+            443
+          ]
+        },
+        "www.prodexlabs.com": {
+          "8.232.147.166": [
+            80,
+            443
+          ]
+        }
+      },
+      "tech_versions": {
+        "Nginx": "1.31.6"
+      }
     }
   ],
   "dns_readings": {
     "atlantis-gcp.prodexlabs.com": {
       "name": "atlantis-gcp.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -31239,7 +31277,7 @@
     "azure-demo.prodexlabs.com": {
       "name": "azure-demo.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:22Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "cname_chain": [
@@ -31248,9 +31286,9 @@
           ],
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 7,
+          "ttl": 2,
           "values": [
-            "150.171.109.151"
+            "150.171.109.113"
           ]
         },
         "aaaa": {
@@ -31260,15 +31298,15 @@
           ],
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 3,
+          "ttl": 7,
           "values": [
-            "2603:1061:14:96::1"
+            "2603:1061:14:49::1"
           ]
         },
         "cname": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 3,
+          "ttl": 1,
           "values": [
             "prodex-test-endpoint-gmdgckfpdzbaheaa.z02.azurefd.net"
           ]
@@ -31304,22 +31342,12 @@
           "values": []
         }
       },
-      "nx_streak": 0,
-      "owners": {
-        "150.171.109.151": {
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation"
-        },
-        "2603:1061:14:96::1": {
-          "asn": "AS8075",
-          "asn_org": "Microsoft Corporation"
-        }
-      }
+      "nx_streak": 0
     },
     "bitec.prodexlabs.com": {
       "name": "bitec.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -31371,12 +31399,12 @@
     "cooked.prodexlabs.com": {
       "name": "cooked.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 53,
+          "ttl": 57,
           "values": [
             "8.232.147.166"
           ]
@@ -31423,7 +31451,7 @@
     "dass.prodexlabs.com": {
       "name": "dass.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -31475,7 +31503,7 @@
     "demo.prodexlabs.com": {
       "name": "demo.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -31527,7 +31555,7 @@
     "docs.prodexlabs.com": {
       "name": "docs.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "cname_chain": [
@@ -31536,10 +31564,10 @@
           ],
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 49,
+          "ttl": 50,
           "values": [
-            "66.33.60.130",
-            "76.76.21.61"
+            "66.33.60.34",
+            "76.76.21.164"
           ]
         },
         "aaaa": {
@@ -31555,7 +31583,7 @@
         "cname": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 49,
+          "ttl": 50,
           "values": [
             "cname.mintlify-dns.com"
           ]
@@ -31577,7 +31605,7 @@
           ],
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 42,
+          "ttl": 510,
           "values": [
             "ns1.vercel-dns-3.com",
             "ns2.vercel-dns-3.com",
@@ -31596,17 +31624,27 @@
           "values": []
         }
       },
-      "nx_streak": 0
+      "nx_streak": 0,
+      "owners": {
+        "66.33.60.34": {
+          "asn": "AS16509",
+          "asn_org": "Amazon.com, Inc."
+        },
+        "76.76.21.164": {
+          "asn": "AS16509",
+          "asn_org": "Amazon.com, Inc."
+        }
+      }
     },
     "gov.prodexlabs.com": {
       "name": "gov.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 293,
+          "ttl": 297,
           "values": [
             "52.244.87.51"
           ]
@@ -31653,12 +31691,12 @@
     "highcom.prodexlabs.com": {
       "name": "highcom.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 293,
+          "ttl": 292,
           "values": [
             "136.81.173.196"
           ]
@@ -31705,59 +31743,7 @@
     "l3h-ivs.prodexlabs.com": {
       "name": "l3h-ivs.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
-      "records": {
-        "a": {
-          "health": "ok",
-          "status": "NOERROR",
-          "ttl": 293,
-          "values": [
-            "136.81.173.196"
-          ]
-        },
-        "aaaa": {
-          "health": "ok",
-          "status": "NOERROR",
-          "ttl": null,
-          "values": []
-        },
-        "cname": {
-          "health": "ok",
-          "status": "NOERROR",
-          "ttl": null,
-          "values": []
-        },
-        "mx": {
-          "health": "ok",
-          "status": "NOERROR",
-          "ttl": null,
-          "values": []
-        },
-        "ns": {
-          "health": "ok",
-          "status": "NOERROR",
-          "ttl": null,
-          "values": []
-        },
-        "txt": {
-          "health": "ok",
-          "status": "NOERROR",
-          "ttl": null,
-          "values": []
-        }
-      },
-      "nx_streak": 0,
-      "owners": {
-        "136.81.173.196": {
-          "asn": "AS396982",
-          "asn_org": "Google LLC"
-        }
-      }
-    },
-    "l3h-nh.prodexlabs.com": {
-      "name": "l3h-nh.prodexlabs.com",
-      "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -31806,15 +31792,67 @@
         }
       }
     },
-    "l3h-ss.prodexlabs.com": {
-      "name": "l3h-ss.prodexlabs.com",
+    "l3h-nh.prodexlabs.com": {
+      "name": "l3h-nh.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 298,
+          "ttl": 292,
+          "values": [
+            "136.81.173.196"
+          ]
+        },
+        "aaaa": {
+          "health": "ok",
+          "status": "NOERROR",
+          "ttl": null,
+          "values": []
+        },
+        "cname": {
+          "health": "ok",
+          "status": "NOERROR",
+          "ttl": null,
+          "values": []
+        },
+        "mx": {
+          "health": "ok",
+          "status": "NOERROR",
+          "ttl": null,
+          "values": []
+        },
+        "ns": {
+          "health": "ok",
+          "status": "NOERROR",
+          "ttl": null,
+          "values": []
+        },
+        "txt": {
+          "health": "ok",
+          "status": "NOERROR",
+          "ttl": null,
+          "values": []
+        }
+      },
+      "nx_streak": 0,
+      "owners": {
+        "136.81.173.196": {
+          "asn": "AS396982",
+          "asn_org": "Google LLC"
+        }
+      }
+    },
+    "l3h-ss.prodexlabs.com": {
+      "name": "l3h-ss.prodexlabs.com",
+      "name_status": "exists",
+      "read_at": "2026-11-06T06:05:19Z",
+      "records": {
+        "a": {
+          "health": "ok",
+          "status": "NOERROR",
+          "ttl": 297,
           "values": [
             "136.81.173.196"
           ]
@@ -31861,7 +31899,7 @@
     "link.prodexlabs.com": {
       "name": "link.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "cname_chain": [
@@ -31888,7 +31926,7 @@
         "cname": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 58,
+          "ttl": 57,
           "values": [
             "track.smtp2go.net"
           ]
@@ -31944,7 +31982,7 @@
     "littleleaffarms.prodexlabs.com": {
       "name": "littleleaffarms.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -31996,12 +32034,12 @@
     "oidc-test.prodexlabs.com": {
       "name": "oidc-test.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 58,
+          "ttl": 52,
           "values": [
             "136.81.198.25"
           ]
@@ -32048,7 +32086,7 @@
     "panthalassa.prodexlabs.com": {
       "name": "panthalassa.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -32100,7 +32138,7 @@
     "ph-test.prodexlabs.com": {
       "name": "ph-test.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -32152,7 +32190,7 @@
     "preview.prodexlabs.com": {
       "name": "preview.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -32204,12 +32242,12 @@
     "prod.prodexlabs.com": {
       "name": "prod.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 289,
+          "ttl": 290,
           "values": [
             "136.81.173.196"
           ]
@@ -32256,12 +32294,12 @@
     "prodexlabs.com": {
       "name": "prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 49,
+          "ttl": 50,
           "values": [
             "8.232.147.166"
           ]
@@ -32301,7 +32339,7 @@
         "ns": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 432,
+          "ttl": 1096,
           "values": [
             "ns-cloud-d1.googledomains.com",
             "ns-cloud-d2.googledomains.com",
@@ -32331,12 +32369,12 @@
     "prosalud-staging.prodexlabs.com": {
       "name": "prosalud-staging.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 58,
+          "ttl": 52,
           "values": [
             "136.81.196.61"
           ]
@@ -32383,12 +32421,12 @@
     "prosalud.prodexlabs.com": {
       "name": "prosalud.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 292,
+          "ttl": 298,
           "values": [
             "136.81.194.166"
           ]
@@ -32435,12 +32473,12 @@
     "sandbox.prodexlabs.com": {
       "name": "sandbox.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 48,
+          "ttl": 49,
           "values": [
             "136.81.198.25"
           ]
@@ -32487,7 +32525,7 @@
     "staging-gpt55.prodexlabs.com": {
       "name": "staging-gpt55.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:20Z",
       "records": {
         "a": {
           "health": "ok",
@@ -32539,12 +32577,12 @@
     "staging.prodexlabs.com": {
       "name": "staging.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 48,
+          "ttl": 49,
           "values": [
             "136.81.178.35"
           ]
@@ -32591,7 +32629,7 @@
     "time.prodexlabs.com": {
       "name": "time.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -32643,7 +32681,7 @@
     "tour.prodexlabs.com": {
       "name": "tour.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:20Z",
       "records": {
         "a": {
           "health": "ok",
@@ -32695,12 +32733,12 @@
     "trial.prodexlabs.com": {
       "name": "trial.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:23Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
           "status": "NOERROR",
-          "ttl": 299,
+          "ttl": 298,
           "values": [
             "136.81.173.196"
           ]
@@ -32747,7 +32785,7 @@
     "uat.prodexlabs.com": {
       "name": "uat.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:24Z",
+      "read_at": "2026-11-06T06:05:19Z",
       "records": {
         "a": {
           "health": "ok",
@@ -32799,7 +32837,7 @@
     "www.prodexlabs.com": {
       "name": "www.prodexlabs.com",
       "name_status": "exists",
-      "read_at": "2026-11-06T00:07:24Z",
+      "read_at": "2026-11-06T06:05:20Z",
       "records": {
         "a": {
           "health": "ok",
