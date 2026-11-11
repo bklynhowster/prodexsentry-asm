@@ -12,6 +12,12 @@
     {"address": "34.54.236.210", "names": ["preview.prodexlabs.com"], "reserved": true},
     {"address": "34.67.20.186", "names": ["atlantis-gcp.prodexlabs.com"], "reserved": false},
     {"address": "8.232.147.166", "names": ["prodexlabs.com", "www.prodexlabs.com", "cooked.prodexlabs.com"], "reserved": true},
-    {"address": "52.244.87.51", "names": ["gov.prodexlabs.com"], "reserved": true}
+    {"address": "52.244.87.51", "names": ["gov.prodexlabs.com"], "reserved": true},
+    {"address": "150.171.110.18", "names": ["azure-demo.prodexlabs.com"], "reserved": false, "dynamic": true},
+    {"address": "66.33.60.130", "names": ["docs.prodexlabs.com"], "reserved": false, "dynamic": true},
+    {"address": "76.76.21.61", "names": ["docs.prodexlabs.com"], "reserved": false, "dynamic": true},
+    {"address": "97.107.135.178", "names": ["link.prodexlabs.com"], "reserved": false, "dynamic": true},
+    {"address": "170.187.131.209", "names": ["link.prodexlabs.com"], "reserved": false, "dynamic": true},
+    {"address": "185.3.93.228", "names": ["link.prodexlabs.com"], "reserved": false, "dynamic": true}
   ]
 }
