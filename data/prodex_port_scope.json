@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "purpose": "Authorization for full TCP port sweeps by existing heavy scans; not scan targets or host classification",
+  "addresses": [
+    {"address": "136.69.87.98", "names": ["uat.prodexlabs.com"], "reserved": true},
+    {"address": "136.81.173.196", "names": ["prod.prodexlabs.com", "bitec.prodexlabs.com", "dass.prodexlabs.com", "demo.prodexlabs.com", "highcom.prodexlabs.com", "l3h-ivs.prodexlabs.com", "l3h-nh.prodexlabs.com", "l3h-ss.prodexlabs.com", "littleleaffarms.prodexlabs.com", "panthalassa.prodexlabs.com", "time.prodexlabs.com", "trial.prodexlabs.com"], "reserved": true},
+    {"address": "136.81.178.35", "names": ["staging.prodexlabs.com"], "reserved": true},
+    {"address": "136.81.194.166", "names": ["prosalud.prodexlabs.com"], "reserved": true},
+    {"address": "136.81.196.61", "names": ["prosalud-staging.prodexlabs.com"], "reserved": true},
+    {"address": "136.81.198.25", "names": ["sandbox.prodexlabs.com", "oidc-test.prodexlabs.com"], "reserved": true},
+    {"address": "34.36.153.196", "names": ["tour.prodexlabs.com"], "reserved": true},
+    {"address": "34.54.236.210", "names": ["preview.prodexlabs.com"], "reserved": true},
+    {"address": "34.67.20.186", "names": ["atlantis-gcp.prodexlabs.com"], "reserved": false},
+    {"address": "8.232.147.166", "names": ["prodexlabs.com", "www.prodexlabs.com", "cooked.prodexlabs.com"], "reserved": true},
+    {"address": "52.244.87.51", "names": ["gov.prodexlabs.com"], "reserved": true}
+  ]
+}
