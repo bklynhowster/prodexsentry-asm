@@ -831,6 +831,16 @@ jobs:
           # this chain for every trigger path and fails if an omitted-input
           # dispatch and a cron run ever resolve differently.
           ACTIVE_PROBE_LIVE: ${{ github.event.inputs.active_probe_live || vars.ACTIVE_PROBE_LIVE || 'true' }}
+          # D-077 (Howie, 2026-11-12): the deep scan may name a sign-in and read its
+          # version with at most two look-only page loads (run_heavy.run_signin_door_phase,
+          # signin_door.py). Prodex first; Command needs Howie's separate word, so the two
+          # repos differ ON THIS LINE ONLY: the default after `||` is 'true' in
+          # prodexsentry-asm and 'false' in commandsentry-asm.
+          # KILL SWITCH, no code change: repo variable SIGNIN_DOOR_LIVE=false
+          # (Settings -> Secrets and variables -> Actions -> Variables). "revoke D-077".
+          # No dispatch input on purpose: a declared input's default is what broke
+          # ACTIVE_PROBE_LIVE above, and nobody needs to arm this for one run.
+          SIGNIN_DOOR_LIVE: ${{ vars.SIGNIN_DOOR_LIVE || 'true' }}
           # Wall-clock ceiling for the cumulative run (seconds). 30 min default —
           # Command holds a single VPN slot, so a longer run starves other scans.
           CUMULATIVE_WALL_CLOCK_S: ${{ vars.CUMULATIVE_WALL_CLOCK_S || '1800' }}
