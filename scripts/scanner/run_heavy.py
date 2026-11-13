@@ -420,6 +420,8 @@ class HeavyScanContext:
     # these two were added to medium alone — the guard doing its job.
     ffuf_catchall_pattern: "tuple[str, str] | None" = None
     ffuf_catchall_pattern_count: int = 0
+    # 438 — mirrors the medium ScanContext: what the calibration probes answered.
+    ffuf_calibration_probes: "tuple | None" = None
     auth_gated: bool = False
     # PRODEX-ONLY (Command's run_medium.ScanContext has neither — verified
     # 2026-08-29). Legitimate instance divergence, not a parity violation; the
